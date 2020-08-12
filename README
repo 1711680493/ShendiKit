@@ -1,0 +1,42 @@
+-----------------------------------
+Project Info 项目信息
+author:Shendi
+QQ:1711680493
+Project Name:Shendi Kit
+Project Version:1.0
+-----------------------------------
+Shendi工具包 将一些用到的工具类集成在此以便通用
+	因为此项目是提供的工具类 所以尽量不使用配置文件
+-等模块化普及 使用模块化
+|-shendi.kit 工具包
+	|-config 配置文件(只限于properties配置文件(后期可能扩展))
+		简单使用 	--配置文件存于项目根目录下 /files/main.properties
+				--Web项目则是WebContent下/files/main.properties
+			ConfigurationFactory.getConfig("这里为在main.properties里定义的配置文件").getProperty("指定配置文件的获取参数");
+		Java项目使用方法
+			1.在项目的根目录下创建 files/main.properties 文件
+			2.在main.properties配置其他配置文件的路径
+		Web项目使用方法
+			1.在项目的WebContent下 新建 files/main.properties 文件
+			2.main.properties 文件用于存放其他文件夹的路径 以files文件夹下的config.properties 为例
+				要想获取到config.properties,main.properties里新增 配置文件名(用于获取的时候输入)=/files/config.properties
+			3.获取配置文件,通过ConfigurationFactory.getConfig(String name); 这里的name为main.properties里输入的配置文件名
+			4.获取到后返回配置文件 Properties 如果没有 则返回空
+		Configuration							配置文件(只支持普通Java项目与Web项目)
+			有存配置文件的HashMap 以及存储其他配置文件路径的配置文件(main) 还有一个存储文件修改时间的HashMap
+			提供了对这三个成员的访问
+			非静态 使用了迪米特法则
+		ConfigurationFactory					配置文件工厂
+			创建了Configuration的对象,提供了getConfig(String name)函数
+			可以获取配置文件 先判断配置文件是否存在于map中 不存在则获取 新建 存于HashMap
+			如果存在则直接返回,出现例外则有日志打印
+			如果配置文件修改了则会进行重新加载
+	|-encrypt									加密算法工具包
+		EncryptUtils					加密工具类
+	|-log.Log									日志类 用于输出日志
+		简单使用 -日志文件夹在项目根目录的 /logs下,web项目则在 项目的 WebContent/logs下
+			输出普通日志 Log.print(日志信息);
+			输出错误日志 Log.printErr(日志信息);
+	|-time								时间工具包
+		TimeUtils						时间工具类
+	

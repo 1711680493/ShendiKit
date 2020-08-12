@@ -1,0 +1,13 @@
+shendi.kit
+shendi.kit.annotation
+shendi.kit.annotation.scan
+shendi.kit.config
+shendi.kit.encrypt
+shendi.kit.exception
+shendi.kit.file
+shendi.kit.log
+shendi.kit.log.interpreter
+shendi.kit.path
+shendi.kit.project
+shendi.kit.test
+shendi.kit.time
