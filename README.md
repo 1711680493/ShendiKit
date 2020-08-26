@@ -3,8 +3,28 @@
 >author:Shendi<br>
 >version: 1.0<br>
 >QQ:1711680493
+
 # 测试样例
 >样例在源码的 shendi.kit.test 包下.
+
+# 目录
+[配置文件](#非常简单的使用-properties-配置文件)<br>
+[时间工具类](#时间工具类)<br>
+[日志工具类](#日志工具类)<br>
+[加密工具类](#加密工具类)<br>
+
+# 开始配置
+>首先需要在项目的根目录(web项目在WebContent下,SpringBoot等项目都在根目录)新建一个文件夹为files<br>
+>然后在这个文件夹下新建一个文件 anno_scan.shendi(大小写要完全一致)<br>
+>接下来在此文件中配置使用了当前工具包注解的 jar 包名,格式如下<br>
+>>jar1.jar;jar2.jar;jar3.jar;jar4.jar<br>
+>当然为了避免重复,可以加上jar包所在的相对路径,如下<br>
+>>/lib/jar1.jar;/lib/jar2.jar<br>
+>使用分号分隔,配置完成之后就可以随意使用此工具包的注解了<br>
+>根据jar包后缀进行判断,所以如果需要扫描所有jar,配置文件内容可以为 .jar<br>
+>>但是这不可避免会出现一些错误,比如被扫描的jar包有一些类有问题等,例如mysql的jdbc驱动...<br>
+
+
 # 非常简单的使用 Properties 配置文件
 ## 功能介绍
 >可以轻松获取到Properties配置文件,并且修改配置文件后可以及时看到结果<br>
@@ -116,6 +136,8 @@
 >第一个参数为这个格式的名称,第二个为什么样的格式,请参见 java.text.SimpleDateFormat 类
 ## TimeDisposal类
 >用于处理时间,比如获取当前到第二天的距离等.<br>
+><b>提供了一个非常好使的方法用于直接获取指定日期--getToTime()</b><br>
+>>此方法参数为年,月,日,时分秒毫秒,如果值为-1则代表当前日期<br>
 >此类中方法都是静态的,如需了解更多,请参阅JavaDoc.
 
 # 日志工具类
@@ -133,7 +155,7 @@
 >存在于项目根目录的 logs 文件夹下<br>
 >如果是 Web 项目则为项目的资源路径(WebContent)的logs目录下.<br>
 
-# 加密
+# 加密工具类
 ## 加密工厂 shendi.kit.encrypt.EncryptFactory
 >通过加密工厂获取对应加密算法类.<br>
 >目前提供了两种加密算法,加一算法(速度快,简单,易破)和密码加密算法<br>
@@ -144,10 +166,27 @@
 >>获取密码加密算法类 EncryptFactory.getEncrypt(EncryptFactory.PWD);<br>
 >需要设置密码可以使用 EncryptFactory.getPwdEncrypt(密码) 来设置并获取<br>
 >>设置后,下次可直接通过 EncryptFactory.getEncrypt(EncryptFactory.PWD); 来获取已经设置密码的类.<br>
+### 双密码加密算法
+> 同上,更加安全,当数据量大时采用多线程处理<br>
+> 使用 EncryptFactory.getTwoPwdEncrypt(密码1,密码2) 来设置并获取
 ### 求和取余加密算法(不可逆)
 >使用 EncryptFactory.getEncrypt(EncryptFactory.SUM_REMAINDER); 来获取
 ### 添加自己的加密算法到工厂
 >新建一个类实现 shendi.kit.encrypt.Encrypt 接口,并使用 EncryptFactory.addEncrypt(获取时的名,新建的加密算法类); 来进行添加
+#### 使用注解的方式添加加密算法到加密工厂
+>在类上使用 @EncryptAnno 注解,此类需要实现 Encrypt 接口<br>
+<pre>
+	@EncryptAnno("Test")
+	class TestEncrypt implements Encrypt {
+		...
+	}
+	
+	class Test {
+		main {
+			EncryptFactory.getEncrypt("A");
+		}
+	}
+</pre>
 
 ## 加密工具类 shendi.kit.encrypt.EncryptUtils
 >这里提供了一个工具类来很简便的对文件进行操作<br>
@@ -156,3 +195,24 @@
 >如果是对文件进行操作,默认保存为 /Shendi_Encrypt_文件名<br>
 >也可以自己指定保存的路径,请参阅此类的文档<br>
 >同样,也提供了解密的方法 EncryptUtils.decodeFiles()<br>
+
+### 简化加密工厂类的操作
+>我们加密一串数据的通常代码形式是这样的<br>
+>>EncryptFactory.getEncrypt(EncryptFactory.ADD_ONE).encrypt(str.getBytes());<br>
+>代码有点过于长了,这不是我的预期结果,于是我在加密工具类中新增了几个方法用于简化操作
+#### EncryptUtils.encrypt(name, data);
+>通过传递加密方法的名称和要加密的数据就可以得到加密后的数据了<br>
+>name 从工厂中获取<br>
+>data 是 Object 类型的,所以不用在像上面的例子一样将字符串转换字节在传递了<br>
+>返回类型是字节数组
+#### EncryptUtils.encryptRS(name, data);
+>与 encrypt 不同的是,返回的类型为字符串<br>
+>有的时候我们加密后希望得到的是一个字符串类型的数据就可以使用此方法<br>
+#### EncryptUtils.decode(name, data);
+#### EncryptUtils.decodeRS(name, data);
+>与加密的两个方法对应
+#### 使用实例
+<pre>
+String rs = EncryptUtils.encryptRS(EncryptFactory.ADD_ONE, "hello,world");
+System.out.println(rs);
+</pre>

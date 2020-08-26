@@ -228,7 +228,8 @@ public final class TimeUtils {
 	/**
 	 * 时间处理类,用于处理计算时间,日期等信息.<br>
 	 * 通常,我们需要计算一些时间 日期差,此类提供了对应的封装<br>
-	 * 直接通过类名使用此类 基本上方法都是静态的 例如 TimeDisposal.nowToTomorrow() 获取现在到第二天零点的时间差
+	 * 直接通过类名使用此类 基本上方法都是静态的 例如 TimeDisposal.nowToTomorrow() 获取现在到第二天零点的时间差<br>
+	 * 使用 {@link TimeDisposal#getToTime(int, int, int, int, int, int, int)} 来方便的获取指定时间,-1为今天<br>
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @since ShendiKit 1.0
 	 * @version 1.0

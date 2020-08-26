@@ -34,7 +34,7 @@ public class LogManager {
 	 */
 	public List<File> getLogs() {
 		//获取所有的日志文件
-		File file = new File(Log.getSavePath());
+		File file = Log.getSavePath();
 		if (file.exists()) { return Arrays.asList(file.listFiles()); }
 		return null;
 	}

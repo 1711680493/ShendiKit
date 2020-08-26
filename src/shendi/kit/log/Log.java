@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import shendi.kit.path.ProjectPath;
 import shendi.kit.time.TimeUtils;
@@ -29,21 +27,24 @@ public class Log {
 	private static boolean isLog = true;
 	
 	/** 日志文件保存路径 默认为当前项目路径 */
-	private static String savePath;
+	private static File savePath;
 	
-//	private int num;
+	/** 上一次的时间戳 */
+	private static long upTime;
 	
-	/** 日志保存到本地的输出流 */
-	private static FileWriter writer = null;
-	
-	/** 计时器 用于执行每天更换一个日志文件 */
-	private static Timer timer = new Timer();
+	/** 当前日志文件路径 */
+	private static String currentPath;
 	
 	static {
-		//获取文件路径
-		savePath = new ProjectPath().getPath("") + File.separatorChar + "logs" + File.separatorChar;
-		//开启每天更换流
-		timingUpdateWriter();
+		// 获取文件路径
+		savePath = new File(new ProjectPath().getPath("") + File.separatorChar + "logs");
+		
+		if (!savePath.exists()) savePath.mkdirs();
+		
+		// 初始化上一次时间戳为今天0点
+		upTime = TimeDisposal.getToTime(-1, -1, -1, 0, 0, 0, 0);
+		
+		currentPath = savePath.getPath() + File.separatorChar + TimeUtils.getTime().getFormatTime("date").getString(upTime);
 	}
 	
 	/**
@@ -51,7 +52,7 @@ public class Log {
 	 * @param obj 日志信息
 	 */
 	public static void print(Object obj) {
-		isDefaultWriter();
+		isNewDay();
 		String str = getString()+obj;
 		//日志开启才输出
 		if (isLog) {
@@ -59,7 +60,7 @@ public class Log {
 			System.out.println(str);
 		}
 		//将日志写在日志文件里
-		try {
+		try (FileWriter writer = new FileWriter(currentPath)){
 			writer.write("[Info] "+str+"\n");
 			writer.flush();
 		} catch (IOException e) {
@@ -72,7 +73,7 @@ public class Log {
 	 * @param obj 日志信息
 	 */
 	public static void printAlarm(Object obj) {
-		isDefaultWriter();
+		isNewDay();
 		String str = getString()+obj;
 		//日志开启才输出
 		if (isLog) {
@@ -80,7 +81,7 @@ public class Log {
 			System.out.println(str);
 		}
 		//将日志写在日志文件里
-		try {
+		try (FileWriter writer = new FileWriter(currentPath)){
 			writer.write("[Alarm] "+str+"\n");
 			writer.flush();
 		} catch (IOException e) {
@@ -93,14 +94,14 @@ public class Log {
 	 * @param obj 日志信息
 	 */
 	public static void printErr(Object obj) {
-		isDefaultWriter();
+		isNewDay();
 		String str = getString()+obj;
 		//日志开启才输出
 		if (isLog) {
 			System.err.println(str);
 		}
 		//将日志写在日志文件里
-		try {
+		try (FileWriter writer = new FileWriter(currentPath)){
 			writer.write("[Error] "+str+"\n");
 			writer.flush();
 		} catch (IOException e) {
@@ -129,19 +130,16 @@ public class Log {
 	}
 	
 	/**
-	 * 如果writer等于null 则赋予其默认值
+	 * 判断是否为新的一天,是则更换路径.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 */
-	private static void isDefaultWriter() {
-		if (writer == null) {
-			try {
-				File file = new File(savePath);
-				if (!file.exists()) {
-					file.mkdirs();
-				}
-				writer = new FileWriter(savePath + TimeUtils.getTime().getFormatTime("date").getString(new Date()),true);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+	private static void isNewDay() {
+		// 判断文件夹是否存在
+		if (!savePath.exists()) { savePath.mkdirs(); }
+		
+		if (System.currentTimeMillis() - upTime > 86400000) {
+			upTime = TimeDisposal.getToTime(-1, -1, -1, 0, 0, 0, 0);
+			currentPath = savePath.getPath() + File.separatorChar + TimeUtils.getTime().getFormatTime("date").getString(upTime);
 		}
 	}
 	
@@ -150,69 +148,20 @@ public class Log {
 	 * @param isLog true 可见,false 不可见
 	 */
 	public static void setIsLog(boolean isLog) {
-		System.err.println(getString() + "设置了日志:"+isLog);
+		System.err.println(getString() + "设置了日志:" + isLog);
 		Log.isLog = isLog;
 	}
 	
 	/**
 	 * 获取日志的保存路径.
-	 * @return 日志保存的文件夹位置.
+	 * @return 日志保存的文件夹
 	 */
-	public static String getSavePath() {
-		return savePath;
-	}
+	public static File getSavePath() { return savePath; }
 	
 	/**
 	 * 设置日志保存的路径
 	 * @param savePath 日志的保存路径.
 	 */
-	public static void setSavePath(String savePath) {
-		Log.savePath = savePath;
-		//关闭之前的流
-		if (writer != null) {
-			try {
-				writer.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		//进入垃圾回收
-		writer = null;
-	}
-	
-	/**
-	 * 定时更换输出流 每天指向一个新的不同的文件
-	 */
-	private static void timingUpdateWriter() {
-		long tomorrow = TimeDisposal.nowToTomorrow();
-		timer.schedule(new TimerTask() {
-			public void run() {
-				try {
-					writer.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-					System.err.println("更换流,关闭当前流失败!");
-				}
-				writer = null;
-			}
-		},tomorrow,86400000);
-	}
-	
-	/**
-	 * 关闭log
-	 */
-	public static void close() {
-		if (timer != null) {
-			timer.cancel();
-		}
-		try {
-			//关流
-			if (writer != null) {
-				writer.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+	public static void setSavePath(File savePath) { Log.savePath = savePath; }	
 	
 }

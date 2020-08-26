@@ -41,6 +41,50 @@ import shendi.kit.log.Log;
 public final class EncryptUtils {
 	
 	/**
+	 * 加密数据,根据指定的加密方法.<br>
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param name 加密方法的名称,通常通过 {@link EncryptFactory} 来获取
+	 * @param data 要加密的数据
+	 * @return 加密后的字节数组
+	 */
+	public static byte[] encrypt(String name, Object data) {
+		return EncryptFactory.getEncrypt(name).encrypt(data.toString().getBytes());
+	}
+	
+	/**
+	 * 加密数据,根据指定的加密方法,加密后数据返回为字符串形式,RS(Return String)
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param name 加密方法的名称,通常通过 {@link EncryptFactory} 来获取
+	 * @param data 要加密的数据
+	 * @return 加密后数据的字符串表示形式
+	 */
+	public static String encryptRS(String name, Object data) {
+		return new String(EncryptFactory.getEncrypt(name).encrypt(data.toString().getBytes()));
+	}
+	
+	/**
+	 * 解密数据,根据指定的解密方法.<br>
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param name 解密方法的名称,通常通过 {@link EncryptFactory} 来获取
+	 * @param data 要解密的数据
+	 * @return 解密后的字节数组
+	 */
+	public static byte[] decode(String name, Object data) {
+		return EncryptFactory.getEncrypt(name).decode(data.toString().getBytes());
+	}
+	
+	/**
+	 * 解密数据,根据指定的解密方法,解密后数据返回为字符串形式,RS(Return String)
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param name 解密方法的名称,通常通过 {@link EncryptFactory} 来获取
+	 * @param data 要解密的数据
+	 * @return 解密后数据的字符串表示形式
+	 */
+	public static String decodeRS(String name, Object data) {
+		return new String(EncryptFactory.getEncrypt(name).decode(data.toString().getBytes()));
+	}
+	
+	/**
 	 * 加密指定路径的文件/文件夹<br>
 	 * 如果是文件夹,则会将此文件夹下所有项加密(包括子文件夹的子文件夹).
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>

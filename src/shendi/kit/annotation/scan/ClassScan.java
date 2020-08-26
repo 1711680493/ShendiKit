@@ -1,7 +1,9 @@
 package shendi.kit.annotation.scan;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -9,7 +11,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import shendi.kit.ShendiKitInfo;
+import shendi.kit.annotation.EncryptAnno;
+import shendi.kit.annotation.PConfig;
 import shendi.kit.log.Log;
+import shendi.kit.path.ProjectPath;
 
 /**
  * 类扫描器,扫描所有的类并存起来.<br>
@@ -18,7 +23,39 @@ import shendi.kit.log.Log;
  */
 public class ClassScan {
 	
-	/** 项目中所有的类,全路径与类一一对应. */
+	/** 当前工具包的注解类 */
+	private static final Class<?>[] ANNOS;
+	
+	/** 需要处理的 jar 包数组 */
+	private static String[] jars;
+	
+	static {
+		ANNOS = new Class[2];
+		ANNOS[0] = PConfig.class;
+		ANNOS[1] = EncryptAnno.class;
+		
+		// 获取需要处理的 jar 包名.
+		File scanFile = new File(new ProjectPath().getPath(File.separatorChar + "files" + File.separatorChar + "/anno_scan.shendi"));
+		if (scanFile.exists() && scanFile.isFile()) {
+			try (FileInputStream input = new FileInputStream(scanFile)) {
+				byte[] data = new byte[input.available()];
+				input.read(data);
+				
+				if (data.length == 0) {
+					Log.printErr("配置文件 anno_scan.shendi 内容为空,请正确填写使用此工具包注解的路径以便正常使用!");
+				} else {
+					jars = new String(data).split(";");
+				}
+			} catch (IOException e) {
+				Log.printErr("在获取配置文件 anno_scan.shendi 时出错,请检查此文件是否被占用: " + e.getMessage());
+			}
+		} else {
+			Log.printErr("获取配置文件 /files/anno_scan.shendi 出错,请检查是否有此文件,如果没有则会影响到注解的使用!");
+		}
+		
+	}
+	
+	/** 项目中所有有工具包注解的类,全路径与类一一对应. */
 	private static final HashMap<String,Class<?>> CLASSES = new HashMap<>();
 	
 	/** 是否初始化了. */
@@ -81,10 +118,20 @@ public class ClassScan {
 					.replace(File.separatorChar, '.').replace('/', '.');
 			
 			Class<?> clazz = Class.forName(className);
+			
 			// 将类添加进集合
-			CLASSES.put(className, clazz);
+			Annotation[] annos = clazz.getAnnotations();
+			if (annos.length > 0) {
+				for (int i = 0;i < ANNOS.length; i++) {
+					for (int j = 0;j < annos.length;j++) {
+						if (ANNOS[i] == annos[j].getClass()) {
+							CLASSES.put(className, clazz);
+							return;
+						}
+					}
+				}
+			}
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 			Log.printAlarm("扫描到指定类文件,创建Class失败,找不到类: " + e.getMessage());
 		}
 	}
@@ -95,21 +142,27 @@ public class ClassScan {
 	 * @param jarPath 文件路径
 	 */
 	private static void disposeJar(String jarPath) {
-		if (jarPath.endsWith(ShendiKitInfo.EXPORT_JAR_NAME)) return;
-		if (jarPath.endsWith(ShendiKitInfo.JAR_SUFFIX)) {
-			try {
-				JarFile jar = new JarFile(jarPath);
-				Enumeration<JarEntry> entry = jar.entries();
-				
-				while (entry.hasMoreElements()) {
-					String name = entry.nextElement().getName();
-					if (name.endsWith(ShendiKitInfo.CLASS_SUFFIX)) disposeClass(name);
+		if (jars == null) return;
+		
+		for (String s : jars) {
+			if (jarPath.endsWith(s.trim())) {
+				if (jarPath.endsWith(ShendiKitInfo.EXPORT_JAR_NAME)) return;
+				if (jarPath.endsWith(ShendiKitInfo.JAR_SUFFIX)) {
+					try {
+						JarFile jar = new JarFile(jarPath);
+						Enumeration<JarEntry> entry = jar.entries();
+						
+						while (entry.hasMoreElements()) {
+							String name = entry.nextElement().getName();
+							if (name.endsWith(ShendiKitInfo.CLASS_SUFFIX)) disposeClass(name);
+						}
+						
+						jar.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+						Log.printErr("扫描Jar包进行处理时出错: " + e.getMessage());
+					}
 				}
-				
-				jar.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-				Log.printErr("扫描Jar包进行处理时出错: " + e.getMessage());
 			}
 		}
 	}
@@ -122,24 +175,27 @@ public class ClassScan {
 	public static HashMap<String, Class<?>> getClasses() {
 		// 没有初始化则先初始化
 		if (!isInit) {
-			// 处理项目使用到的 Jar 包,
+			// 处理项目使用到的需要处理的 Jar 包,
 			String[] classPaths = System.getProperty("java.class.path").split(";");
-			for (String classPath : classPaths) {
-				disposeJar(classPath);
-			}
 			
 			// 扫描整个项目,为空则可能是项目已打包,上述代码已做对应操作.
 			URL resource = ClassScan.class.getResource("/");
 			if (resource != null) {
 				ClassScan.classPath = resource.getPath().substring(1);
-				// Web 项目先扫描 lib 目录下的 jar
+				
+				if (jars != null) {
+					for (String classPath : classPaths) disposeJar(classPath);
+				}
+				
+				// Web 项目先扫描 lib 目录下需要处理的 jar
 				if (classPath.endsWith("WEB-INF/classes/")) {
 					File file = new File(classPath.substring(0, classPath.length() - 8) + "lib");
-					if (file.exists()) {
+					if (file.exists() && jars != null) {
 						File[] files = file.listFiles();
 						for (File f : files) disposeJar(f.getPath());
 					}
 				}
+				
 				scanClass(classPath);
 			}
 			
@@ -156,6 +212,8 @@ public class ClassScan {
 				// 处理Jar,扫描根目录除开 classPath 目录
 				scanJarByJava9(projectPath);
 			}
+			
+			Log.print("Current project has kit annotation class number is: " + CLASSES.size());
 			
 			// 递归完会有大量垃圾,建议JVM回收
 			System.gc();
