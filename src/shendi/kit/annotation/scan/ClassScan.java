@@ -11,13 +11,16 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import shendi.kit.ShendiKitInfo;
+import shendi.kit.annotation.CommandAnno;
+import shendi.kit.annotation.ConsoleAnno;
 import shendi.kit.annotation.EncryptAnno;
 import shendi.kit.annotation.PConfig;
 import shendi.kit.log.Log;
 import shendi.kit.path.ProjectPath;
+import shendi.kit.util.SKClassLoader;
 
 /**
- * 类扫描器,扫描所有的类并存起来.<br>
+ * 类扫描器,扫描所有的类的注解并存起来.<br>
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @version 1.0
  */
@@ -30,9 +33,11 @@ public class ClassScan {
 	private static String[] jars;
 	
 	static {
-		ANNOS = new Class[2];
+		ANNOS = new Class[4];
 		ANNOS[0] = PConfig.class;
 		ANNOS[1] = EncryptAnno.class;
+		ANNOS[2] = ConsoleAnno.class;
+		ANNOS[3] = CommandAnno.class;
 		
 		// 获取需要处理的 jar 包名.
 		File scanFile = new File(new ProjectPath().getPath(File.separatorChar + "files" + File.separatorChar + "/anno_scan.shendi"));
@@ -63,6 +68,8 @@ public class ClassScan {
 	
 	/** 当前项目的类路径,如果当前项目已打成jar包,则为null. */
 	private static String classPath;
+	
+	private ClassScan() {}
 	
 	/**
 	 * 扫描目录下所有类,存取.
@@ -117,14 +124,14 @@ public class ClassScan {
 			String className = classPath.substring(0, classPath.length() - ShendiKitInfo.CLASS_SUFFIX.length())
 					.replace(File.separatorChar, '.').replace('/', '.');
 			
-			Class<?> clazz = Class.forName(className);
+			Class<?> clazz = SKClassLoader.getSk().loadClass(className);
 			
 			// 将类添加进集合
 			Annotation[] annos = clazz.getAnnotations();
 			if (annos.length > 0) {
 				for (int i = 0;i < ANNOS.length; i++) {
 					for (int j = 0;j < annos.length;j++) {
-						if (ANNOS[i] == annos[j].getClass()) {
+						if (ANNOS[i] == annos[j].annotationType()) {
 							CLASSES.put(className, clazz);
 							return;
 						}
@@ -220,6 +227,46 @@ public class ClassScan {
 			isInit = true;
 		}
 		return CLASSES;
+	}
+	
+	/**
+	 * 重新扫描加载,用于热更.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 */
+	public static synchronized void reload() {
+		CLASSES.clear();
+		isInit = false;
+		getClasses();
+	}
+	
+	/**
+	 * 重新加载某个单独的类.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param clazz 类全路径,例如 shendi.kit.Test
+	 */
+	public static synchronized void reload(String clazz) {
+		if (CLASSES.containsKey(clazz)) {
+			for (String classFilter : ShendiKitInfo.CLASS_FILTER)
+				if (classPath.endsWith(classFilter)) return;
+			
+			try {
+				Class<?> c = SKClassLoader.reloadClass(clazz);
+				// 将类添加进集合
+				Annotation[] annos = c.getAnnotations();
+				if (annos.length > 0) {
+					for (int i = 0;i < ANNOS.length; i++) {
+						for (int j = 0;j < annos.length;j++) {
+							if (ANNOS[i] == annos[j].annotationType()) {
+								CLASSES.put(clazz, c);
+								return;
+							}
+						}
+					}
+				}
+			} catch (ClassNotFoundException e) {
+				Log.printAlarm("扫描到指定类文件,创建Class失败,找不到类: " + e.getMessage());
+			}
+		}
 	}
 	
 }

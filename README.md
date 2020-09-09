@@ -8,15 +8,22 @@
 >样例在源码的 shendi.kit.test 包下.
 
 # 目录
-[配置文件](#非常简单的使用-properties-配置文件)<br>
-[时间工具类](#时间工具类)<br>
-[日志工具类](#日志工具类)<br>
-[加密工具类](#加密工具类)<br>
+### [控制台模块](#控制台模块)<br>
+>>[给自己的程序增加一个控制台模块](#给自己的程序增加一个控制台模块)<br>
+>>[添加命令](#添加命令)<br>
+>>[命令行控制台](#命令行控制台)<br>
+>>[窗体控制台](#窗体控制台)<br>
+>>[自定义控制台](#自定义控制台)<br>
+### [配置文件](#非常简单的使用-properties-配置文件)<br>
+### [时间工具类](#时间工具类)<br>
+### [日志工具类](#日志工具类)<br>
+### [加密工具类](#加密工具类)<br>
+### [工具类](#工具类)<br>
 
 # 开始配置
->首先需要在项目的根目录(web项目在WebContent下,SpringBoot等项目都在根目录)新建一个文件夹为files<br>
->然后在这个文件夹下新建一个文件 anno_scan.shendi(大小写要完全一致)<br>
->接下来在此文件中配置使用了当前工具包注解的 jar 包名,格式如下<br>
+>1.首先需要在项目的根目录(web项目在WebContent下,SpringBoot等项目都在根目录)新建一个文件夹为files<br>
+>2.在这个文件夹下新建一个文件 anno_scan.shendi(大小写要完全一致)<br>
+>3.在此文件中配置使用了当前工具包注解的 jar 包名,格式为如下<br>
 >>jar1.jar;jar2.jar;jar3.jar;jar4.jar<br>
 >当然为了避免重复,可以加上jar包所在的相对路径,如下<br>
 >>/lib/jar1.jar;/lib/jar2.jar<br>
@@ -24,10 +31,59 @@
 >根据jar包后缀进行判断,所以如果需要扫描所有jar,配置文件内容可以为 .jar<br>
 >>但是这不可避免会出现一些错误,比如被扫描的jar包有一些类有问题等,例如mysql的jdbc驱动...<br>
 
+# 控制台模块
+>有的时候我们需要给自己的程序添加一个后端控制来增强交互,这时就可以使用此模块<br>
+>我自己也有这一需求,所以此模块就这样诞生了.<br><br>
+>>会不断完善,后续可能会开发出可以实时修改变量的功能,请期待<br>
+>提供了一个测试类 shendi.kit.test.TestConsole <br><br>
+## 给自己的程序增加一个控制台模块
+>好处就是增强了交互,时刻观察到当前软件状态等<br><br>
+>为了使得开发变得简单,我只提供了注解的方式来使用<br><br>
+>分为五个步骤<br>
+>1.创建类<br>
+>2.创建方法/字段<br>
+>3.给类添加 @ConsoleAnno 注解<br>
+>4.给方法/字段添加 @CommandAnno(name,info) 注解<br>
+>5.注册控制台
+>>目前只提供了几种控制台,下方会一一列举,后续会增加<br>
+>>通过控制台对象的 register() 函数来注册<br>
+>>例如: new CommandConsole().register();<br>
+
+## 添加命令
+>引入注解 import shendi.kit.annotation.CommandAnno;<br>
+>使用 @CommandAnno(name,info) 注解来增加一条命令<br>
+>>其中,name为String类型,代表命令的名称,info也是String类型,代表命令的附加信息<br>
+>>要求: 只能修饰在字段/方法上<br>
+>>>如果是方法,必须是public修饰的,方法返回值必须为java.lang.String,必须无参<br>
+>><b>并且拥有命令的类必须使用 @ConsoleAnno 注解</b><br>
+
+## 命令行控制台
+>实现类: shendi.kit.console.CommandConsole<br>
+>描述: 提供一个可以在命令行控制台进行交互的功能,功能简单的控制台<br>
+>自带三个命令 help/reload/exit<br>
+>help		显示所有命令<br>
+>reload		重新加载命令(可以动态修改)<br>
+>exit		退出命令行控制台<br>
+
+## 窗体控制台
+>实现类: shendi.kit.console.DeskAppConsole<br>
+>描述: 窗体控制台,内嵌命令行控制台,并提供可以设置实时显示命令的方法<br>
+><b>窗体控制台与程序是绑定在一起的,当控制台被关闭,程序也会被关闭<b><br>
+
+## 自定义控制台
+>如果不满足当前的命令行控制台可以自定义一个,方法如下<br>
+>新建一个类继承 shendi.kit.console.Console 类<br>
+>实现以下两个方法<br>
+>>protected void register(HashMap<String, Command> commands)<br>
+>>public void destroy()<br>
+>register代表注册,destroy代表销毁<br>
+>在register中传递的参数 commands 代表当前已有的所有命令<br>
+>>是一个HashMap,键为命令名,值为命令(包含函数/字段),要了解更多可以查阅 shendi.kit.data.Command 类
 
 # 非常简单的使用 Properties 配置文件
 ## 功能介绍
->可以轻松获取到Properties配置文件,并且修改配置文件后可以及时看到结果<br>
+>可以轻松获取到Properties配置文件<br>
+>可以达到实时的效果<br>
 >可以使用注解的方式标记一个类,从配置文件里获取到对应类和类的全路径(本人用策略模式较多,所以就封装了这样的功能).
 ## main.properties
 >在使用之前我们需要在项目的根目录下新增一个名为 files 的文件夹,并在文件夹下新建一个 main.properties 文件.<br>
@@ -216,3 +272,9 @@
 String rs = EncryptUtils.encryptRS(EncryptFactory.ADD_ONE, "hello,world");
 System.out.println(rs);
 </pre>
+
+# 工具类
+>以下是一些比较单一的工具类,具体使用可以看文档<br>
+>流处理工具类: shendi.kit.util.StreamUtils<br>
+>类加载器: SKClassLoader<br>
+

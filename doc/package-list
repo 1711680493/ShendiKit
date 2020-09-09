@@ -2,6 +2,10 @@ shendi.kit
 shendi.kit.annotation
 shendi.kit.annotation.scan
 shendi.kit.config
+shendi.kit.console
+shendi.kit.data
+shendi.kit.deskapp
+shendi.kit.deskapp.effect
 shendi.kit.encrypt
 shendi.kit.exception
 shendi.kit.file
@@ -11,3 +15,4 @@ shendi.kit.path
 shendi.kit.project
 shendi.kit.test
 shendi.kit.time
+shendi.kit.util

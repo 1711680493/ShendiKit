@@ -6,14 +6,19 @@
  * @since ShendiKit 1.0
  */
 module shendi.kit {
+	exports shendi.kit.annotation;
 	exports shendi.kit.config;
-//	exports shendi.kit.file;
+	exports shendi.kit.console;
+	exports shendi.kit.data;
+	exports shendi.kit.deskapp;
+	exports shendi.kit.deskapp.effect;
+	exports shendi.kit.encrypt;
+	exports shendi.kit.exception;
+	exports shendi.kit.file;
 	exports shendi.kit.log;
 	exports shendi.kit.log.interpreter;
 	exports shendi.kit.path;
 	exports shendi.kit.project;
 	exports shendi.kit.time;
-	exports shendi.kit.annotation;
-	exports shendi.kit.encrypt;
-	exports shendi.kit.exception;
+	exports shendi.kit.util;
 }
