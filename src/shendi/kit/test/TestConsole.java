@@ -2,7 +2,7 @@ package shendi.kit.test;
 
 import shendi.kit.annotation.CommandAnno;
 import shendi.kit.annotation.ConsoleAnno;
-import shendi.kit.console.DeskAppConsole;
+import shendi.kit.console.CommandConsole;
 
 /**
  * 测试控制台.
@@ -12,8 +12,8 @@ import shendi.kit.console.DeskAppConsole;
 @ConsoleAnno
 public class TestConsole {
 	public static void main(String[] args) {
-//		new CommandConsole().register();
-		new DeskAppConsole().register();
+		new CommandConsole().register();
+//		new DeskAppConsole().register();
 	}
 	
 	@CommandAnno(name="test1", info="测试1") public String test1 = "我是测试数据1";

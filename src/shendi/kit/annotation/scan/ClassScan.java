@@ -124,7 +124,7 @@ public class ClassScan {
 			String className = classPath.substring(0, classPath.length() - ShendiKitInfo.CLASS_SUFFIX.length())
 					.replace(File.separatorChar, '.').replace('/', '.');
 			
-			Class<?> clazz = SKClassLoader.getSk().loadClass(className);
+			Class<?> clazz = Class.forName(className);
 			
 			// 将类添加进集合
 			Annotation[] annos = clazz.getAnnotations();

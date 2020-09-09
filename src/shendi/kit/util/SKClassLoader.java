@@ -1,6 +1,5 @@
 package shendi.kit.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -29,17 +28,15 @@ public final class SKClassLoader extends ClassLoader {
 		if (clazz == null) return null;
 		else {
 			sk = new SKClassLoader();
-			clazz = File.separator.concat(clazz.replace('.', File.separatorChar).concat(ShendiKitInfo.CLASS_SUFFIX));
+			clazz = "/".concat(clazz.replace('.', '/').concat(ShendiKitInfo.CLASS_SUFFIX));
 			byte[] classData = null;
-			
-			try (InputStream input = sk.getResourceAsStream(clazz)) {
+			try (InputStream input = SKClassLoader.class.getResourceAsStream(clazz)) {
 				classData = new byte[input.available()];
 				input.read(classData, 0, classData.length);
 			} catch (IOException e) {
 				Log.printErr("重新加载指定类获取出错: " + clazz + "---" + e.getMessage());
 				return null;
 			}
-			
 			return sk.defineClass(null, classData, 0, classData.length);
 		}
 	}

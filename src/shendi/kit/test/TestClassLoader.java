@@ -17,7 +17,7 @@ public class TestClassLoader {
 	
 	public void a() {
 		// 在运行后五秒内请修改此输出来查看是否重新加载
-		System.out.println("aaaa");
+		System.out.println("dde");
 	}
 	
 }
