@@ -17,11 +17,22 @@ public class StreamUtils {
 	private StreamUtils() {}
 	
 	/**
-	 * 读取一行数据.
+	 * 从指定的输入流中读取一行数据.
+	 * @param input 要操作的输入流
 	 * @return 如果没有数据,则返回null
-	 * @throws IOException 
+	 * @throws IOException 在读取的过程中出现错误
 	 */
 	public static String readLine(InputStream input) throws IOException {
+		return new String(readLineRByte(input));
+	}
+	
+	/**
+	 * 从指定的输入流中读取一行数据.
+	 * @param input 要操作的输入流
+	 * @return 如果没有数据,则返回null
+	 * @throws IOException 在读取的过程中出现错误
+	 */
+	public static byte[] readLineRByte(InputStream input) throws IOException {
 		int value = -1;
 		//有效数据长度
 		int len = 0;
@@ -31,7 +42,7 @@ public class StreamUtils {
 			if (len >= data.length) {
 				byte[] temp = data;
 				data = new byte[len+1024];
-				System.arraycopy(temp,0,data,0,temp.length);
+				System.arraycopy(temp, 0, data, 0, temp.length);
 			}
 			data[len] = (byte) value;
 			len++;
@@ -40,9 +51,61 @@ public class StreamUtils {
 		}
 		// 数组长度为0,返回null
 		if (len == 0) return null;
-		return new String(data, 0, len);
+		byte[] d = new byte[len];
+		System.arraycopy(data, 0, d, 0, len);
+		return d;
 	}
 
+	/**
+	 * 从指定的输入流中读取以指定字节结尾的数据(读取到的数据包含结尾).<br>
+	 * 如果可能读取不到,则请给输入流设置超时时间.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param input 要操作的输入流
+	 * @param end 数据的结尾,例如以 \r\n结尾则数组为 {'\r','\n'}
+	 * @return 读取的数据,如果没有则返回null
+	 * @throws IOException 读取过程中出现错误
+	 */
+	public static byte[] readByEnd(InputStream input, byte[] end) throws IOException {
+		int value = -1, len = 0;
+		byte[] data = new byte[1024];
+		
+		while ((value = input.read()) != -1) {
+			//如果数组长度不够则增长
+			if (len >= data.length) {
+				byte[] temp = data;
+				data = new byte[len+1024];
+				System.arraycopy(temp, 0, data, 0, temp.length);
+			}
+			data[len] = (byte) value;
+			len++;
+			
+			if (endsWith(data, len, end)) break;
+		}
+		if (len == 0) return null;
+		byte[] d = new byte[len];
+		System.arraycopy(data, 0, d, 0, len);
+		return d;
+	}
+	
+	/**
+	 * 判断指定数据是否以指定数据结尾.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param data 被判断的数据
+	 * @param len 被判断数据的长度
+	 * @param end 结尾的数据
+	 * @return true is yes,false is no.
+	 */
+	public static boolean endsWith(byte[] data, int len, byte[] end) {
+		if (len > end.length) {
+			for (int i = 1; i <= end.length; i++) {
+				if (end[end.length - i] != data[len - i]) return false;
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	/**
 	 * 将一个文件读取为字节流,读取的文件必须是确定存在的.
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>

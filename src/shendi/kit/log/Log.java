@@ -53,19 +53,12 @@ public class Log {
 	 */
 	public static void print(Object obj) {
 		isNewDay();
+		//获取堆栈跟踪信息
 		String str = getString()+obj;
 		//日志开启才输出
-		if (isLog) {
-			//获取堆栈跟踪信息
-			System.out.println(str);
-		}
+		if (isLog) System.out.println(str);
 		//将日志写在日志文件里
-		try (FileWriter writer = new FileWriter(currentPath)){
-			writer.write("[Info] "+str+"\n");
-			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		write("[Info] "+str+"\n");
 	}
 	
 	/**
@@ -76,17 +69,9 @@ public class Log {
 		isNewDay();
 		String str = getString()+obj;
 		//日志开启才输出
-		if (isLog) {
-			//获取堆栈跟踪信息
-			System.out.println(str);
-		}
+		if (isLog) System.out.println(str);
 		//将日志写在日志文件里
-		try (FileWriter writer = new FileWriter(currentPath)){
-			writer.write("[Alarm] "+str+"\n");
-			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		write("[Alarm] "+str+"\n");
 	}
 	
 	/**
@@ -97,14 +82,21 @@ public class Log {
 		isNewDay();
 		String str = getString()+obj;
 		//日志开启才输出
-		if (isLog) {
-			System.err.println(str);
-		}
+		if (isLog) System.err.println(str);
 		//将日志写在日志文件里
-		try (FileWriter writer = new FileWriter(currentPath)){
-			writer.write("[Error] "+str+"\n");
-			writer.flush();
+		write("[Error] "+str+'\n');
+	}
+	
+	/**
+	 * 将信息输出到文件中.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param info 信息
+	 */
+	private static void write(Object info) {
+		try (FileWriter writer = new FileWriter(currentPath, true)){
+			writer.write(info.toString());
 		} catch (IOException e) {
+			System.err.println("日志信息输出到文件中出错,信息为: " + info);
 			e.printStackTrace();
 		}
 	}

@@ -1,4 +1,4 @@
-# 简介
+ 简介
 >Project Name:Shendi Kit<br>
 >author:Shendi<br>
 >version: 1.0<br>
@@ -15,10 +15,20 @@
 >>[窗体控制台](#窗体控制台)<br>
 >>[自定义控制台](#自定义控制台)<br>
 ### [配置文件](#非常简单的使用-properties-配置文件)<br>
-### [时间工具类](#时间工具类)<br>
-### [日志工具类](#日志工具类)<br>
-### [加密工具类](#加密工具类)<br>
-### [单独工具类](#工具类)<br>
+### [时间工具](#时间工具包)<br>
+### [日志工具](#日志工具包)<br>
+### [加密工具](#加密工具包)<br>
+### [爬虫工具](#爬虫工具包)<br>
+>此包待完善,目前只提供了一些简单地功能<br>
+>>[获取网页数据](#获取网页数据)<br>
+>>[两行代码获取所有的a标签](#两行代码获取所有的a标签)<br>
+>>[元素标签](#元素标签)<br>
+### [简洁实用工具包-shendi.kit.util](#工具类)<br>
+>>统一在 shendi.kit.util 包下<br>
+>>[流处理工具类](#StreamUtils)<br>
+>>[自定义类加载器](#SKClassLoader)<br>
+>>[HTTP工具类](#HttpUtil)<br>
+
 
 # 开始配置
 >1.首先需要在项目的根目录(web项目在WebContent下,SpringBoot等项目都在根目录)新建一个文件夹为files<br>
@@ -30,6 +40,8 @@
 >使用分号分隔,配置完成之后就可以随意使用此工具包的注解了<br>
 >根据jar包后缀进行判断,所以如果需要扫描所有jar,配置文件内容可以为 .jar<br>
 >>但是这不可避免会出现一些错误,比如被扫描的jar包有一些类有问题等,例如mysql的jdbc驱动...<br>
+>注: 当前项目如果打包成jar也需要加入进去<br>
+>如果不想扫描,可以将文件内容改为 No(只有N和o这两个字母)
 
 # 控制台模块
 >有的时候我们需要给自己的程序添加一个后端控制来增强交互,这时就可以使用此模块<br>
@@ -177,7 +189,7 @@
 >参数与注解的两个参数对应,返回值为Class<?>,所以需要自己进行强转.
 
 
-# 时间工具类
+# 时间工具包
 >对时间的操作我封装成了一个类 shendi.kit.time.TimeUtils<br>
 >此类提供了一个静态方法供获取对象 TimeUtils.getTime();<br>
 >通过对象,可以创建时间-shendi.kit.time.Time类,创建时间格式等.<br>
@@ -196,7 +208,7 @@
 >>此方法参数为年,月,日,时分秒毫秒,如果值为-1则代表当前日期<br>
 >此类中方法都是静态的,如需了解更多,请参阅JavaDoc.
 
-# 日志工具类
+# 日志工具包
 >日志打印类 shendi.kit.log.Log<br>
 >>用于打印日志和控制日志是否在控制台可见.<br>
 >日志管理类 shendi.kit.log.LogManager<br>
@@ -211,7 +223,7 @@
 >存在于项目根目录的 logs 文件夹下<br>
 >如果是 Web 项目则为项目的资源路径(WebContent)的logs目录下.<br>
 
-# 加密工具类
+# 加密工具包
 ## 加密工厂 shendi.kit.encrypt.EncryptFactory
 >通过加密工厂获取对应加密算法类.<br>
 >目前提供了两种加密算法,加一算法(速度快,简单,易破)和密码加密算法<br>
@@ -273,8 +285,64 @@ String rs = EncryptUtils.encryptRS(EncryptFactory.ADD_ONE, "hello,world");
 System.out.println(rs);
 </pre>
 
-# 工具类
->以下是一些比较单一的工具类,具体使用可以看文档<br>
->流处理工具类: shendi.kit.util.StreamUtils<br>
->类加载器: SKClassLoader<br>
+# 爬虫工具包
+> 目前提供微量功能,后续会对此进行扩展<br>
+> 对 HTTP 数据获取可参考下方的[HTTP工具类](#HttpUtil)<br>
+### 获取网页数据
+> 使用 shendi.kit.reptile.Reptile<br>
+> 仅需一行代码,可以获取一个 HTML 页面内容<br>
+> 代码如下:<br>
+>> String data = Reptile.index("www.baidu.com");<br>
+> 如果想设置请求类型可以在后方加上<br>
+>> String data = Reptile.index("www.baidu.com", "POST");<br>
 
+### 两行代码获取所有的a标签
+> 同样也是使用 Reptile 类<br>
+> 通过 List<Element> getElements(name, data) 方法来解析数据获取对应标签<br>
+> 例如 获取页面中所有的 a 标签<br>
+>> String data = Reptile.index("www.baidu.com");<br>
+>> List<Element> e = Reptile.getElements("a", data);<br>
+> 当然不只局限与 a 标签,可以自行设置<br>
+### 元素标签
+> shendi.kit.reptile.Element 代表一个元素<br>
+> 其中有如下方法<br>
+> String attr(name); 				获取当前元素的对应属性<br>
+> String html(); 					当前元素的元素内容<br>
+> Set<String> attrNames();			获取所有元素的名称<br>
+> HashMap<String, String> attrs()	获取所有元素<br>
+
+# 工具类
+#### StreamUtils
+>流处理工具类<br>
+>下面演示此类的少量方法,更多请直接参考此类<br>
+<pre>
+	// 读取一行,String readLine(InputStream);
+	String line = StreamUtils.readLine(input);
+	// 读取一行,字节形式 bybte[] readLineRByte(InputStream)
+	byte[] bLine = StreamUtils.readLineRByte(input);
+	// 读取数据直到指定结尾,byte[] readByEnd(InputStream, byte[]);,其中第二个 参数是要指定的结尾
+	byte[] data = StreamUtils.readByEnd(input, "\n".getBytes());
+	// 读取一个文件的数据,byte[] getFile(String)或getFile(File)
+	byte[] fData = StreamUtils.getFile("C:/1.txt");
+</pre>
+
+#### SKClassLoader
+>类加载器<br>
+>用于将外部class文件定义可使用的类
+
+#### HttpUtil
+>Http工具类<br>
+<pre>
+	// 首先创建对象,有四个重载
+	// HttpUtil([String]host),(host, [int]port),(host, port, [String]reqType),(host, port, [byte[]]data)
+	// 第一个为用主机名创建,其余的可以在创建后进行设置
+	// 第二个为主机名+端口创建,第三个为主机名+端口+请求类型
+	// 第四个将请求类型更换成了一个http的数据,通常此构造用于将获取的http数据发送给服务器使用
+	HttpUtil http = new HttpUtil("shop.shendi.xyz");
+	// 可以设置一些请求头 端口等信息,端口默认80(setPort)
+	http.setReqHead("req", "hh");
+	// 最终要使用 send 方法来完成请求
+	http.sned();
+	// 然后可以直接获取到数据,例如,获取当前http的全部数据(包含协议头,响应头响应体)
+	System.out.print(new String(http.getRespData()));
+</pre>

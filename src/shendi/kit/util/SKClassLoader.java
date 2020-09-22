@@ -41,6 +41,25 @@ public final class SKClassLoader extends ClassLoader {
 		}
 	}
 	
+	@Override
+	protected Class<?> findClass(String name) throws ClassNotFoundException {
+		Class<?> c = findLoadedClass(name);
+		if (c == null) {
+			sk = new SKClassLoader();
+			name = "/".concat(name.replace('.', '/').concat(ShendiKitInfo.CLASS_SUFFIX));
+			byte[] classData = null;
+			try (InputStream input = SKClassLoader.class.getResourceAsStream(name)) {
+				classData = new byte[input.available()];
+				input.read(classData, 0, classData.length);
+			} catch (IOException e) {
+				Log.printErr("重新加载指定类获取出错: " + name + "---" + e.getMessage());
+				return null;
+			}
+			return sk.defineClass(null, classData, 0, classData.length);
+		}
+		return c;
+	}
+	
 	/**
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @return {@link SKClassLoader} 的实例

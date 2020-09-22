@@ -6,6 +6,8 @@
  * @since ShendiKit 1.0
  */
 module shendi.kit {
+	requires transitive java.desktop;
+	
 	exports shendi.kit.annotation;
 	exports shendi.kit.config;
 	exports shendi.kit.console;
@@ -21,4 +23,5 @@ module shendi.kit {
 	exports shendi.kit.project;
 	exports shendi.kit.time;
 	exports shendi.kit.util;
+	exports shendi.kit.reptile;
 }
