@@ -77,7 +77,6 @@ public class HttpUtil {
 		this(host, port, (byte[])null);
 		
 		if (reqType != null && "" != reqType) this.reqType = reqType;
-		reqHeads.put("Host", host);
 	}
 	
 	/**
@@ -105,10 +104,11 @@ public class HttpUtil {
 					reqPath += '/';
 				}
 			}
-			this.host = host.substring(0,index);
+			host = host.substring(0,index);
 		}
 		this.host = host;
 		this.data = data;
+		reqHeads.put("Host", host);
 		if (port != -1) this.port = port;
 	}
 
