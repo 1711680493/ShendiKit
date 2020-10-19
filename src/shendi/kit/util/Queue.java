@@ -61,6 +61,7 @@ public class Queue<E> {
 	 */
 	public E peek() { return front == null ? null : front.data; }
 	
+	/** @return 队列中元素的个数 */
 	public int size() { return size; }
 	
 }

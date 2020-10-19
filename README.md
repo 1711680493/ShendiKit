@@ -1,8 +1,9 @@
  简介
 >Project Name:Shendi Kit<br>
 >author:Shendi<br>
->version: 1.0<br>
->QQ:1711680493
+>version: 1.1<br>
+>QQ:1711680493<br>
+>以前版本可在分支中找到<br>
 
 # 测试样例
 >样例在源码的 shendi.kit.test 包下.
@@ -28,7 +29,9 @@
 >>[流处理工具类](#StreamUtils)<br>
 >>[自定义类加载器](#SKClassLoader)<br>
 >>[HTTP工具类](#HttpUtil)<br>
-
+>>[数学工具类](#Math)<br>
+>>[判空工具类](#IsNullUtil)<br>
+>>[字节工具类](#ByteUtil)<br>
 
 # 开始配置
 >1.首先需要在项目的根目录(web项目在WebContent下,SpringBoot等项目都在根目录)新建一个文件夹为files<br>
@@ -55,6 +58,7 @@
 >1.创建类<br>
 >2.创建方法/字段<br>
 >3.给类添加 @ConsoleAnno 注解<br>
+>>3.1.在JDK9模块化后,需要导出此类所在的包,在module-info.java中exports<br>
 >4.给方法/字段添加 @CommandAnno(name,info) 注解<br>
 >5.注册控制台
 >>目前只提供了几种控制台,下方会一一列举,后续会增加<br>
@@ -346,3 +350,63 @@ System.out.println(rs);
 	// 然后可以直接获取到数据,例如,获取当前http的全部数据(包含协议头,响应头响应体)
 	System.out.print(new String(http.getRespData()));
 </pre>
+
+#### Math
+>数学工具类<br>
+<pre>
+	// 单位转换,如果后两参数传递的浮点型则返回的结果也带小数
+	String[] names = {"厘米", "分米", "米"};
+	String s = Math.unitConvert(names, 10, 10);
+	s == "1分米"
+	
+	String s = Math.unitConvert(names, 10, 1011);
+	s == "10米 1分米 1厘米"
+</pre>
+
+#### IsNullUtil
+>判空工具类<br>
+>SK 1.1中新增
+<pre>
+	通常在写函数的时候会有很多参数
+	首先会对其进行判断
+	例如
+	if (account == null || "".equals(account)) {}
+	
+	当参数一多,就要写很长的代码,或者重复很多次上述操作
+	于是此类就这样诞生了
+	对于上述操作,判断 null 和 "" 为空的
+	可以直接通过 {@link #strsIsNull(String...)} 来判断
+	例如
+	String account = null;
+	String password = "hello";
+	IsNullUtil.strsIsNull(account, password)
+	== true
+	
+	account = "world";
+	IsNullUtil.strsIsNull(account, password)
+	== false
+	
+	当然,也可以自己设定判空条件,使用 {@link #isNull(Object[], Object...)} 函数
+	在写 Java Web 项目通常参数会为 "null"
+	if (IsNullUtil.isNull(new String[] {"", "null"}, account, password)) {
+		...
+	}
+</pre>
+
+#### ByteUtil
+>字节工具类<br>
+<pre>
+	// 将字节数组插入到另一个字节数组中
+	// ByteUtil.insert(byte[], int, byte[], int, int);
+	// 参数分别为,字节数组,数组的开始偏移,被插入的字节数组,插入的位置,插入多少个
+	byte[] source = {1, 2, 3};
+	byte[] data = {4, 5};
+	byte[] result = ByteUtil.insert(data, 0, source, source.length, data.length);
+	result == {1, 2, 3, 4, 5};
+	
+	source = {1, 3, 4};
+	data = {2};
+	result = ByteUtil.insert(data, 0, source, 1, data.length);
+	result == {1, 2, 3, 4};
+</pre>
+

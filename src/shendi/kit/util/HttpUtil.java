@@ -199,7 +199,10 @@ public class HttpUtil {
 			int size = bState.length + bHeads.length;
 			if (body != null) {
 				size += body.length;
-				respBody = new String(body);
+				// 如果没有Content-Length,则去掉空行尾巴
+				if (!respHeads.containsKey("Content-Length")) {
+					respBody = new String(body, 0, body.length - END_BODY.length);
+				}
 			}
 			respData = new byte[size];
 			System.arraycopy(bState, 0, respData, 0, bState.length);
