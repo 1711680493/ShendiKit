@@ -225,9 +225,8 @@ public class ClassScan {
 			
 			// 模块化后的版本(1.9及以上)需要格外处理,上述操作没有处理任何类则做此操作.
 			// 这种操作经过检验,只有在未打包的高版本普通Java项目中会出现.
-			String[] version = System.getProperty("java.version").split("\\.");
-			if (CLASSES.size() == 0 && version.length > 1 &&
-					!(Integer.parseInt(version[0]) <= 1 && Integer.parseInt(version[1]) <= 8)) {
+			String version = System.getProperty("java.version");
+			if (CLASSES.size() == 0 && Double.parseDouble(version) >= 1.9) {
 				String projectPath = System.getProperty("user.dir");
 				// 路径以分隔符结尾,不然获取到的会以分隔符开头.
 				ClassScan.classPath = projectPath + File.separatorChar + "bin" + File.separatorChar;

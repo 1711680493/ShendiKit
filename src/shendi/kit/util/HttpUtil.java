@@ -14,7 +14,7 @@ import shendi.kit.log.Log;
 /**
  * Http 协议工具类.<br>
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
- * @version 1.0
+ * @version 1.1
  */
 public class HttpUtil {
 	/** 头的结尾 */
@@ -38,6 +38,8 @@ public class HttpUtil {
 	private int timeout = 3000;
 	/** 请求头 */
 	private Map<String,String> reqHeads = new HashMap<>();
+	/** 请求参数 */
+	private StringBuilder parameters;
 	/** 请求的数据 */
 	private byte[] data;
 	
@@ -47,6 +49,8 @@ public class HttpUtil {
 	private Map<String, String> respHeads = new HashMap<>();
 	/** 响应体 */
 	private String respBody;
+	/** 响应体的字节形式 */
+	private byte[] respBodyData;
 	/** 响应的所有数据 */
 	private byte[] respData;
 	/** 响应状态 */
@@ -99,10 +103,6 @@ public class HttpUtil {
 			String str = host.substring(index, host.length());
 			if (str.length() > 1) {
 				reqPath = str;
-				// 非文件的子目录尾缀需要加 /
-				if (reqPath.indexOf('.') == -1) {
-					reqPath += '/';
-				}
 			}
 			host = host.substring(0,index);
 		}
@@ -111,7 +111,7 @@ public class HttpUtil {
 		reqHeads.put("Host", host);
 		if (port != -1) this.port = port;
 	}
-
+	
 	/**
 	 * 完成请求.
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
@@ -129,13 +129,26 @@ public class HttpUtil {
 			if (data == null) {
 				StringBuilder build = new StringBuilder(30);
 				build.append(reqType); build.append(' ');
-				build.append(reqPath); build.append(' ');
+				
+				build.append(reqPath);
+				if (parameters != null && "get".equalsIgnoreCase(reqType)) {
+					build.append('?');
+					build.append(parameters);
+				}
+				build.append(' ');
+				
 				build.append(httpV); build.append("\r\n");
 				reqHeads.forEach((k,v) -> {
 					build.append(k); build.append(": "); build.append(v);
 					build.append("\r\n");
 				});
 				build.append("\r\n");
+				
+				if (parameters != null && "post".equalsIgnoreCase(reqType)) {
+					build.insert(build.length() - 4, "\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: " + parameters.length());
+					build.append(parameters);
+				}
+				
 				data = build.toString().getBytes();
 			}
 			output.write(data); output.flush();
@@ -193,6 +206,7 @@ public class HttpUtil {
 						Log.printAlarm("响应数据应有响应体,但是没有.");
 					}
 				}
+				respBodyData = body;
 			}
 			
 			// 合并数据,完成响应
@@ -202,6 +216,8 @@ public class HttpUtil {
 				// 如果没有Content-Length,则去掉空行尾巴
 				if (!respHeads.containsKey("Content-Length")) {
 					respBody = new String(body, 0, body.length - END_BODY.length);
+				} else {
+					respBody = new String(body);
 				}
 			}
 			respData = new byte[size];
@@ -321,5 +337,29 @@ public class HttpUtil {
 
 	/** @return 响应状态信息 */
 	public String getStateInfo() { return stateInfo; }
+	
+	/**
+	 * 添加请求参数,如果使用了此方法,则不应在链接后加参数.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param key 参数键
+	 * @param value 参数值
+	 */
+	public void addParameter(String key, String value) {
+		if (parameters == null) parameters = new StringBuilder();
+		if (parameters.length() != 0) parameters.append('&');
+		parameters.append(key);
+		parameters.append('=');
+		parameters.append(value);
+	}
+	
+	/**
+	 * 直接设置请求参数,格式为 key=value&key=value,如果使用了此方法,则不应在链接后加参数.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param param 请求参数
+	 */
+	public void setParameters(String param) { parameters = new StringBuilder(param); }
+	
+	/** @return 响应体的字节形式 */
+	public byte[] getRespBodyData() { return respBodyData; }
 	
 }

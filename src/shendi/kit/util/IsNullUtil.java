@@ -42,18 +42,22 @@ public class IsNullUtil {
 	 * 通过指定的条件判断元素集合是否正确.<br>
 	 * 首先会进行判 null 操作,不为null则通过给定的错误条件集合判断.
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
-	 * @param nul 元素不正确的条件集合,例如字符串判空则为 "".
+	 * @param nul 元素不正确的条件集合,例如字符串判空则为 "",如果只需要判断是否为null则传递null
 	 * @param objs 要被判断的元素集合
 	 * @return 元素是否正确/为空,true则代表元素集合中有元素不正确.
 	 */
-	public static boolean isNull(Object[] nul,Object... objs) {
-		if (nul == null) return false;
+	public static boolean isNull(Object[] nul, Object... objs) {
 		if (objs == null) return true;
-		
-		for (Object o : objs) {
-			if (o == null) return true;
-			for (Object n : nul) {
-				if (o.equals(n)) return true;
+		if (nul == null) {
+			for (Object o : objs) {
+				if (o == null) return true;
+			}
+		} else {
+			for (Object o : objs) {
+				if (o == null) return true;
+				for (Object n : nul) {
+					if (o.equals(n)) return true;
+				}
 			}
 		}
 		return false;

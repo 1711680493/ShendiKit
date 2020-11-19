@@ -1,8 +1,7 @@
 package shendi.kit.exception;
 
 /**
- * 不支持解密异常.<br>
- * 当一个不可逆的加密类试图执行解密方法时出现.
+ * 当变量不应小于0但小于0时抛出.
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @version 1.0
  */

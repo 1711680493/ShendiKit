@@ -24,4 +24,7 @@ module shendi.kit {
 	exports shendi.kit.time;
 	exports shendi.kit.util;
 	exports shendi.kit.reptile;
+	exports shendi.kit.security;
+	
+	exports shendi.kit.format.json;
 }

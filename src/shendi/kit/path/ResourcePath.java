@@ -23,7 +23,6 @@ public class ResourcePath implements Path {
 	}
 	
 	@Override public String getPath(String path) {
-		System.out.println(RESOURCE_PATH);
 		return RESOURCE_PATH.concat(path);
 	}
 	

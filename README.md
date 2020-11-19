@@ -24,6 +24,9 @@
 >>[获取网页数据](#获取网页数据)<br>
 >>[两行代码获取所有的a标签](#两行代码获取所有的a标签)<br>
 >>[元素标签](#元素标签)<br>
+### [JSON工具](#JSON工具包)<br>
+>待完善<br>
+>>[JSONObject](#JSONObject-1)<br>
 ### [简洁实用工具包-shendi.kit.util](#工具类)<br>
 >>统一在 shendi.kit.util 包下<br>
 >>[流处理工具类](#StreamUtils)<br>
@@ -33,6 +36,18 @@
 >>[判空工具类](#IsNullUtil)<br>
 >>[字节工具类](#ByteUtil)<br>
 
+# SK 1.1版本变化
+>ConfigurationFactory类新增方法 getProperty(config, name),将两个方法融合,用于简化操作,直接获取properties配置的值.<br>
+>>之前使用ConfigurationFactory.getConfig(config).getProperty(name);<br>
+><br>
+>修复HttpUtil 1.0的已知问题,比如无法访问接口等<br>
+>>并且增加了遗漏的功能,设置参数,在之前POST请求无法带请求参数,现在可以使用addParameter(key,value)或setParameters(param)来直接设置<br>
+><br>
+>解决了扫描注解高版本Java无法扫描本项目的问题.<br>
+>util包中新增Math类,用于处理单位换算等<br>
+>util包中新增IsNullUtil类,用于判断给定的参数是否为空(条件可以自行设定)<br>
+>util包中新增ByteUtil类,用于处理对字节的操作(我经常用)<br>
+>新增shendi.kit.format.json包,用于处理json.(目前还不完善,详细信息请看对应介绍)<br>
 # 开始配置
 >1.首先需要在项目的根目录(web项目在WebContent下,SpringBoot等项目都在根目录)新建一个文件夹为files<br>
 >2.在这个文件夹下新建一个文件 anno_scan.shendi(大小写要完全一致)<br>
@@ -192,6 +207,11 @@
 >在之前说到可以通过注解的方式,获取到指定类,使用的就是此方法了<br>
 >参数与注解的两个参数对应,返回值为Class<?>,所以需要自己进行强转.
 
+### getProperty(String config, String name)
+>在1.1版本增加了此函数,在之前我们获取Properties配置文件并获取值需要如下代码<br>
+>ConfigurationFactroy.getConfig("xxx").getProperty("xx");<br>
+>这样显得很长,于是添加了此方法,将 getConfig和getProperty融合.<br>
+>返回值为String,并有一重载可以设置编码getProperty(config,name,encode)<br>
 
 # 时间工具包
 >对时间的操作我封装成了一个类 shendi.kit.time.TimeUtils<br>
@@ -315,6 +335,18 @@ System.out.println(rs);
 > Set<String> attrNames();			获取所有元素的名称<br>
 > HashMap<String, String> attrs()	获取所有元素<br>
 
+# JSON工具包
+>位于 shendi.kit.format.json 下<br>
+>SK 1.1新增<br>
+### JSONObject
+>Json对象,格式如下<br>
+>>{key:value,key:value}<br>
+>注: 目前还未完善,key和value都不能使用转义字符,并且value不能为JSONObject或JSONArray<br>
+>并且只能取值<br>
+><br>
+>直接通过字符串创建JSONObject对象<br>
+>通过getString(key) 来获取对应值,其中也可以使用getInt,getDouble等.以及has用于判断是否存在<br>
+
 # 工具类
 #### StreamUtils
 >流处理工具类<br>
@@ -350,9 +382,9 @@ System.out.println(rs);
 	// 然后可以直接获取到数据,例如,获取当前http的全部数据(包含协议头,响应头响应体)
 	System.out.print(new String(http.getRespData()));
 </pre>
-
 #### Math
 >数学工具类<br>
+>SK 1.1中新增
 <pre>
 	// 单位转换,如果后两参数传递的浮点型则返回的结果也带小数
 	String[] names = {"厘米", "分米", "米"};
@@ -395,6 +427,7 @@ System.out.println(rs);
 
 #### ByteUtil
 >字节工具类<br>
+>SK 1.1中新增
 <pre>
 	// 将字节数组插入到另一个字节数组中
 	// ByteUtil.insert(byte[], int, byte[], int, int);

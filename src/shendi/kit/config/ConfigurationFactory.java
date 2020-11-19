@@ -21,7 +21,7 @@ import shendi.kit.path.ProjectPath;
  * 通过 {@link #getConfig(String)} 来获取一个在main.properties中对应的另一个Properties的文件,默认处理编码UTF-8.
  * 如果需要指定处理编码,请使用 {@link #getConfig(String, String)}
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
- * @version 1.0
+ * @version 1.1
  */
 public class ConfigurationFactory {
 	
@@ -108,6 +108,37 @@ public class ConfigurationFactory {
 				Log.printErr("配置工厂获取不到对应配置文件 文件名,name=" + name);
 				return null;
 			}
+		}
+	}
+	
+	/**
+	 * 对于 properties 配置文件,使用此方法可直接简易获取.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param config 配置文件名
+	 * @param name 键名
+	 * @return 指定配置文件内键的值
+	 * @since 1.1
+	 */
+	public static String getProperty(String config, String name) { return getProperty(config, name, null); }
+	
+	/**
+	 * 对于 properties 配置文件,可直接设置编码.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param config	配置文件名
+	 * @param name		键名
+	 * @param encode	编码,为null则使用默认编码
+	 * @return 指定配置文件内键的值
+	 * @since 1.1
+	 */
+	public static String getProperty(String config, String name, String encode) {
+		String value = getConfig(config).getProperty(name);
+		if (encode == null) return value;
+		try {
+			return new String(value.getBytes(), encode);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			Log.printErr("此编码不被支持: " + encode);
+			return value;
 		}
 	}
 	
