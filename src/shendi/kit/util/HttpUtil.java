@@ -35,7 +35,7 @@ public class HttpUtil {
 	/** 请求路径 */
 	private String reqPath = "/";
 	/** 超时时间 */
-	private int timeout = 3000;
+	private int timeout = 5000;
 	/** 请求头 */
 	private Map<String,String> reqHeads = new HashMap<>();
 	/** 请求参数 */

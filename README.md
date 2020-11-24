@@ -48,6 +48,10 @@
 >util包中新增IsNullUtil类,用于判断给定的参数是否为空(条件可以自行设定)<br>
 >util包中新增ByteUtil类,用于处理对字节的操作(我经常用)<br>
 >新增shendi.kit.format.json包,用于处理json.(目前还不完善,详细信息请看对应介绍)<br>
+>控制台在创建时可以设置组,命令注解可以设置组,解决之前多个控制台共用所有命令问题.<br>
+>解决 SKClassLoader在高版本JDK中找不到类的问题<br>
+>优化了待发布的Path包,解决高版本,JavaWeb等路径获取问题<br>
+
 # 开始配置
 >1.首先需要在项目的根目录(web项目在WebContent下,SpringBoot等项目都在根目录)新建一个文件夹为files<br>
 >2.在这个文件夹下新建一个文件 anno_scan.shendi(大小写要完全一致)<br>
@@ -79,6 +83,12 @@
 >>目前只提供了几种控制台,下方会一一列举,后续会增加<br>
 >>通过控制台对象的 register() 函数来注册<br>
 >>例如: new CommandConsole().register();<br>
+><br>
+>在1.1版本中新增设置组功能<br>
+>>通过给注解添加参数 @ConsoleAnno("group") 来将一个类里所有未设置组的命令设置组<br>
+>在注册控制台时,通过重载的函数来设置控制台所使用的组<br>
+>>例如: new CommandConsole().register("group");<br>
+>如果没有设置组则使用默认组.<br>
 
 ## 添加命令
 >引入注解 import shendi.kit.annotation.CommandAnno;<br>
@@ -87,6 +97,10 @@
 >>要求: 只能修饰在字段/方法上<br>
 >>>如果是方法,必须是public修饰的,方法返回值必须为java.lang.String,必须无参<br>
 >><b>并且拥有命令的类必须使用 @ConsoleAnno 注解</b><br>
+><br>
+>在1.1版本新增设置组功能<br>
+>>例如: @CommandAnno(name, info, group="group");<br>
+>>命令中设置组优先于控制台组,如果未设置,则使用控制台组.<br>
 
 ## 命令行控制台
 >实现类: shendi.kit.console.CommandConsole<br>

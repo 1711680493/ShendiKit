@@ -1,15 +1,17 @@
 package shendi.kit.util;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import shendi.kit.ShendiKitInfo;
 import shendi.kit.log.Log;
+import shendi.kit.path.PathFactory;
 
 /**
  * 类加载器,简化使用.
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
- * @version 1.0
+ * @version 1.1
  */
 public final class SKClassLoader extends ClassLoader {
 	private SKClassLoader() {}
@@ -30,12 +32,23 @@ public final class SKClassLoader extends ClassLoader {
 			sk = new SKClassLoader();
 			clazz = "/".concat(clazz.replace('.', '/').concat(ShendiKitInfo.CLASS_SUFFIX));
 			byte[] classData = null;
-			try (InputStream input = SKClassLoader.class.getResourceAsStream(clazz)) {
+			
+			// 在高版本打包后使用class.getResourceAsStream, 未打包使用路径方式获取.
+			InputStream input = SKClassLoader.class.getResourceAsStream(clazz);
+			try {
+				if (input == null) input = new FileInputStream(PathFactory.get(PathFactory.RESOURCE).getPath(clazz));
+				
 				classData = new byte[input.available()];
 				input.read(classData, 0, classData.length);
 			} catch (IOException e) {
 				Log.printErr("重新加载指定类获取出错: " + clazz + "---" + e.getMessage());
 				return null;
+			} finally {
+				try {
+					if (input != null) input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 			return sk.defineClass(null, classData, 0, classData.length);
 		}
@@ -48,12 +61,22 @@ public final class SKClassLoader extends ClassLoader {
 			sk = new SKClassLoader();
 			name = "/".concat(name.replace('.', '/').concat(ShendiKitInfo.CLASS_SUFFIX));
 			byte[] classData = null;
-			try (InputStream input = SKClassLoader.class.getResourceAsStream(name)) {
+			// 在高版本打包后使用class.getResourceAsStream, 未打包使用路径方式获取.
+			InputStream input = SKClassLoader.class.getResourceAsStream(name);
+			try {
+				if (input == null) input = new FileInputStream(PathFactory.get(PathFactory.RESOURCE).getPath(name));
+				
 				classData = new byte[input.available()];
 				input.read(classData, 0, classData.length);
 			} catch (IOException e) {
 				Log.printErr("重新加载指定类获取出错: " + name + "---" + e.getMessage());
 				return null;
+			} finally {
+				try {
+					if (input != null) input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 			return sk.defineClass(null, classData, 0, classData.length);
 		}

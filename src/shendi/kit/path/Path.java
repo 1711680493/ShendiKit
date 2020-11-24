@@ -2,7 +2,10 @@ package shendi.kit.path;
 
 /**
  * 通常,我们会需要获取一些路径,比如项目根路径等.<br>
- * 此接口用于获取对应的路径.
+ * 此接口用于获取对应的路径.<br>
+ * <br>
+ * 在普通Java项目与高版本Java使用System.getProperty("user.dir")<br>
+ * 在JavaWeb项目使用.class.getResource("/");
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @since ShendiKit 1.0
  * @version 1.0

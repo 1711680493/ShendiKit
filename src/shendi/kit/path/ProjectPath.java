@@ -44,7 +44,7 @@ public final class ProjectPath implements Path {
 			Object pathObj = ProjectPath.class.getResource("/");
 			//路径不为空则获取指定文件判断是否有
 			if (pathObj != null) {
-				return ProjectPath.class.getResource("/").getPath() + "../../" + path;
+				return ProjectPath.class.getResource("/").getPath().concat("../../").concat(path);
 			}
 			Log.printErr("从项目路径获取文件路径失败 path=" + pathObj);
 			break;

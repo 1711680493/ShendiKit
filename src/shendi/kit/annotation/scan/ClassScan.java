@@ -267,6 +267,7 @@ public class ClassScan {
 			
 			try {
 				Class<?> c = SKClassLoader.reloadClass(clazz);
+				if (c == null) return;
 				// 将类添加进集合
 				Annotation[] annos = c.getAnnotations();
 				if (annos.length > 0) {

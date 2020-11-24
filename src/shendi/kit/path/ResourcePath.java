@@ -1,6 +1,6 @@
 package shendi.kit.path;
 
-import java.net.URL;
+import shendi.kit.project.ProjectTypeUtils;
 
 /**
  * 从项目中的源路径获取指定文件路径
@@ -13,13 +13,34 @@ public class ResourcePath implements Path {
 
 	/** bin 目录 */
 	private static final String RESOURCE_PATH;
+	
 	static {
-		URL r = ClassLoader.getSystemResource("");
-		if (r == null) {
-			RESOURCE_PATH = ResourcePath.class.getResource("/").getPath().substring(1);
-		} else {
-			RESOURCE_PATH = r.getPath().substring(1);
+//		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+//		StackTraceElement callInfo = stackTraceElements[stackTraceElements.length - 1];
+//		String path = null;
+//		String packageName = null;
+//		try {
+//			Class<?> c = Class.forName(callInfo.getClassName());
+//			// 获取到此类所在目录 - 包名则是源目录
+//			path = c.getResource("").getPath();
+//			packageName = c.getPackage().getName().replace(".", "/");
+//		} catch (ClassNotFoundException e) {
+//			e.printStackTrace();
+//		}
+//		RESOURCE_PATH = path.substring(1, path.indexOf(packageName));
+		String path  = null;
+		switch (ProjectTypeUtils.TYPE) {
+		case JavaWeb:
+			Object pathObj = ProjectPath.class.getResource("/");
+			//路径不为空则获取指定文件判断是否有
+			if (pathObj != null) {
+				path = ProjectPath.class.getResource("/").getPath().concat("../../");
+			}
+			break;
+		case Java:
+			path = System.getProperty("user.dir");
 		}
+		RESOURCE_PATH = path + "/bin/";
 	}
 	
 	@Override public String getPath(String path) {
