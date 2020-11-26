@@ -227,7 +227,7 @@ public class ClassScan {
 			// 这种操作经过检验,只有在未打包的高版本普通Java项目中会出现.
 			String version = System.getProperty("java.version");
 			if (version.indexOf('.') != -1) {
-				version = version.substring(0, version.indexOf('.') + 1);
+				version = version.substring(0, version.indexOf('.') + 2);
 			}
 			
 			if (CLASSES.size() == 0 && Double.parseDouble(version) >= 1.9) { 
