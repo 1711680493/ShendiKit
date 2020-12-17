@@ -12,8 +12,8 @@
 
 # 目录
 ### [版本变化](#SK-版本变化)
->[1.1 Start](#v-1.0)<br>
->[1.1 Small Kit](#v-1.1)
+>[1.1 Start](#v-10)<br>
+>[1.1 Small Kit](#v-11)
 
 ### [SK 配置](#开始配置)
 >[SK 配置文件地址](#配置文件地址)<br>
@@ -432,11 +432,11 @@ System.out.println(rs);
 >直接通过字符串创建JSONObject对象<br>
 >通过getString(key) 来获取对应值,其中也可以使用getInt,getDouble等.以及has用于判断是否存在<br>
 
-#id工具包
+# id工具包
 >位于 shendi.kit.id 下<br>
 >SK 1.1新增<br>
 
-### SnakeFlake
+### SnowFlake
 >雪花算法,生成唯一id,可用于分布式架构,高并发等.<br>
 >雪花算法为 Twitter 开源的分布式 id 生成算法<br>
 >其核心思想就是: 使用一个 64 位的数字作为全局唯一id.在分布式系统中的应用十分广泛.<br>
