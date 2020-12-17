@@ -1,75 +1,114 @@
- 简介
->Project Name:Shendi Kit<br>
+# 简介
+>Shendi Kit<br>
 >author:Shendi<br>
 >version: 1.1<br>
 >QQ:1711680493<br>
->以前版本可在分支中找到<br>
+>[引导页面](https://1711680493.github.io)<br>
+>Java工具包,纯Java制作,使用JDK8<br>
+>以前版本可在分支中找到
 
 # 测试样例
 >样例在源码的 shendi.kit.test 包下.
 
 # 目录
-### [控制台](#控制台模块)<br>
->>[给自己的程序增加一个控制台模块](#给自己的程序增加一个控制台模块)<br>
->>[添加命令](#添加命令)<br>
->>[命令行控制台](#命令行控制台)<br>
->>[窗体控制台](#窗体控制台)<br>
->>[自定义控制台](#自定义控制台)<br>
-### [配置文件](#非常简单的使用-properties-配置文件)<br>
-### [时间工具](#时间工具包)<br>
-### [日志工具](#日志工具包)<br>
-### [加密工具](#加密工具包)<br>
-### [爬虫工具](#爬虫工具包)<br>
->此包待完善,目前只提供了一些简单地功能<br>
->>[获取网页数据](#获取网页数据)<br>
->>[两行代码获取所有的a标签](#两行代码获取所有的a标签)<br>
->>[元素标签](#元素标签)<br>
-### [JSON工具](#JSON工具包)<br>
->待完善<br>
->>[JSONObject](#JSONObject-1)<br>
-### [简洁实用工具包-shendi.kit.util](#工具类)<br>
->>统一在 shendi.kit.util 包下<br>
->>[流处理工具类](#StreamUtils)<br>
->>[自定义类加载器](#SKClassLoader)<br>
->>[HTTP工具类](#HttpUtil)<br>
->>[数学工具类](#Math)<br>
->>[判空工具类](#IsNullUtil)<br>
->>[字节工具类](#ByteUtil)<br>
+### [版本变化](#SK-版本变化)
+>[1.1 Start](#v-1.0)<br>
+>[1.1 Small Kit](#v-1.1)
 
-# SK 1.1版本变化
+### [SK 配置](#开始配置)
+>[SK 配置文件地址](#配置文件地址)<br>
+>[SK 默认配置文件](#默认配置文件)<br>
+>>[注解扫描配置](#anno_scan.shendi注解扫描配置)<br>
+
+### [控制台](#控制台模块)
+>[给自己的程序增加一个控制台模块](#给自己的程序增加一个控制台模块)<br>
+>[添加命令](#添加命令)<br>
+>[命令行控制台](#命令行控制台)<br>
+>[窗体控制台](#窗体控制台)<br>
+>[自定义控制台](#自定义控制台)
+
+### [配置文件](#非常简单的使用-properties-配置文件)
+### [时间工具](#时间工具包)
+### [日志工具](#日志工具包)
+### [加密工具](#加密工具包)
+### [爬虫工具](#爬虫工具包)
+>此包待完善,目前只提供了一些简单地功能<br>
+>[获取网页数据](#获取网页数据)<br>
+>[两行代码获取所有的a标签](#两行代码获取所有的a标签)<br>
+>[元素标签](#元素标签)<br>
+
+### [JSON工具](#JSON工具包)
+>待完善<br>
+>[JSONObject](#JSONObject)<br>
+
+### [id工具](#id工具包)
+>[雪花算法](#SnowFlake)
+
+### [简洁实用工具包-shendi.kit.util](#工具类)
+>统一在 shendi.kit.util 包下<br>
+>[流处理工具类](#StreamUtils)<br>
+>[自定义类加载器](#SKClassLoader)<br>
+>[HTTP工具类](#HttpUtil)<br>
+>[数学工具类](#Math)<br>
+>[判空工具类](#IsNullUtil)<br>
+>[字节工具类](#ByteUtil)<br>
+>[位工具类](#BitUtil)<br>
+>[文件工具类](#FileUtil)<br>
+
+
+# SK 版本变化
+## v 1.0
+>起航,包含以下<br>
+>Properties配置,控制台,时间工具,日志,加密工具,路径工具,爬虫工具,util包等.
+
+## v 1.1
 >ConfigurationFactory类新增方法 getProperty(config, name),将两个方法融合,用于简化操作,直接获取properties配置的值.<br>
 >>之前使用ConfigurationFactory.getConfig(config).getProperty(name);<br>
-><br>
+
 >修复HttpUtil 1.0的已知问题,比如无法访问接口等<br>
 >>并且增加了遗漏的功能,设置参数,在之前POST请求无法带请求参数,现在可以使用addParameter(key,value)或setParameters(param)来直接设置<br>
-><br>
+
 >解决了扫描注解高版本Java无法扫描本项目的问题.<br>
 >util包中新增Math类,用于处理单位换算等<br>
 >util包中新增IsNullUtil类,用于判断给定的参数是否为空(条件可以自行设定)<br>
->util包中新增ByteUtil类,用于处理对字节的操作(我经常用)<br>
+>util包中新增ByteUtil类,用于处理对字节的操作<br>
+>util包中新增BitUtil类,用于处理对bit的操作<br>
+>util包中新增FileUtil类,用于处理对文件的操作<br>
 >新增shendi.kit.format.json包,用于处理json.(目前还不完善,详细信息请看对应介绍)<br>
+>新增shendi.kit.id包,用于处理id生成<br>
 >控制台在创建时可以设置组,命令注解可以设置组,解决之前多个控制台共用所有命令问题.<br>
 >解决 SKClassLoader在高版本JDK中找不到类的问题<br>
 >优化了待发布的Path包,解决高版本,JavaWeb等路径获取问题<br>
 
 # 开始配置
->1.首先需要在项目的根目录(web项目在WebContent下,SpringBoot等项目都在根目录)新建一个文件夹为files<br>
->2.在这个文件夹下新建一个文件 anno_scan.shendi(大小写要完全一致)<br>
->3.在此文件中配置使用了当前工具包注解的 jar 包名,格式为如下<br>
->>jar1.jar;jar2.jar;jar3.jar;jar4.jar<br>
->当然为了避免重复,可以加上jar包所在的相对路径,如下<br>
->>/lib/jar1.jar;/lib/jar2.jar<br>
->使用分号分隔,配置完成之后就可以随意使用此工具包的注解了<br>
+### 配置文件地址
+>普通Java项目以及SpringBoot项目等,配置文件地址在项目根目录的/files下<br>
+>Web项目配置文件地址在WebContent的/files下<br>
+>具体位置以 shendi.kit.path.ProjectPath 为准.
+>>如果没有此目录,则项目可能无法正常运作
+
+### 默认配置文件
+>在配置文件地址下(/files)<br>
+
+##### anno_scan.shendi(注解扫描配置)
+>此文件编码必须为UTF-8,否则无法正常读取<br>
+>此文件配置需要扫描的jar,如果当前项目打包则也需要加入<br>
+>格式为 jar1.jar;jar2.jar;jar3.jar;jar4.jar 使用分号隔开<br>
+>当然,为了避免重复,可以加上jar包所在的相对路径,如下<br>
+>/lib/jar1.jar;/lib/jar2.jar<br>
 >根据jar包后缀进行判断,所以如果需要扫描所有jar,配置文件内容可以为 .jar<br>
->>但是这不可避免会出现一些错误,比如被扫描的jar包有一些类有问题等,例如mysql的jdbc驱动...<br>
->注: 当前项目如果打包成jar也需要加入进去<br>
->如果不想扫描,可以将文件内容改为 No(只有N和o这两个字母)
+>>在扫描时会触发此类的静态代码块,所以扫描所有jar则可能出现一些问题,例如mysql的jdbc驱动...<br>
+
+>如果不想扫描jar包,可以将文件内容改为 No Jar(大小写等完全一致)<br>
+>如果不想扫描注解(不用),可以将文件内容改为 No
 
 # 控制台模块
 >有的时候我们需要给自己的程序添加一个后端控制来增强交互,这时就可以使用此模块<br>
->我自己也有这一需求,所以此模块就这样诞生了.<br><br>
->>会不断完善,后续可能会开发出可以实时修改变量的功能,请期待<br>
->提供了一个测试类 shendi.kit.test.TestConsole <br><br>
+>我自己也有这一需求,所以此模块就这样诞生了.
+>>会不断完善,后续可能会开发出可以实时修改变量的功能,请期待
+
+>提供了一个测试类 shendi.kit.test.TestConsole <br>
+
 ## 给自己的程序增加一个控制台模块
 >好处就是增强了交互,时刻观察到当前软件状态等<br><br>
 >为了使得开发变得简单,我只提供了注解的方式来使用<br><br>
@@ -78,16 +117,19 @@
 >2.创建方法/字段<br>
 >3.给类添加 @ConsoleAnno 注解<br>
 >>3.1.在JDK9模块化后,需要导出此类所在的包,在module-info.java中exports<br>
+
 >4.给方法/字段添加 @CommandAnno(name,info) 注解<br>
 >5.注册控制台
 >>目前只提供了几种控制台,下方会一一列举,后续会增加<br>
 >>通过控制台对象的 register() 函数来注册<br>
 >>例如: new CommandConsole().register();<br>
-><br>
+
 >在1.1版本中新增设置组功能<br>
 >>通过给注解添加参数 @ConsoleAnno("group") 来将一个类里所有未设置组的命令设置组<br>
+
 >在注册控制台时,通过重载的函数来设置控制台所使用的组<br>
 >>例如: new CommandConsole().register("group");<br>
+
 >如果没有设置组则使用默认组.<br>
 
 ## 添加命令
@@ -96,7 +138,9 @@
 >>其中,name为String类型,代表命令的名称,info也是String类型,代表命令的附加信息<br>
 >>要求: 只能修饰在字段/方法上<br>
 >>>如果是方法,必须是public修饰的,方法返回值必须为java.lang.String,必须无参<br>
+
 >><b>并且拥有命令的类必须使用 @ConsoleAnno 注解</b><br>
+
 ><br>
 >在1.1版本新增设置组功能<br>
 >>例如: @CommandAnno(name, info, group="group");<br>
@@ -121,6 +165,7 @@
 >实现以下两个方法<br>
 >>protected void register(HashMap<String, Command> commands)<br>
 >>public void destroy()<br>
+
 >register代表注册,destroy代表销毁<br>
 >在register中传递的参数 commands 代表当前已有的所有命令<br>
 >>是一个HashMap,键为命令名,值为命令(包含函数/字段),要了解更多可以查阅 shendi.kit.data.Command 类
@@ -204,6 +249,7 @@
 
 ## shendi.kit.config.ConfigurationFactory
 >ConfigurationFactory 是一个配置文件工厂类,里面提供了一些方法让我们非常简单的获取配置文件<br>
+
 ### getConfig(String);
 >上面说到了在 main.properties 中配置其他配置文件的路径,那么我们如何获取?<br>
 >使用 ConfigurationFactory 的 getConfig 方法,是静态的.<br>
@@ -217,6 +263,7 @@
 
 >我们的main.properties里如果包含中文,可以通过 getConfig 的另一个重载来设置对应编码<br>
 >默认编码为 UTF-8,所以不用担心中文问题,当然,这只作用于 main.properties.
+
 ### getPConfigAnnoClass(String config,String name)
 >在之前说到可以通过注解的方式,获取到指定类,使用的就是此方法了<br>
 >参数与注解的两个参数对应,返回值为Class<?>,所以需要自己进行强转.
@@ -232,14 +279,17 @@
 >此类提供了一个静态方法供获取对象 TimeUtils.getTime();<br>
 >通过对象,可以创建时间-shendi.kit.time.Time类,创建时间格式等.<br>
 >里面有几个内部类
+
 ## Time类
 >第一个就是Time类,用于表示一个时间,一个Time类只能表示一个时间,并且不可改变.<br>
 >当一个Time类通过 TimeUtils.createTime 的方式创建则直接拥有字符串,时间戳,Date的表示形式,并且不可改变.<br>
+
 ## TimeFormat类
 >用于格式化时间的类,比如将字符串格式化成long/Date形式,或者将Date格式化成对应的字符串形式.<br>
 >默认提供了几种格式化形式,请参见 TimeUtils.getFormatTime(String) 方法<br>
 >也可以自己创建对应的格式,使用 TimeUtils.addTimeFormat(String,String) 方法,有两个参数<br>
 >第一个参数为这个格式的名称,第二个为什么样的格式,请参见 java.text.SimpleDateFormat 类
+
 ## TimeDisposal类
 >用于处理时间,比如获取当前到第二天的距离等.<br>
 ><b>提供了一个非常好使的方法用于直接获取指定日期--getToTime()</b><br>
@@ -249,14 +299,18 @@
 # 日志工具包
 >日志打印类 shendi.kit.log.Log<br>
 >>用于打印日志和控制日志是否在控制台可见.<br>
+
 >日志管理类 shendi.kit.log.LogManager<br>
 >>用于获取日志
+
 ## Log类
 >使用方法比较简单,目前有以下三种日志形式<br>
 >>普通日志 Log.print();<br>
 >>警报日志 Log.printAlarm();<br>
 >>错误日志 Log.printErr();<br>
+
 >使用 setIsLog(false) 来隐藏日志在控制台的显示<br>
+
 ### 日志文件
 >存在于项目根目录的 logs 文件夹下<br>
 >如果是 Web 项目则为项目的资源路径(WebContent)的logs目录下.<br>
@@ -266,19 +320,25 @@
 >通过加密工厂获取对应加密算法类.<br>
 >目前提供了两种加密算法,加一算法(速度快,简单,易破)和密码加密算法<br>
 >>加一算法 EncryptFactory.getEncrypt(EncryptFactory.ADD_ONE);<br>
+
 ### 密码加密算法
 >通过自己提供的密码来对数据进行操作<br>
 >如果没有设置密码,则使用默认的密码<br>
 >>获取密码加密算法类 EncryptFactory.getEncrypt(EncryptFactory.PWD);<br>
+
 >需要设置密码可以使用 EncryptFactory.getPwdEncrypt(密码) 来设置并获取<br>
 >>设置后,下次可直接通过 EncryptFactory.getEncrypt(EncryptFactory.PWD); 来获取已经设置密码的类.<br>
+
 ### 双密码加密算法
 > 同上,更加安全,当数据量大时采用多线程处理<br>
 > 使用 EncryptFactory.getTwoPwdEncrypt(密码1,密码2) 来设置并获取
+
 ### 求和取余加密算法(不可逆)
 >使用 EncryptFactory.getEncrypt(EncryptFactory.SUM_REMAINDER); 来获取
+
 ### 添加自己的加密算法到工厂
 >新建一个类实现 shendi.kit.encrypt.Encrypt 接口,并使用 EncryptFactory.addEncrypt(获取时的名,新建的加密算法类); 来进行添加
+
 #### 使用注解的方式添加加密算法到加密工厂
 >在类上使用 @EncryptAnno 注解,此类需要实现 Encrypt 接口<br>
 <pre>
@@ -305,18 +365,23 @@
 ### 简化加密工厂类的操作
 >我们加密一串数据的通常代码形式是这样的<br>
 >>EncryptFactory.getEncrypt(EncryptFactory.ADD_ONE).encrypt(str.getBytes());<br>
+
 >代码有点过于长了,这不是我的预期结果,于是我在加密工具类中新增了几个方法用于简化操作
+
 #### EncryptUtils.encrypt(name, data);
 >通过传递加密方法的名称和要加密的数据就可以得到加密后的数据了<br>
 >name 从工厂中获取<br>
 >data 是 Object 类型的,所以不用在像上面的例子一样将字符串转换字节在传递了<br>
 >返回类型是字节数组
+
 #### EncryptUtils.encryptRS(name, data);
 >与 encrypt 不同的是,返回的类型为字符串<br>
 >有的时候我们加密后希望得到的是一个字符串类型的数据就可以使用此方法<br>
+
 #### EncryptUtils.decode(name, data);
 #### EncryptUtils.decodeRS(name, data);
 >与加密的两个方法对应
+
 #### 使用实例
 <pre>
 String rs = EncryptUtils.encryptRS(EncryptFactory.ADD_ONE, "hello,world");
@@ -326,11 +391,13 @@ System.out.println(rs);
 # 爬虫工具包
 > 目前提供微量功能,后续会对此进行扩展<br>
 > 对 HTTP 数据获取可参考下方的[HTTP工具类](#HttpUtil)<br>
+
 ### 获取网页数据
 > 使用 shendi.kit.reptile.Reptile<br>
 > 仅需一行代码,可以获取一个 HTML 页面内容<br>
 > 代码如下:<br>
 >> String data = Reptile.index("www.baidu.com");<br>
+
 > 如果想设置请求类型可以在后方加上<br>
 >> String data = Reptile.index("www.baidu.com", "POST");<br>
 
@@ -340,7 +407,9 @@ System.out.println(rs);
 > 例如 获取页面中所有的 a 标签<br>
 >> String data = Reptile.index("www.baidu.com");<br>
 >> List<Element> e = Reptile.getElements("a", data);<br>
+
 > 当然不只局限与 a 标签,可以自行设置<br>
+
 ### 元素标签
 > shendi.kit.reptile.Element 代表一个元素<br>
 > 其中有如下方法<br>
@@ -352,14 +421,50 @@ System.out.println(rs);
 # JSON工具包
 >位于 shendi.kit.format.json 下<br>
 >SK 1.1新增<br>
+
 ### JSONObject
 >Json对象,格式如下<br>
 >>{key:value,key:value}<br>
+
 >注: 目前还未完善,key和value都不能使用转义字符,并且value不能为JSONObject或JSONArray<br>
 >并且只能取值<br>
 ><br>
 >直接通过字符串创建JSONObject对象<br>
 >通过getString(key) 来获取对应值,其中也可以使用getInt,getDouble等.以及has用于判断是否存在<br>
+
+#id工具包
+>位于 shendi.kit.id 下<br>
+>SK 1.1新增<br>
+
+### SnakeFlake
+>雪花算法,生成唯一id,可用于分布式架构,高并发等.<br>
+>雪花算法为 Twitter 开源的分布式 id 生成算法<br>
+>其核心思想就是: 使用一个 64 位的数字作为全局唯一id.在分布式系统中的应用十分广泛.<br>
+>64位,默认配置为,第一位为0(正数),41位表示时间戳,5位机房id,5位机器id,12位序列号
+
+#### 构造方法
+>(); 默认构造,使用默认配置<br>
+>(int, int); 通过指定的机房id和机器id<br>
+>(int tBitNum, int gBitNum, int hBitNum, int sBitNum, int groupId, int hostId);
+>>自定义设置,通过指定的时间戳位,机房id位,机器id位,序列号位,机房id,机器id创建.
+
+#### 使用
+>在创建对象后,通过 spawn() 方法来生成id<br>
+<pre>
+    SnowFlake snow = new SnowFlake();
+    long id = snow.spawn();
+</pre>
+>此算法生成的id够用70年,默认初始时间戳为2020-12-17(我完成这个类的日期)<br>
+>也可以通过 setStartTime(long) 来设置初始时间戳,请勿在使用时设置,并保证设置的值为常量<br>
+<pre>
+    设置初始时间戳示例
+    long t = System.currentTimeMillis();
+    t -> 时间戳,例如为 11111111111
+    -------------
+    SnowFlake snow = new SnowFlake();
+    snow.setStartTime(11111111111);
+    long id = snow.spawn();
+</pre>
 
 # 工具类
 #### StreamUtils
@@ -396,6 +501,7 @@ System.out.println(rs);
 	// 然后可以直接获取到数据,例如,获取当前http的全部数据(包含协议头,响应头响应体)
 	System.out.print(new String(http.getRespData()));
 </pre>
+
 #### Math
 >数学工具类<br>
 >SK 1.1中新增
@@ -457,3 +563,36 @@ System.out.println(rs);
 	result == {1, 2, 3, 4};
 </pre>
 
+#### BitUtil
+>位工具类<br>
+>SK 1.1中新增
+<pre>
+    /**
+     * 获取指定数值占多少位,数字符号位占一位.
+     * int sizeOf(long);
+     * sizeOf(0) -> 2
+     * sizeOf(1) -> 2
+     * sizeOf(2) -> 3
+     */
+    int bitNum = BitUtil.sizeOf(1);
+    /**
+     * 获取指定位数的最大十进制值,不带符号位
+     * long bitMax(int);
+     * bitMax(0) -> 0
+     * bitMax(1) -> 1
+     * bitMax(2) -> 3
+     * bitMax(3) -> 7
+     */
+     int max = BitUtil.bitMax(1);
+</pre>
+
+#### FileUtil
+>文件工具类<br>
+>SK 1.1中新增
+<pre>
+	// 使用指定数据更新/创建指定文件,update(String, byte[])
+    FileUtil.update("C:/1.txt", "hello".getBytes());
+    // 同上,参数一为相对路径,updateByPro(String, byte[])
+    // 例如将项目下的1.txt内容更改
+    FileUtil.updateByPro("/1.txt", "hello.getBytes());
+</pre>

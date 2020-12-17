@@ -57,8 +57,10 @@ public class ClassScan {
 				} else {
 					// 数据为No则不扫描
 					String d = new String(data);
-					if ("No".equalsIgnoreCase(d)) {
+					if ("No".equals(d)) {
 						isInit = true;
+					} else if ("No Jar".equals(d)) {
+						jars = null;
 					} else {
 						jars = d.split(";");
 					}

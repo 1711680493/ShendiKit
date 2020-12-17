@@ -16,7 +16,6 @@ module shendi.kit {
 	exports shendi.kit.deskapp.effect;
 	exports shendi.kit.encrypt;
 	exports shendi.kit.exception;
-	exports shendi.kit.file;
 	exports shendi.kit.log;
 	exports shendi.kit.log.interpreter;
 	exports shendi.kit.path;
@@ -27,4 +26,6 @@ module shendi.kit {
 	exports shendi.kit.security;
 	
 	exports shendi.kit.format.json;
+	
+	exports shendi.kit.id;
 }
