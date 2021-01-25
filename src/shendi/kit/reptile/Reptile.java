@@ -7,7 +7,7 @@ import java.util.List;
 import shendi.kit.exception.HttpResponseException;
 import shendi.kit.exception.NullHttpResponseException;
 import shendi.kit.log.Log;
-import shendi.kit.util.HttpUtil;
+import shendi.kit.net.http.HttpUtil;
 
 /**
  * 爬虫工具.<br>

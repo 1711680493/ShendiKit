@@ -55,7 +55,7 @@ public final class SKClassLoader extends ClassLoader {
 	}
 	
 	@Override
-	protected Class<?> findClass(String name) throws ClassNotFoundException {
+	public Class<?> findClass(String name) throws ClassNotFoundException {
 		Class<?> c = findLoadedClass(name);
 		if (c == null) {
 			sk = new SKClassLoader();

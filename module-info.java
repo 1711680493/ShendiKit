@@ -28,4 +28,8 @@ module shendi.kit {
 	exports shendi.kit.format.json;
 	
 	exports shendi.kit.id;
+	exports shendi.kit.manager;
+	
+	exports shendi.kit.net;
+	exports shendi.kit.net.http;
 }

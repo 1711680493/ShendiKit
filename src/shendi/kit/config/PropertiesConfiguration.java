@@ -21,7 +21,7 @@ public final class PropertiesConfiguration {
 	/** 用于存取其他Properties配置文件的池子. */
 	private HashMap<String,Properties> CONFIGS = new HashMap<>();
 	
-	/** 配置文件文件最后修改时间(用于判断文件是否被修改) */
+	/** 配置文件最后修改时间(用于判断文件是否被修改) */
 	private final HashMap<String,Long> FILE_LAST_MODIFIED = new HashMap<>();
 	
 	/** 所有配置文件 */

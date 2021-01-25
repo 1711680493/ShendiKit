@@ -1,7 +1,7 @@
 package shendi.kit.log.interpreter;
 
+import shendi.kit.time.Time;
 import shendi.kit.time.TimeUtils;
-import shendi.kit.time.TimeUtils.Time;
 
 /**
  * 日志时间解释器,用于解释日志的时间.
@@ -13,6 +13,6 @@ public class LogTimeInterpreter implements LogTimeCreate {
 	
 	@Override
 	public Time logTime(String time) {
-		return TimeUtils.getTime().createTime(time, TimeUtils.getTime().getFormatTime());
+		return TimeUtils.createTime(time, TimeUtils.getFormatTime());
 	}
 }

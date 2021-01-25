@@ -1,10 +1,17 @@
 package shendi.kit.format.json;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import shendi.kit.log.Log;
 
 /**
  * JSON 格式对象.<br>
- * 一个JSON对象格式为 {a:b,b:c}
+ * 一个JSON对象格式为 {a:b,b:c},在创建对象后可通过 isJson 来判断当前字符串是否为JSONObject.
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @version 1.1
  * @since 1.1
@@ -17,6 +24,13 @@ public class JSONObject {
 	/** 解析后的键值对集合 */
 	private HashMap<String, String> jsons = new HashMap<>();
 	
+	/** 当前对象的Json是否为 JSONObject(是否解析成功) */
+	private boolean isJson;
+	
+	/**
+	 * 使用 Json 数据来创建 JSONObject 对象.
+	 * @param json JsonObject数据,格式为 {"key" : value,...}
+	 */
 	public JSONObject(String json) {
 		this.json = json;
 		if (json == null || json.length() < 5) return;
@@ -73,6 +87,80 @@ public class JSONObject {
 			}
 			jsons.put(key, value);
 		}
+		isJson = true;
+	}
+	
+	/**
+	 * 将 JSON 的值填充到指定类的属性中,一般这个类为 JavaBean.<br>
+	 * json key 与类属性名匹配(区分大小写).<br>
+	 * 且属性只支持一些常见类型,如果不是则会匹配失败
+	 * @param type 类的类型,例如 JSONObject.class
+	 * @return type 所对应类的对象.
+	 */
+	public <T>T convert(Class<T> type) {
+		Constructor<T> constructor = null;
+		try {
+			constructor = type.getDeclaredConstructor();
+		} catch (NoSuchMethodException | SecurityException e) {
+			Log.printErr("JSON转Class,在获取构造方法时出错: " + e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
+		
+		if (constructor == null) {
+			Log.printErr("JSON转Class,此类没有无参构造方法!");
+		} else {
+			T obj = null;
+			try {
+				obj = constructor.newInstance();
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				Log.printErr("JSON转Class,在创建对象时出错: " + e.getMessage());
+				e.printStackTrace();
+				return null;
+			}
+			
+			// 将 json 中的数据填充到 bean 中
+			Field[] fs = type.getDeclaredFields();
+			Set<Entry<String, String>> entrys = jsons.entrySet();
+			for (Field f : fs) {
+				String name = f.getName();
+				for (Entry<String, String> entry : entrys) {
+					// 匹配 JSON
+					if (entry.getKey().equals(name)) {
+						f.setAccessible(true);
+						Class<?> t = f.getType();
+						try {
+							String v = entry.getValue();
+							if (t == String.class) {
+								f.set(obj, v);
+							} else if (t == short.class  || t == Short.class) {
+								f.set(obj, Short.parseShort(v));
+							} else if (t == int.class	 || t == Integer.class) {
+								f.set(obj, Integer.parseInt(v));
+							} else if (t == long.class	 || t == Long.class) {
+								f.set(obj, Long.parseLong(v));
+							} else if (t == float.class  || t == Float.class) {
+								f.set(obj, Float.parseFloat(v));
+							} else if (t == double.class || t == Double.class) {
+								f.set(obj, Double.parseDouble(v));
+							} else if (t == boolean.class|| t == Boolean.class) {
+								f.set(obj, Boolean.parseBoolean(v));
+							} else if (t == StringBuffer.class) {
+								f.set(obj, new StringBuffer(v));
+							} else if (t == StringBuilder.class) {
+								f.set(obj, new StringBuilder(v));
+							}
+						} catch (IllegalArgumentException | IllegalAccessException e) {
+							Log.printErr("JSON转Class,在给属性赋值时出错: " + e.getMessage());
+							e.printStackTrace();
+							return null;
+						}
+					}
+				}
+			}
+			return obj;
+		}
+		return null;
 	}
 	
 	/**
@@ -92,12 +180,44 @@ public class JSONObject {
 	public String getString(String name) { return jsons.get(name); }
 	
 	/**
-	 * 获取指定键对应的值,以 Int 的形式
+	 * 获取指定键对应的值,以 short 的形式
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param name 键
 	 * @return 值
 	 */
-	public int getInt(String name) { return Integer.parseInt(jsons.get(name)); }
+	public short getShort(String name) { return has(name) ? Short.parseShort(jsons.get(name)) : null; }
+	
+	/**
+	 * 获取指定键对应的值,以 int 的形式
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param name 键
+	 * @return 值
+	 */
+	public int getInt(String name) { return has(name) ? Integer.parseInt(jsons.get(name)) : null; }
+	
+	/**
+	 * 获取指定键对应的值,以 long 的形式
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param name 键
+	 * @return 值
+	 */
+	public long getLong(String name) { return has(name) ? Long.parseLong(jsons.get(name)) : null; }
+	
+	/**
+	 * 获取指定键对应的值,以 float 的形式
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param name 键
+	 * @return 值
+	 */
+	public double getFloat(String name) { return has(name) ? Float.parseFloat(jsons.get(name)) : null; }
+	
+	/**
+	 * 获取指定键对应的值,以 double 的形式
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param name 键
+	 * @return 值
+	 */
+	public double getDouble(String name) { return has(name) ? Double.parseDouble(jsons.get(name)) : null; }
 	
 	/**
 	 * 获取指定键对应的值,以 Boolean 的形式
@@ -105,17 +225,27 @@ public class JSONObject {
 	 * @param name 键
 	 * @return 值
 	 */
-	public boolean getBoolean(String name) { return Boolean.parseBoolean(jsons.get(name)); }
+	public boolean getBoolean(String name) { return has(name) ? Boolean.parseBoolean(jsons.get(name)) : null; }
 	
 	/**
-	 * 获取指定键对应的值,以 Double 的形式
+	 * 获取指定键对应的值,以 byte 的形式
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param name 键
 	 * @return 值
 	 */
-	public double getDouble(String name) { return Double.parseDouble(jsons.get(name)); }
+	public byte getByte(String name) { return has(name) ? Byte.parseByte(jsons.get(name)) : null; }
+	
+	/**
+	 * 获取指定键对应的值,以 char 的形式
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param name 键
+	 * @return 值
+	 */
+	public char getChar(String name) { return has(name) ? jsons.get(name).charAt(0) : null; }
+	
+	/** @return 当前对象数据格式是否为JSONObject */
+	public boolean isJson() { return isJson; }
 	
 	/** @return 当前对象的源JSON数据 */
-	public String getJson() { return json; }
-	
+	@Override public String toString() { return json; }
 }

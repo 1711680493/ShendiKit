@@ -1,4 +1,4 @@
-package shendi.kit.util;
+package shendi.kit.net.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,13 +6,19 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import shendi.kit.exception.HttpResponseException;
 import shendi.kit.exception.NullHttpResponseException;
 import shendi.kit.log.Log;
+import shendi.kit.util.ByteUtil;
+import shendi.kit.util.StreamUtils;
 
 /**
  * Http 协议工具类.<br>
+ * HTML不区分大小写<br>
+ * 所以,响应头的名称统一大写存储.
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @version 1.1
  */
@@ -57,6 +63,10 @@ public class HttpUtil {
 	private int state;
 	/** 响应状态信息 */
 	private String stateInfo;
+	/** 是否需要自行处理响应体 */
+	private HttpDataDispose dispose;
+	/** 数据每次处理传递的最大大小 */
+	private int dataDisposeLen = 1048576;
 	
 	/**
 	 * 根据指定的地址创建
@@ -72,10 +82,18 @@ public class HttpUtil {
 	public HttpUtil(String host, int port) { this(host, port, ""); }
 	
 	/**
+	 * 根据指定的地址和请求类型创建
+	 * @param host 主机名
+	 * @param reqType 请求类型
+	 */
+	public HttpUtil(String host, String reqType) { this(host, -1, reqType); }
+	
+	/**
 	 * 根据指定的主机名,端口,协议创建
 	 * @param host 主机名
 	 * @param port 端口
 	 * @param reqType 请求类型
+	 * @since 1.1
 	 */
 	public HttpUtil(String host, int port, String reqType) {
 		this(host, port, (byte[])null);
@@ -86,7 +104,7 @@ public class HttpUtil {
 	/**
 	 * 根据指定的主机名,端口,数据创建<br>
 	 * 通常用于将一个完整的HTTP数据发给另一个服务器.
-	 * @param host 主机名
+	 * @param host 主机名,也可为url,如果port=-1,则从主机名中解析端口,如果无,则用默认
 	 * @param port 端口
 	 * @param data 请求的所有数据
 	 */
@@ -96,20 +114,30 @@ public class HttpUtil {
 			int len = host.indexOf("/");
 			host = host.substring(len+2, host.length());
 		}
-		
 		// 获取请求路径
 		int index = host.indexOf('/');
 		if (index != -1) {
-			String str = host.substring(index, host.length());
+			String str = host.substring(index);
 			if (str.length() > 1) {
-				reqPath = str;
+				this.reqPath = str;
 			}
 			host = host.substring(0,index);
 		}
-		this.host = host;
+		// 如果端口不存在则从host中获取,如果无,则使用默认
+		if (port == -1) {
+			index = host.indexOf(':');
+			if (index != -1) {
+				this.port = Integer.parseInt(host.substring(index + 1));
+				this.host = host.substring(0, index);
+			} else {
+				this.host = host;
+			}
+		} else {
+			this.port = port;
+			this.host = host;
+		}
 		this.data = data;
 		reqHeads.put("Host", host);
-		if (port != -1) this.port = port;
 	}
 	
 	/**
@@ -127,25 +155,46 @@ public class HttpUtil {
 			
 			// 发送请求
 			if (data == null) {
-				StringBuilder build = new StringBuilder(30);
+				StringBuilder build = new StringBuilder(100);
 				build.append(reqType); build.append(' ');
-				
 				build.append(reqPath);
-				if (parameters != null && "get".equalsIgnoreCase(reqType)) {
+				
+				// 请求类型将参数加到地址还是加到内容, true为加到地址,false为加到内容
+				boolean paramPos = !"post".equalsIgnoreCase(reqType);
+				boolean paramNotNull = parameters != null;
+				
+				if (paramNotNull && paramPos) {
 					build.append('?');
 					build.append(parameters);
 				}
 				build.append(' ');
-				
 				build.append(httpV); build.append("\r\n");
-				reqHeads.forEach((k,v) -> {
+				
+				// POST请求会默认添加Content-Type和Content-Length请求,如果已有,则不添加
+				boolean addContentType = true;
+				boolean addContentLength = true;
+				
+				Set<Entry<String, String>> entrys = reqHeads.entrySet();
+				for (Entry<String, String> entry : entrys) {
+					String k = entry.getKey();
+					String v = entry.getValue();
+					
 					build.append(k); build.append(": "); build.append(v);
+					if ("Content-Type".equalsIgnoreCase(k)) addContentType = false;
+					else if ("Content-Length".equalsIgnoreCase(k)) addContentLength = false;
 					build.append("\r\n");
-				});
+				}
+				
 				build.append("\r\n");
 				
-				if (parameters != null && "post".equalsIgnoreCase(reqType)) {
-					build.insert(build.length() - 4, "\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: " + parameters.length());
+				if (paramNotNull && !paramPos) {
+					int len = build.length() - 4;
+					if (addContentType) {
+						build.insert(len, "\r\nContent-Type:application/x-www-form-urlencoded");
+					}
+					if (addContentLength) {
+						build.insert(len, "\r\nContent-Length:" + parameters.length());
+					}
 					build.append(parameters);
 				}
 				
@@ -154,7 +203,7 @@ public class HttpUtil {
 			output.write(data); output.flush();
 			
 			// 处理响应
-			// 先获取第一行,状态是204,205,304则没有响应体,以\r\n\r\n结尾
+			// 先获取第一行,类型为 HEAD 或状态是204,205,304则没有响应体,以\r\n\r\n结尾
 			byte[] bState = StreamUtils.readLineRByte(input);
 			if (bState == null) {
 				Log.printErr("处理Http响应失败,获取状态信息(第一行)为空");
@@ -181,29 +230,69 @@ public class HttpUtil {
 				if (index == -1) {
 					Log.printAlarm("遍历响应头,某个响应头不是键值对形式: " + head);
 				} else {
-					respHeads.put(head.substring(0, index).trim(), head.substring(index + 1).trim());
+					// 键统一大写存储
+					respHeads.put(head.substring(0, index).trim().toUpperCase(), head.substring(index + 1).trim());
 				}
 			}
 			
 			// 没有响应体则不获取
 			// 有响应体则判断响应头是否有 Content-Length,是则读取指定大小,否则判断结尾
 			byte[] body = null;
-			if (!(state == 204 || state == 205 || state == 304)) {
+			
+			// 如果需要格外处理响应则不会将响应数据保存
+			if (!("HEAD".equalsIgnoreCase(reqType) || state == 204 || state == 205 || state == 302 || state == 304)) {
 				// 获取响应体
-				if (respHeads.containsKey("Content-Length")) {
+				if (respHeads.containsKey("CONTENT-LENGTH")) {
 					try {
-						body = new byte[Integer.parseInt(respHeads.get("Content-Length"))];
+						int len = Integer.parseInt(respHeads.get("CONTENT-LENGTH"));
+						if (dispose == null) {
+							body = new byte[len];
+							for (int i = 0, value = -1; i < body.length; i++) {
+								value = input.read();
+								body[i] = (byte) value;
+							}
+							respBody = new String(body);
+						} else {
+							if (len == 0) {
+								Log.print("HttpUtil 处理响应: Content-Length=0,无响应数据");
+							} else {
+								byte[] tmp = new byte[dataDisposeLen];
+								int l = -1;
+								while ((l = input.read(tmp)) != -1) {
+									if (dispose.dispose(ByteUtil.subByte(tmp, 0, l))) {
+										break;
+									}
+									
+									len -= l;
+									if (len <= 0) break;
+								}
+							}
+						}
 					} catch (NumberFormatException e) {
-						Log.printErr("请求头的Content-Length的值不为数字！" + respHeads.get("Content-Length"));
-					}
-					for (int i = 0, value = -1; i < body.length; i++) {
-						value = input.read();
-						body[i] = (byte) value;
+						Log.printErr("请求头的Content-Length的值不为数字！" + respHeads.get("CONTENT-LENGTH"));
 					}
 				} else {
-					body = StreamUtils.readByEnd(input, END_BODY);
-					if (body == null) {
-						Log.printAlarm("响应数据应有响应体,但是没有.");
+					if (dispose == null) {
+						body = StreamUtils.readByEnd(input, END_BODY);
+						if (body != null) {
+							int size = body.length - END_BODY.length;
+							if (size >= 0) respBody = new String(body, 0, size);
+						}
+						if (respBody == null) Log.printAlarm("响应数据应有响应体,但是没有.");
+					} else {
+						byte[] tmp = new byte[dataDisposeLen];
+						int l = -1;
+						while ((l = input.read(tmp)) != -1) {
+							// 判断是否结尾
+							if (StreamUtils.endsWith(tmp, l, END_BODY)) {
+								dispose.dispose(ByteUtil.subByte(tmp, 0, l - END_BODY.length));
+								break;
+							} else {
+								if (dispose.dispose(ByteUtil.subByte(tmp, 0, l))) {
+									break;
+								}
+							}
+						}
 					}
 				}
 				respBodyData = body;
@@ -213,12 +302,6 @@ public class HttpUtil {
 			int size = bState.length + bHeads.length;
 			if (body != null) {
 				size += body.length;
-				// 如果没有Content-Length,则去掉空行尾巴
-				if (!respHeads.containsKey("Content-Length")) {
-					respBody = new String(body, 0, body.length - END_BODY.length);
-				} else {
-					respBody = new String(body);
-				}
 			}
 			respData = new byte[size];
 			System.arraycopy(bState, 0, respData, 0, bState.length);
@@ -283,9 +366,6 @@ public class HttpUtil {
 	 */
 	public void setTimeout(int timeout) { this.timeout = timeout; }
 
-	/** @return 响应头的字符串形式 */
-	public String getRespHeadStr() { return respHeadStr; }
-	
 	/**
 	 * 获取请求头集合.
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
@@ -316,12 +396,18 @@ public class HttpUtil {
 	 */
 	public void setData(byte[] data) { this.data = data; }
 	
+	/** @return 响应头的字符串形式 */
+	public String getRespHeadStr() { return respHeadStr; }
+	
 	/**
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
-	 * @param head 响应头名
+	 * @param name 响应头名
 	 * @return 指定的响应头
 	 */
-	public String getRespHead(String head) { return respHeads.get(head); }
+	public String getRespHead(String name) {
+		if (name == null) return null;
+		return respHeads.get(name.toUpperCase());
+	}
 
 	/** @return 响应头集合 */
 	public Map<String, String> getRespHeads() { return respHeads; }
@@ -343,8 +429,9 @@ public class HttpUtil {
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param key 参数键
 	 * @param value 参数值
+	 * @since 1.1
 	 */
-	public void addParameter(String key, String value) {
+	public void addParameter(String key, Object value) {
 		if (parameters == null) parameters = new StringBuilder();
 		if (parameters.length() != 0) parameters.append('&');
 		parameters.append(key);
@@ -356,10 +443,33 @@ public class HttpUtil {
 	 * 直接设置请求参数,格式为 key=value&key=value,如果使用了此方法,则不应在链接后加参数.
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param param 请求参数
+	 * @since 1.1
 	 */
 	public void setParameters(String param) { parameters = new StringBuilder(param); }
 	
+	/**
+	 * @return 请求参数
+	 * @since 1.1
+	 */
+	public String getParameters() { return parameters.toString(); }
+	
 	/** @return 响应体的字节形式 */
 	public byte[] getRespBodyData() { return respBodyData; }
+	
+	/**
+	 * 设置当前响应的处理方法,当设置了后,此HttpUtil对象将不在存储格外的响应数据(respBody,respBodyData将为空),以节省内存开销.<br>
+	 * 需要在 send 之前设置.
+	 * @param dispose 处理响应体的方法
+	 * @since 1.1
+	 */
+	public void setDispose(HttpDataDispose dispose) { this.dispose = dispose; }
+	
+	/**
+	 * 设置响应处理每次传递的最大大小<br>
+	 * 需要在 send 之前设置.
+	 * @param dataDisposeLen 大小,单位byte,默认 1M
+	 * @since 1.1
+	 */
+	public void setDataDisposeLen(int dataDisposeLen) { this.dataDisposeLen = dataDisposeLen; }
 	
 }

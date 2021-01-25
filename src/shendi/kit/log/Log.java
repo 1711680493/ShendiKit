@@ -44,7 +44,7 @@ public class Log {
 		// 初始化上一次时间戳为今天0点
 		upTime = TimeDisposal.getToTime(-1, -1, -1, 0, 0, 0, 0);
 		
-		currentPath = savePath.getPath() + File.separatorChar + TimeUtils.getTime().getFormatTime("date").getString(upTime);
+		currentPath = savePath.getPath() + File.separatorChar + TimeUtils.getFormatTime("date").getString(upTime);
 	}
 	
 	/**
@@ -118,7 +118,7 @@ public class Log {
 	private static String getString() {
 		//获取堆栈跟踪信息
 		StackTraceElement callInfo = getStackTraceInfo();
-		return "["+ TimeUtils.getTime().getFormatTime().getString(new Date()) +"] "+callInfo.getClassName()+"."+callInfo.getMethodName()+"()."+callInfo.getLineNumber()+"\t\t>";
+		return "["+ TimeUtils.getFormatTime().getString(new Date()) +"] "+callInfo.getClassName()+"."+callInfo.getMethodName()+"()."+callInfo.getLineNumber()+"\t\t>";
 	}
 	
 	/**
@@ -131,7 +131,7 @@ public class Log {
 		
 		if (System.currentTimeMillis() - upTime > 86400000) {
 			upTime = TimeDisposal.getToTime(-1, -1, -1, 0, 0, 0, 0);
-			currentPath = savePath.getPath() + File.separatorChar + TimeUtils.getTime().getFormatTime("date").getString(upTime);
+			currentPath = savePath.getPath() + File.separatorChar + TimeUtils.getFormatTime("date").getString(upTime);
 		}
 	}
 	

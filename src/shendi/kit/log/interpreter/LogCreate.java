@@ -5,7 +5,7 @@ import java.util.HashMap;
 import shendi.kit.log.LogFactory;
 import shendi.kit.log.LogFactory.LogInfo;
 import shendi.kit.log.LogFactory.LogType;
-import shendi.kit.time.TimeUtils.Time;
+import shendi.kit.time.Time;
 
 /**
  * Log解释器,用于将一条Log解释成便于使用的 {@link LogInfo}.<br>

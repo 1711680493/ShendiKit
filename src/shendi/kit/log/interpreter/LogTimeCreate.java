@@ -1,6 +1,6 @@
 package shendi.kit.log.interpreter;
 
-import shendi.kit.time.TimeUtils.Time;
+import shendi.kit.time.Time;
 
 /**
  * Log时间解释器.

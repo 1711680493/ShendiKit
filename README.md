@@ -4,6 +4,7 @@
 >version: 1.1<br>
 >QQ:1711680493<br>
 >[引导页面](https://1711680493.github.io)<br>
+>[github所在地址](https://1711680493.github.io<br>
 >Java工具包,纯Java制作,使用JDK8<br>
 >以前版本可在分支中找到
 
@@ -44,17 +45,21 @@
 ### [id工具](#id工具包)
 >[雪花算法](#SnowFlake)
 
+### [HTTP工具](#HTTP工具包)
+>[工具类](#工具类)<br>
+>[响应数据处理接口](#响应数据处理接口)<br>
+>[文件下载(处理响应体)](#文件下载)
+
 ### [简洁实用工具包-shendi.kit.util](#工具类)
 >统一在 shendi.kit.util 包下<br>
 >[流处理工具类](#StreamUtils)<br>
 >[自定义类加载器](#SKClassLoader)<br>
->[HTTP工具类](#HttpUtil)<br>
+>[HTTP工具类](#HttpUtil) *已移动至 shendi.kit.net.http, 具体请参考文档[HTTP工具](#HTTP工具包)<br>
 >[数学工具类](#Math)<br>
 >[判空工具类](#IsNullUtil)<br>
 >[字节工具类](#ByteUtil)<br>
 >[位工具类](#BitUtil)<br>
 >[文件工具类](#FileUtil)<br>
-
 
 # SK 版本变化
 ## v 1.0
@@ -65,8 +70,12 @@
 >ConfigurationFactory类新增方法 getProperty(config, name),将两个方法融合,用于简化操作,直接获取properties配置的值.<br>
 >>之前使用ConfigurationFactory.getConfig(config).getProperty(name);<br>
 
->修复HttpUtil 1.0的已知问题,比如无法访问接口等<br>
->>并且增加了遗漏的功能,设置参数,在之前POST请求无法带请求参数,现在可以使用addParameter(key,value)或setParameters(param)来直接设置<br>
+>新增 shendi.kit.net.http 包,将 HttpUtil 从 util 包中提出
+>>修复HttpUtil 1.0的已知问题,比如无法访问接口等<br>
+>>>并且增加了遗漏的功能,设置参数,在之前POST请求无法带请求参数,现在可以使用addParameter(key,value)或setParameters(param)来直接设置<br>
+>>>增加对HEAD类型支持,以及可从host可携带端口,新增构造 (host, type)
+
+>>包内新增HttpDataDispose接口用以处理http响应数据(比如文件下载,具体请参考文档
 
 >解决了扫描注解高版本Java无法扫描本项目的问题.<br>
 >util包中新增Math类,用于处理单位换算等<br>
@@ -78,7 +87,9 @@
 >新增shendi.kit.id包,用于处理id生成<br>
 >控制台在创建时可以设置组,命令注解可以设置组,解决之前多个控制台共用所有命令问题.<br>
 >解决 SKClassLoader在高版本JDK中找不到类的问题<br>
+>优化扫描器,使得扫描时不加载对应类的静态方法<br>
 >优化了待发布的Path包,解决高版本,JavaWeb等路径获取问题<br>
+>TimeUtils改进,将Time,TimeFormat从内部类提取,且修复已知BUG<br>
 
 # 开始配置
 ### 配置文件地址
@@ -97,7 +108,7 @@
 >当然,为了避免重复,可以加上jar包所在的相对路径,如下<br>
 >/lib/jar1.jar;/lib/jar2.jar<br>
 >根据jar包后缀进行判断,所以如果需要扫描所有jar,配置文件内容可以为 .jar<br>
->>在扫描时会触发此类的静态代码块,所以扫描所有jar则可能出现一些问题,例如mysql的jdbc驱动...<br>
+>>(*已移除,后续版本不会初始化对应类,也就不会执行静态代码块)在扫描时会触发此类的静态代码块,所以扫描所有jar则可能出现一些问题,例如mysql的jdbc驱动...<br>
 
 >如果不想扫描jar包,可以将文件内容改为 No Jar(大小写等完全一致)<br>
 >如果不想扫描注解(不用),可以将文件内容改为 No
@@ -275,13 +286,11 @@
 >返回值为String,并有一重载可以设置编码getProperty(config,name,encode)<br>
 
 # 时间工具包
->对时间的操作我封装成了一个类 shendi.kit.time.TimeUtils<br>
->此类提供了一个静态方法供获取对象 TimeUtils.getTime();<br>
->通过对象,可以创建时间-shendi.kit.time.Time类,创建时间格式等.<br>
->里面有几个内部类
+>shendi.kit.time.TimeUtils<br>
+>封装了添加格式,获取格式等操作,对时间的操作封装在内部类 TimeDisposal中.<br>
 
 ## Time类
->第一个就是Time类,用于表示一个时间,一个Time类只能表示一个时间,并且不可改变.<br>
+>Time类,用于表示一个时间,一个Time类只能表示一个时间,并且不可改变.<br>
 >当一个Time类通过 TimeUtils.createTime 的方式创建则直接拥有字符串,时间戳,Date的表示形式,并且不可改变.<br>
 
 ## TimeFormat类
@@ -430,7 +439,9 @@ System.out.println(rs);
 >并且只能取值<br>
 ><br>
 >直接通过字符串创建JSONObject对象<br>
->通过getString(key) 来获取对应值,其中也可以使用getInt,getDouble等.以及has用于判断是否存在<br>
+>创建完后可以通过 isJson() 来获取当前JSON是否没有错误<br>
+>通过 getString(key) 来获取对应值,其中也可以使用getInt,getDouble等.以及has用于判断是否存在<br>
+>通过 convert(Class) 来将 json 转化为对应类,转化的对象数据会自行填充
 
 # id工具包
 >位于 shendi.kit.id 下<br>
@@ -466,6 +477,97 @@ System.out.println(rs);
     long id = snow.spawn();
 </pre>
 
+# HTTP工具包
+>shendi.kit.net.http<br>
+>SK 1.1 新增
+
+#### 工具类
+>shendi.kit.net.http.HttpUtil<br>
+
+<pre>
+	// 首先创建对象,有以下几个重载,具体请参考 API 文档
+	/* 
+		HttpUtil([String]host),用主机名创建,其余的可以在创建后进行设置
+			(host, [int]port),主机名+端口创建
+			(host, [String]reqType),主机名+请求类型创建
+			(host, port, [String]reqType),主机名+端口+请求类型
+			(host, port, [byte[]]data) 将请求类型更换成了一个http的数据,通常此构造用于将获取的http数据发送给服务器使用
+	*/
+	// host参数可以携带端口等信息,与浏览器url对应
+	HttpUtil http = new HttpUtil("http://localhost:8080", "POST");
+	// 可以设置一些请求头 端口等信息,端口默认80(setPort)
+	http.setReqHead("req", "hh");
+	// 然后可以直接获取到数据,例如,获取当前http的全部数据(包含协议头,响应头响应体)
+	System.out.print(new String(http.getRespData()));
+	// 添加请求参数
+	http.addParameter("a", "b");
+	// 设置请求参数
+	http.setParameters("a=b&c=d");
+	// 最终要使用 send 方法来完成请求,注意,设置操作必须在send()之前使用.
+	http.sned();
+</pre>
+
+#### [响应数据处理接口](#响应数据处理接口)
+>shendi.kit.net.http.HttpDataDispose<br>
+>实现此接口来用以给 HttpUtil 设置处理函数.<br>
+>包含 boolean dispose(byte[] data) 函数,当有响应数据时会被调用.
+
+#### 文件下载
+>当我们使用http的方式下载文件时,基础用法已经满足不了需求
+>>只有所有数据都读取完成时才会完成send(),这时会程序会卡住,当下载的文件过大时则会遇到内存溢出的问题
+
+>这时我们需要自行处理响应,于是需要使用到 setDispose() 来设置处理方法
+
+<pre>
+	// 创建对象
+	HttpUtil http = new HttpUtil("localhost/down");
+	/*
+		设置响应处理,列举三种使用方式
+		HttpDataDispose dispose = new HttpDataDispose() {
+			@Override
+			public boolean dispose(byte[] data) {
+				// 处理数据,data为接收到的数据,return false代表处理还未完成,将继续读取数据
+				// 当处理数据遇到问题时,应return true来终止此次 HTTP.
+				return false;
+			}
+		};
+		http.setDispose(dispose);
+		// 第二种
+		http.setDispose(new HttpDataDispose() {
+			@Override
+			public boolean dispose(byte[] data) {
+				return false;
+			}
+		});
+		// 第三种,lambda表达式
+		http.setDispose((data) -> {
+			return false;
+		});
+	这里使用最简洁的lambda表达式
+	*/
+	// 需要注意的是,当使用了 setDispose 方法设置处理响应,则此 HttpUtil 对象的 respBody和respBodyData将为空(这样做是为了节省开销)
+	OutputStream output = new FileOutputStream("C:/1.txt");
+	http.setDispose((data) -> {
+		try {
+			output.write(data);
+			output.flush();
+		} catch (Exception e) {
+			return true;
+		}
+		return false;
+	});
+	// 通常我们还需要自行设置超时时间,0为不超时
+	http.setTimeout(0);
+	// 在 send 的时候可能会发生一些错误,最常见的有 Connection reset
+	// 这时可以出错后再次执行一次
+	try {
+		http.send();
+	} catch (Exception e) {
+		http.send();
+	}
+	output.close();
+</pre>
+
 # 工具类
 #### StreamUtils
 >流处理工具类<br>
@@ -487,20 +589,7 @@ System.out.println(rs);
 
 #### HttpUtil
 >Http工具类<br>
-<pre>
-	// 首先创建对象,有四个重载
-	// HttpUtil([String]host),(host, [int]port),(host, port, [String]reqType),(host, port, [byte[]]data)
-	// 第一个为用主机名创建,其余的可以在创建后进行设置
-	// 第二个为主机名+端口创建,第三个为主机名+端口+请求类型
-	// 第四个将请求类型更换成了一个http的数据,通常此构造用于将获取的http数据发送给服务器使用
-	HttpUtil http = new HttpUtil("shop.shendi.xyz");
-	// 可以设置一些请求头 端口等信息,端口默认80(setPort)
-	http.setReqHead("req", "hh");
-	// 最终要使用 send 方法来完成请求
-	http.sned();
-	// 然后可以直接获取到数据,例如,获取当前http的全部数据(包含协议头,响应头响应体)
-	System.out.print(new String(http.getRespData()));
-</pre>
+>在 SK 1.1 中,此类被移至 shendi.kit.net.http 包中,文档也移动,请参考 [HTTP工具](#HTTP工具包)
 
 #### Math
 >数学工具类<br>

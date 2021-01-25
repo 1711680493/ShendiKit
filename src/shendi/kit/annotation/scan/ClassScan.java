@@ -38,6 +38,9 @@ public class ClassScan {
 	/** 是否初始化了. */
 	private static boolean isInit;
 	
+	/** 系统类加载器 */
+	private static final ClassLoader cl = ClassScan.class.getClassLoader();
+	
 	static {
 		ANNOS = new Class[4];
 		ANNOS[0] = PConfig.class;
@@ -76,7 +79,6 @@ public class ClassScan {
 	
 	/** 项目中所有有工具包注解的类,全路径与类一一对应. */
 	private static final HashMap<String,Class<?>> CLASSES = new HashMap<>();
-	
 	
 	/** 当前项目的类路径,如果当前项目已打成jar包,则为null. */
 	private static String classPath;
@@ -138,7 +140,7 @@ public class ClassScan {
 			className = classPath.substring(0, classPath.length() - ShendiKitInfo.CLASS_SUFFIX.length())
 					.replace(File.separatorChar, '.').replace('/', '.');
 			
-			Class<?> clazz = Class.forName(className);
+			Class<?> clazz = cl.loadClass(className);
 			
 			// 将类添加进集合
 			Annotation[] annos = clazz.getAnnotations();

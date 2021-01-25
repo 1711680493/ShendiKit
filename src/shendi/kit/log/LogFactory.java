@@ -5,7 +5,7 @@ import shendi.kit.log.interpreter.LogCreate;
 import shendi.kit.log.interpreter.LogErrorInterpreter;
 import shendi.kit.log.interpreter.LogInfoInterpreter;
 import shendi.kit.log.interpreter.LogInterpreter;
-import shendi.kit.time.TimeUtils.Time;
+import shendi.kit.time.Time;
 
 /**
  * 日志工厂,拥有 {@link LogInfo} 与 {@link LogType} 两个内部类.<br>
