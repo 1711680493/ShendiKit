@@ -49,6 +49,7 @@
 >[工具类](#工具类)<br>
 >[响应数据处理接口](#响应数据处理接口)<br>
 >[文件下载(处理响应体)](#文件下载)
+>[重定向/转发(保留session等)](#重定向与转发)
 
 ### [简洁实用工具包-shendi.kit.util](#工具类)
 >统一在 shendi.kit.util 包下<br>
@@ -507,7 +508,7 @@ System.out.println(rs);
 	http.sned();
 </pre>
 
-#### [响应数据处理接口](#响应数据处理接口)
+#### 响应数据处理接口
 >shendi.kit.net.http.HttpDataDispose<br>
 >实现此接口来用以给 HttpUtil 设置处理函数.<br>
 >包含 boolean dispose(byte[] data) 函数,当有响应数据时会被调用.
@@ -563,9 +564,43 @@ System.out.println(rs);
 	try {
 		http.send();
 	} catch (Exception e) {
-		http.send();
+		try {
+			http.send();
+		} catch (Exception e) {
+			// exception dispose
+		}
 	}
 	output.close();
+</pre>
+
+#### 重定向与转发
+>当页面返回结果为重定向内容,我们想要的结果大多都是重定向后的数据,这时需要处理重定向的方法<br>
+>当我们访问的网页需要登录才能查看,需要保存session/token等信息时,这时需要使用原有的HttpUtil对象<br>
+>HttpUtil提供了 redirect(url) 函数用以进行重定向/转发
+
+<pre>
+	/*
+		对于重定向,也就是上面说到的那种情况,可以使用HttpUtil的 setRedirect(true);
+		设置过后,当我们执行send()函数,页面需要重定向则会自行重定向,最后的结果为重定向的结果
+		有的时候会遇到重定向后又一个重定向的情况(可能无限重定向),则可通过设置最大重定向次数来进行限制
+		setRedirectMaxSize(int) 重定向的最大次数,默认为5
+		setRedirect 内部实现使用 redirect 函数.
+	*/
+	HttpUtil http = new HttpUtil("localhost/redirect");
+	http.setRedirect(true);
+	try {
+		http.send();
+	} catch (Exception e) {
+	}
+	// 获取到的结果为重定向后的结果
+	System.out.println(http.getRespBody());
+	/*
+		对于转发,使用对象的 redirect 方法,与重定向一致,也可使用setRedirectMaxSize(int)设置转发次数
+	*/
+	http.redirect("localhost/index");
+	/******************
+	转发也可以自行重新send,redirect会保留请求信息并重新请求,拥有转发的效果,重定向默认也使用redirect函数.
+	*******************/
 </pre>
 
 # 工具类

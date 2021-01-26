@@ -68,6 +68,11 @@ public class HttpUtil {
 	/** 数据每次处理传递的最大大小 */
 	private int dataDisposeLen = 1048576;
 	
+	/** 当页面返回结果为重定向时,是否重定向 */
+	private boolean isRedirect = false;
+	/** 重定向所支持的最大次数,默认5,有时候可能页面会无限的重定向,这样就会造成程序卡死的局面,通过设置此变量来控制次数 */
+	private int redirectMaxSize = 5;
+	
 	/**
 	 * 根据指定的地址创建
 	 * @param host 主机名
@@ -138,6 +143,59 @@ public class HttpUtil {
 		}
 		this.data = data;
 		reqHeads.put("Host", host);
+	}
+	
+	/**
+	 * 使用当前对象进行重定向,会保留当前对象的请求头等信息<br>
+	 * 当 isRedirect=true 时,页面重定向将自动使用此函数<br>
+	 * 重定向最大次数为 {@link #redirectMaxSize}
+	 * 如果需要一些格外的信息则需要自行添加
+	 * @param url 重定向的地址
+	 */
+	public void redirect(String url) {
+		if (redirectMaxSize-- <= 0) {
+			Log.print("重定向次数已达限制: " + url);
+			return;
+		}
+		
+		// 初始化和清空
+		data = null;
+		
+		// 去掉协议头
+		if (url != null && (url.indexOf("http://") != -1 || url.indexOf("https://") != -1)) {
+			int len = url.indexOf("/");
+			url = url.substring(len+2, url.length());
+		}
+		// 获取请求路径
+		int index = url.indexOf('/');
+		if (index != -1) {
+			String str = url.substring(index);
+			if (str.length() > 1) {
+				this.reqPath = str;
+			}
+			url = url.substring(0,index);
+		}
+		// 如果端口不存在则从host中获取,如果无,则初始化为默认
+		index = url.indexOf(':');
+		if (index != -1) {
+			this.port = Integer.parseInt(host.substring(index + 1));
+			this.host = url.substring(0, index);
+		} else {
+			this.host = url;
+			this.port = 80;
+		}
+		reqHeads.put("Host", host);
+		
+		// 执行重定向操作
+		try {
+			send();
+		} catch (IOException e) {
+			Log.printErr("在执行重定向操作时出现IO错误: " + e.getMessage());
+		} catch (NullHttpResponseException e) {
+			Log.printErr("在执行重定向操作时响应为空!");
+		} catch (HttpResponseException e) {
+			Log.printErr("在执行重定向操作时响应数据有误!");
+		}
 	}
 	
 	/**
@@ -296,6 +354,21 @@ public class HttpUtil {
 					}
 				}
 				respBodyData = body;
+			} else if (isRedirect && (state == 301 || state == 302)) {
+				String location = respHeads.get("LOCATION");
+				if (location == null) {
+					Log.printErr("页面重定向时失败,响应头location为空,此次数据为当前页面数据,请检查.");
+				} else {
+					StringBuilder b = new StringBuilder(100);
+					b.append("页面由 ");
+					b.append(host); b.append(port); b.append(reqPath);
+					b.append(" 重定向至 ");
+					b.append(location);
+					Log.print(b);
+					
+					redirect(location);
+					return;
+				}
 			}
 			
 			// 合并数据,完成响应
@@ -471,5 +544,17 @@ public class HttpUtil {
 	 * @since 1.1
 	 */
 	public void setDataDisposeLen(int dataDisposeLen) { this.dataDisposeLen = dataDisposeLen; }
+
+	/**
+	 * 当页面返回结果为重定向时,是否自动获取重定向后的页面
+	 * @param isRedirect true为获取,默认false
+	 */
+	public void setRedirect(boolean isRedirect) { this.isRedirect = isRedirect; }
+	
+	/**
+	 * 设置重定向的最大次数,有时候可能遇到无限重定向的局面,通过设置此变量来避免此局面,前提是 isRedirecr=true
+	 * @param redirectMaxSize 重定向的最大次数
+	 */
+	public void setRedirectMaxSize(int redirectMaxSize) { this.redirectMaxSize = redirectMaxSize; }
 	
 }
