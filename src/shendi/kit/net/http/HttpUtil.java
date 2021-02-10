@@ -40,7 +40,7 @@ public class HttpUtil {
 	private String reqType = "GET";
 	/** 请求路径 */
 	private String reqPath = "/";
-	/** 超时时间 */
+	/** 读取等待的超时时间 */
 	private int timeout = 5000;
 	/** 请求头 */
 	private Map<String,String> reqHeads = new HashMap<>();
@@ -65,8 +65,8 @@ public class HttpUtil {
 	private String stateInfo;
 	/** 是否需要自行处理响应体 */
 	private HttpDataDispose dispose;
-	/** 数据每次处理传递的最大大小 */
-	private int dataDisposeLen = 1048576;
+	/** 数据处理每次传递的最大字节,默认 32kb */
+	private int dataDisposeLen = 32786;
 	
 	/** 当页面返回结果为重定向时,是否重定向 */
 	private boolean isRedirect = false;
@@ -433,7 +433,7 @@ public class HttpUtil {
 	/** @return 超时时间 */
 	public int getTimeout() { return timeout; }
 	/**
-	 * 设置此次操作的超时时间
+	 * 设置读取等待操作的超时时间
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param timeout 时间,单位毫秒
 	 */

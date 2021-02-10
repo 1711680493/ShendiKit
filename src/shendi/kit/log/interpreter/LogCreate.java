@@ -78,6 +78,6 @@ public abstract class LogCreate {
 		String className = callInfo.substring(0,callInfo.indexOf(method) - 1);
 		/* 最后得到日志信息 */
 		info = info.substring(info.indexOf('>') + 1).trim();
-		return LogFactory.getLogFactory().create(logResource, type, time, callInfo, className, method, line,info);
+		return LogFactory.create(logResource, type, time, callInfo, className, method, line,info);
 	}
 }

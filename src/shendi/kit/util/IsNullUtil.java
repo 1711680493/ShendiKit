@@ -41,6 +41,12 @@ public class IsNullUtil {
 	/**
 	 * 通过指定的条件判断元素集合是否正确.<br>
 	 * 首先会进行判 null 操作,不为null则通过给定的错误条件集合判断.
+	 * <pre>
+	 * String a = "123";
+	 * Object b = null;
+	 * isNull(new Object(){}, );
+	 * 
+	 * </pre>
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param nul 元素不正确的条件集合,例如字符串判空则为 "",如果只需要判断是否为null则传递null
 	 * @param objs 要被判断的元素集合
@@ -61,6 +67,18 @@ public class IsNullUtil {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * 判断参数是否为 null.<br>
+	 * 需要注意的是,第一个参数不能为数组,否则使用的是其重载.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param objs 要被判断的元素集合
+	 * @return 元素是否为 null,true则代表元素集合中有元素为null.
+	 */
+	public static boolean isNull(Object... objs) {
+		if (objs == null) return true;
+		return isNull(null, objs);
 	}
 	
 	/**

@@ -66,7 +66,7 @@ public class LogManager {
 	 * @param file 指定的文件
 	 * @return 普通信息列表
 	 */
-	public List<LogInfo> getInfo(File file) { return readFile(file,LogFactory.getLogFactory().LOG_INFO_I); }
+	public List<LogInfo> getInfo(File file) { return readFile(file,LogFactory.LOG_INFO_I); }
 	
 	/**
 	 * 获取指定文件的警报日志信息.
@@ -74,7 +74,7 @@ public class LogManager {
 	 * @param file 指定的文件
 	 * @return 警报信息列表
 	 */
-	public List<LogInfo> getAlarm(File file) { return readFile(file,LogFactory.getLogFactory().LOG_ALARM_I); }
+	public List<LogInfo> getAlarm(File file) { return readFile(file,LogFactory.LOG_ALARM_I); }
 	
 	/**
 	 * 获取指定文件的错误日志信息.
@@ -82,7 +82,7 @@ public class LogManager {
 	 * @param file 指定的文件
 	 * @return 错误信息列表
 	 */
-	public List<LogInfo> getError(File file) { return readFile(file,LogFactory.getLogFactory().LOG_ERROR_I); }
+	public List<LogInfo> getError(File file) { return readFile(file,LogFactory.LOG_ERROR_I); }
 	
 	/**
 	 * 读取日志文件,根据指定的解释器进行处理.
@@ -91,7 +91,7 @@ public class LogManager {
 	 * @param create 指定的解释器
 	 * @return 经过解释器处理的日志列表
 	 */
-	private List<LogInfo> readFile(File file,LogCreate create) {
+	private List<LogInfo> readFile(File file, LogCreate create) {
 		List<LogInfo> infos = new ArrayList<>();
 		if (file.exists()) {
 			BufferedReader read = null;
@@ -100,7 +100,7 @@ public class LogManager {
 				String info;
 				while ((info = read.readLine()) != null) {
 					//创建错误信息
-					LogInfo log = LogFactory.getLogFactory().getLog(info,create);
+					LogInfo log = LogFactory.getLog(info,create);
 					if (log != null) infos.add(log);
 				}
 			} catch (FileNotFoundException e) {

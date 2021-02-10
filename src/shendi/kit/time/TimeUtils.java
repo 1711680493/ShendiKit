@@ -102,7 +102,7 @@ public final class TimeUtils {
 	
 	/**
 	 * 获取一个默认的 TimeFormat 对象.<br>
-	 * 类 TimeUtils 的 getFormatTime() 方法的效果等同于 getFormatTime(getTime().DATE_TIME);
+	 * 类 TimeUtils 的 getFormatTime() 方法的效果等同于 getFormatTime(TimeUtils.DATE_TIME);
 	 * @author <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>Shendi QQ</a>
 	 * @return 默认的Time
 	 * @see #getFormatTime(String)
@@ -122,19 +122,19 @@ public final class TimeUtils {
 	 * 		<th>descript</th>
 	 * 	</tr>
 	 * 	<tr>
-	 * 		<td>getTime().DATE_TIME</td>
+	 * 		<td>TimeUtils.DATE_TIME</td>
 	 * 		<td>yyyy-MM-dd HH:mm:ss</td>
 	 * 		<td>2020-04-06 22:00:00</td>
 	 * 		<td>处理的结果为年月日 时分秒 数据库等地方都可以用到</td>
 	 * 	</tr>
 	 * 	<tr>
-	 * 		<td>getTime().F_DATE_TIME</td>
+	 * 		<td>TimeUtils.F_DATE_TIME</td>
 	 * 		<td>yyyy-MM-dd HH-mm-ss</td>
 	 * 		<td>2020-04-06 22-00-00</td>
 	 * 		<td>处理的结果可用于作为文件名</td>
 	 * 	</tr>
 	 * 	<tr>
-	 * 		<td>getTime().DATE</td>
+	 * 		<td>TimeUtils.DATE</td>
 	 * 		<td>yyyy-MM-dd</td>
 	 * 		<td>2020-04-06</td>
 	 * 		<td>处理的结果精确到当天</td>

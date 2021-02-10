@@ -29,21 +29,33 @@ public class Element {
 		this.name = name;
 		// 先解析元素的属性
 		int firstLast = element.indexOf('>');
-		String[] attributes = element.substring(element.indexOf(' ') + 1, firstLast).split(" ");
-		for (int i = 0; i < attributes.length; i++) {
-			if (!"".equals(attributes[i])) {
-				String k = attributes[i].trim();
-				for (int j = i + 1; j < attributes.length; j++) {
-					String v = attributes[j].trim();
-					if (!"".equals(v) && !"=".equals(v)) {
-						int len = attributes[j].length();
-						v = len <= 2 ? "" : attributes[j].substring(1, len - 1);
-						kvs.put(k, v);
-						i = j;
-						break;
-					}
-				}
+		// 元素的属性内容,通过从左到右的字符解析
+		String attrs = element.substring(element.indexOf(' ') + 1, firstLast);
+		while (attrs.length() > 0) {
+			// 等于号分隔
+			int split = attrs.indexOf('=');
+			if (split == -1) break;
+			String k = attrs.substring(0, split).trim();
+			if (split == attrs.length()) break;
+			attrs = attrs.substring(split + 1);
+			
+			// 值以 ' 或者 " 开头
+			attrs = attrs.trim();
+			char vF = attrs.charAt(0);
+			attrs = attrs.substring(1);
+			if (vF == '\'') {
+				split = attrs.indexOf('\'');
+			} else if (vF == '\"') {
+				split = attrs.indexOf('\"');
+			} else {
+				break;
 			}
+			
+			if (split == -1) break;
+			String v = attrs.substring(0, split).trim();
+			if (split == attrs.length()) break;
+			attrs = attrs.substring(split + 1);
+			kvs.put(k, v);
 		}
 		
 		// 获取元素内容
@@ -72,5 +84,11 @@ public class Element {
 	public String html() { return html; }
 	
 	@Override public String toString() { return element; }
+	
+	public static void main(String[] args) {
+		Element e = ElementFactory.createElement("<a href=\"/vod/10.html\" title=\"酒店情趣炮房偷拍猥琐锅盖头男和好身材妹子啪啪 战斗力不够要靠用手来满足妹子\">酒店情趣炮房偷拍猥琐锅盖头男和好身材妹子啪啪 战斗力不够要靠用手来满足妹子</a>");
+		System.out.println(e);
+		System.out.println(e.attr("href"));
+	}
 	
 }

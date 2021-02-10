@@ -1,12 +1,11 @@
 # 简介
->Shendi Kit<br>
->author:Shendi<br>
->version: 1.1<br>
->QQ:1711680493<br>
->[引导页面](https://1711680493.github.io)<br>
->[github所在地址](https://1711680493.github.io<br>
->Java工具包,纯Java制作,使用JDK8<br>
->以前版本可在分支中找到
+Shendi Kit<br>
+author:Shendi<br>
+version: 1.1<br>
+QQ:1711680493<br>
+[引导页面](https://1711680493.github.io)<br>
+Java工具包,纯Java制作,使用JDK8<br>
+以前版本可在分支中找到
 
 # 测试样例
 >样例在源码的 shendi.kit.test 包下.
@@ -48,7 +47,7 @@
 ### [HTTP工具](#HTTP工具包)
 >[工具类](#工具类)<br>
 >[响应数据处理接口](#响应数据处理接口)<br>
->[文件下载(处理响应体)](#文件下载)
+>[文件下载(处理响应体)](#文件下载)<br>
 >[重定向/转发(保留session等)](#重定向与转发)
 
 ### [简洁实用工具包-shendi.kit.util](#工具类)
@@ -91,6 +90,9 @@
 >优化扫描器,使得扫描时不加载对应类的静态方法<br>
 >优化了待发布的Path包,解决高版本,JavaWeb等路径获取问题<br>
 >TimeUtils改进,将Time,TimeFormat从内部类提取,且修复已知BUG<br>
+>对日志的更改
+>>Log日志输出支持格式化输出,且增加两种日志级别 Debug和Exception,并支持新增日志级别,参考 Log.log 函数.<br>
+>>新增ALog抽象类,用以对日志进行缓存,新增DefaultLog实现类,新增DebugLog类,用以处理Debug日志缓存
 
 # 开始配置
 ### 配置文件地址
@@ -314,16 +316,54 @@
 >>用于获取日志
 
 ## Log类
->使用方法比较简单,目前有以下三种日志形式<br>
->>普通日志 Log.print();<br>
->>警报日志 Log.printAlarm();<br>
->>错误日志 Log.printErr();<br>
+有以下几种级别的日志
+<ol>
+	<li>调试日志 Log.printDebug();</li>
+	<li>普通日志 Log.print();</li>
+	<li>警报日志 Log.printAlarm();</li>
+	<li>异常日志 Log.printExcept();</li>
+	<li>错误日志 Log.printErr();</li>
+</ol>
 
->使用 setIsLog(false) 来隐藏日志在控制台的显示<br>
+使用 setIsLog(false) 来隐藏日志在控制台的显示<br>
+对于某种级别的日志也提供了对应的隐藏方法,例如 setIsLogDebug,setIsLogInfo...<br>
+
+支持格式化输出日志,参考 printf 函数,例如日志内容为12345
+>Log.print("1%s345", "2");
+
+## 日志缓存
+使用 Log 类进行输出则是没有缓存的,对于需要很详细的日志时(debug),则性能会比较低下,于是提供了缓存类来解决此问题<br>
+
+shendi.kit.log.Alog抽象类,所有日志缓存的父类<br>
+
+有一个子类 DefaultLog,其中实现了一些参数的设置,简化了扩展<br>
+
+DefaultLog也有一个子类 DebugLog 类,使用如下(代码取自 shendi.kit.test.TestDebugLog)
+<pre>
+DebugLog log = new DebugLog("测试调试级日志");
+		
+log.log("Start-开始");
+log.log("1. Start get time-开始获取时间");
+long time = System.currentTimeMillis();
+log.log("Time is %s", TimeUtils.getFormatTime().getString(time));
+
+log.log("2. Time is ok-获取到的时间是否正确");
+if (time < 1000000) {
+	log.log("Time no ok, < 1000000");
+}
+log.log("Time ok, > 1000000");
+log.log("End-结束");
+
+log.commit();
+</pre>
+
+使用方法为,创建对应对象,并给此次操作命名(一般一个类对应一个对象,不要在局部函数中创建)<br>
+然后使用对象的 log 函数进行日志打印(支持格式化输出)<br>
+最后使用对象的 commit 函数完成此次操作,如果不使用,则缓存不能被刷新到硬盘中,将会造成内存溢出
 
 ### 日志文件
->存在于项目根目录的 logs 文件夹下<br>
->如果是 Web 项目则为项目的资源路径(WebContent)的logs目录下.<br>
+存在于项目根目录的 logs 文件夹下<br>
+如果是 Web 项目则为项目的资源路径(WebContent)的logs目录下.
 
 # 加密工具包
 ## 加密工厂 shendi.kit.encrypt.EncryptFactory
@@ -667,6 +707,9 @@ System.out.println(rs);
 	if (IsNullUtil.isNull(new String[] {"", "null"}, account, password)) {
 		...
 	}
+	有时我们只需要判断是否为 null,所以提供了此函数的重载 isNull(Object...)
+	因为有此重载,则此函数传递的第一个参数不能为数组,否则将会被解析成 isNull(Object[], Object...)
+	此函数等价于调用 isNull(null, Object...);
 </pre>
 
 #### ByteUtil

@@ -9,7 +9,6 @@ import shendi.kit.time.Time;
 
 /**
  * 日志工厂,拥有 {@link LogInfo} 与 {@link LogType} 两个内部类.<br>
- * 通过 {@link #getLogFactory()} 获取此类唯一的对象.<br>
  * 此类持有 日志解释器 信息日志解释器 错误日志解释器的引用.
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @version 1.0
@@ -19,23 +18,36 @@ import shendi.kit.time.Time;
  * @see LogCreate
  */
 public final class LogFactory {
-	/** 此类的唯一对象 */
-	private static final LogFactory LOG_FACTORY = new LogFactory();
 	
 	/** 日志解释器 */
-	public final LogInterpreter LOG_I;
+	public static final LogInterpreter LOG_I;
 	
 	/** 日志普通信息解释器 */
-	public final LogInfoInterpreter LOG_INFO_I;
+	public static final LogInfoInterpreter LOG_INFO_I;
 	
 	/** 日志警报信息解释器 */
-	public final LogAlarmInterpreter LOG_ALARM_I;
+	public static final LogAlarmInterpreter LOG_ALARM_I;
 	
 	/** 日志错误信息解释器 */
-	public final LogErrorInterpreter LOG_ERROR_I;
+	public static final LogErrorInterpreter LOG_ERROR_I;
+	
+	/** 调试级别的日志 */
+	public static final String LEVEL_DEBUG = "[Debug]";
+	
+	/** 信息级别的日志 */
+	public static final String LEVEL_INFO = "[Info]";
+	
+	/** 警报级别的日志 */
+	public static final String LEVEL_ALARM = "[Alarm]";
+	
+	/** 异常级别的日志 */
+	public static final String LEVEL_EXCEPTION = "[Exception]";
+	
+	/** 错误级别的日志 */
+	public static final String LEVEL_ERROR = "[Error]";
 	
 	/** 给解释器进行初始化 */
-	public LogFactory() {
+	static {
 		//初始化
 		LOG_I = new LogInterpreter();
 		LOG_INFO_I = new LogInfoInterpreter();
@@ -50,7 +62,7 @@ public final class LogFactory {
 	 * @since ShendiKit 1.0
 	 * @see LogType
 	 */
-	public class LogInfo {
+	public static class LogInfo {
 		/**
 		 * 日志原本的信息
 		 */
@@ -171,11 +183,27 @@ public final class LogFactory {
 
 		@Override
 		public String toString() {
-			return "LogInfo [logResource=" + logResource + ", type=" + type + ", time=" + time + ", callInfo="
-					+ callInfo + ", className=" + className + ", method=" + method + ", line=" + line + ", info=" + info
-					+ "]";
+			StringBuilder builder = new StringBuilder();
+			builder.append("{\"logResource\":\"");
+			builder.append(logResource);
+			builder.append("\",\"type\":\"");
+			builder.append(type);
+			builder.append("\",\"time\":\"");
+			builder.append(time);
+			builder.append("\",\"callInfo\":\"");
+			builder.append(callInfo);
+			builder.append("\",\"className\":\"");
+			builder.append(className);
+			builder.append("\",\"method\":\"");
+			builder.append(method);
+			builder.append("\",\"line\":\"");
+			builder.append(line);
+			builder.append("\",\"info\":\"");
+			builder.append(info);
+			builder.append("\"}");
+			return builder.toString();
 		}
-	}
+   	}
 	
 	/**
 	 * 代表日志的类型.
@@ -184,21 +212,18 @@ public final class LogFactory {
 	 * @since ShendiKit 1.0
 	 * @see LogInfo
 	 */
-	public enum LogType {
+	public static enum LogType {
+		/**调试日志*/
+		Debug,
 		/**普通日志*/
 		Info,
 		/*警报日志*/
 		Alarm,
+		/*异常日志*/
+		Exception,
 		/**错误日志*/
 		Error
 	}
-	
-	/**
-	 * 获取此类唯一对象.
-	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
-	 * @return LogFactory object.
-	 */
-	public static LogFactory getLogFactory() { return LOG_FACTORY; }
 	
 	/**
 	 * 创建一个日志信息.<br>
@@ -214,7 +239,7 @@ public final class LogFactory {
 	 * @param line 触发所在行
 	 * @return create new LogInfo object.
 	 */
-	public LogInfo create(String logResource,LogType type,Time time,String callInfo,String className,String method,int line,String info) {
+	public static LogInfo create(String logResource,LogType type,Time time,String callInfo,String className,String method,int line,String info) {
 		return new LogInfo(logResource, type, time, callInfo, className, method, line, info);
 	}
 	
@@ -227,7 +252,7 @@ public final class LogFactory {
 	 * @return 返回一个被解释后的日志,返回null则代表log不为日志或出错
 	 * @see #getLog(String)
 	 */
-	public LogInfo getLog(String log) { return getLog(log,null); }
+	public static LogInfo getLog(String log) { return getLog(log,null); }
 	
 	/**
 	 * 解析日志成便于使用的 LogInfo.<br>
@@ -260,7 +285,7 @@ public final class LogFactory {
 	 * @param create 要使用的解释器类型,如果为null,则使用默认的解释器
 	 * @return 返回一个被解释后的日志,返回null则代表log不为日志或出错
 	 */
-	public LogInfo getLog(String log,LogCreate create) {
+	public static LogInfo getLog(String log,LogCreate create) {
 		if (create == null) return LOG_I.interpreterLog(log);
 		return create.interpreterLog(log);
 	}
