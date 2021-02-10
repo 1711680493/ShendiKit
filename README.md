@@ -682,84 +682,88 @@ System.out.println(rs);
 #### IsNullUtil
 >判空工具类<br>
 >SK 1.1中新增
+
 <pre>
-	通常在写函数的时候会有很多参数
-	首先会对其进行判断
-	例如
-	if (account == null || "".equals(account)) {}
-	
-	当参数一多,就要写很长的代码,或者重复很多次上述操作
-	于是此类就这样诞生了
-	对于上述操作,判断 null 和 "" 为空的
-	可以直接通过 {@link #strsIsNull(String...)} 来判断
-	例如
-	String account = null;
-	String password = "hello";
-	IsNullUtil.strsIsNull(account, password)
-	== true
-	
-	account = "world";
-	IsNullUtil.strsIsNull(account, password)
-	== false
-	
-	当然,也可以自己设定判空条件,使用 {@link #isNull(Object[], Object...)} 函数
-	在写 Java Web 项目通常参数会为 "null"
-	if (IsNullUtil.isNull(new String[] {"", "null"}, account, password)) {
-		...
-	}
-	有时我们只需要判断是否为 null,所以提供了此函数的重载 isNull(Object...)
-	因为有此重载,则此函数传递的第一个参数不能为数组,否则将会被解析成 isNull(Object[], Object...)
-	此函数等价于调用 isNull(null, Object...);
+通常在写函数的时候会有很多参数
+首先会对其进行判断
+例如
+if (account == null || "".equals(account)) {}
+
+当参数一多,就要写很长的代码,或者重复很多次上述操作
+于是此类就这样诞生了
+对于上述操作,判断 null 和 "" 为空的
+可以直接通过 {@link #strsIsNull(String...)} 来判断
+例如
+String account = null;
+String password = "hello";
+IsNullUtil.strsIsNull(account, password)
+== true
+
+account = "world";
+IsNullUtil.strsIsNull(account, password)
+== false
+
+当然,也可以自己设定判空条件,使用 {@link #isNull(Object[], Object...)} 函数
+在写 Java Web 项目通常参数会为 "null"
+if (IsNullUtil.isNull(new String[] {"", "null"}, account, password)) {
+	...
+}
+有时我们只需要判断是否为 null,所以提供了此函数的重载 isNull(Object...)
+因为有此重载,则此函数传递的第一个参数不能为数组,否则将会被解析成 isNull(Object[], Object...)
+此函数等价于调用 isNull(null, Object...);
 </pre>
 
 #### ByteUtil
 >字节工具类<br>
 >SK 1.1中新增
+
 <pre>
-	// 将字节数组插入到另一个字节数组中
-	// ByteUtil.insert(byte[], int, byte[], int, int);
-	// 参数分别为,字节数组,数组的开始偏移,被插入的字节数组,插入的位置,插入多少个
-	byte[] source = {1, 2, 3};
-	byte[] data = {4, 5};
-	byte[] result = ByteUtil.insert(data, 0, source, source.length, data.length);
-	result == {1, 2, 3, 4, 5};
-	
-	source = {1, 3, 4};
-	data = {2};
-	result = ByteUtil.insert(data, 0, source, 1, data.length);
-	result == {1, 2, 3, 4};
+// 将字节数组插入到另一个字节数组中
+// ByteUtil.insert(byte[], int, byte[], int, int);
+// 参数分别为,字节数组,数组的开始偏移,被插入的字节数组,插入的位置,插入多少个
+byte[] source = {1, 2, 3};
+byte[] data = {4, 5};
+byte[] result = ByteUtil.insert(data, 0, source, source.length, data.length);
+result == {1, 2, 3, 4, 5};
+
+source = {1, 3, 4};
+data = {2};
+result = ByteUtil.insert(data, 0, source, 1, data.length);
+result == {1, 2, 3, 4};
 </pre>
 
 #### BitUtil
 >位工具类<br>
 >SK 1.1中新增
+
 <pre>
-    /**
-     * 获取指定数值占多少位,数字符号位占一位.
-     * int sizeOf(long);
-     * sizeOf(0) -> 2
-     * sizeOf(1) -> 2
-     * sizeOf(2) -> 3
-     */
-    int bitNum = BitUtil.sizeOf(1);
-    /**
-     * 获取指定位数的最大十进制值,不带符号位
-     * long bitMax(int);
-     * bitMax(0) -> 0
-     * bitMax(1) -> 1
-     * bitMax(2) -> 3
-     * bitMax(3) -> 7
-     */
-     int max = BitUtil.bitMax(1);
+/**
+ * 获取指定数值占多少位,数字符号位占一位.
+ * int sizeOf(long);
+ * sizeOf(0) -> 2
+ * sizeOf(1) -> 2
+ * sizeOf(2) -> 3
+ */
+int bitNum = BitUtil.sizeOf(1);
+/**
+ * 获取指定位数的最大十进制值,不带符号位
+ * long bitMax(int);
+ * bitMax(0) -> 0
+ * bitMax(1) -> 1
+ * bitMax(2) -> 3
+ * bitMax(3) -> 7
+ */
+ int max = BitUtil.bitMax(1);
 </pre>
 
 #### FileUtil
 >文件工具类<br>
 >SK 1.1中新增
+
 <pre>
-	// 使用指定数据更新/创建指定文件,update(String, byte[])
-    FileUtil.update("C:/1.txt", "hello".getBytes());
-    // 同上,参数一为相对路径,updateByPro(String, byte[])
-    // 例如将项目下的1.txt内容更改
-    FileUtil.updateByPro("/1.txt", "hello.getBytes());
+// 使用指定数据更新/创建指定文件,update(String, byte[])
+FileUtil.update("C:/1.txt", "hello".getBytes());
+// 同上,参数一为相对路径,updateByPro(String, byte[])
+// 例如将项目下的1.txt内容更改
+FileUtil.updateByPro("/1.txt", "hello.getBytes());
 </pre>
