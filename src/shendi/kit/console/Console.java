@@ -6,6 +6,7 @@ import shendi.kit.annotation.ConsoleAnno;
 import shendi.kit.annotation.scan.ConsoleScan;
 import shendi.kit.console.command.Command;
 import shendi.kit.console.command.ExecuteCommand;
+import shendi.kit.log.Log;
 
 /**
  * 控制台抽象类,实现此类来实现一个控制台视图<br>
@@ -114,18 +115,21 @@ public abstract class Console {
 		
 		Command c = commands.get(name);
 		if (c == null) return null;
-		if (split.length < 2) return c.execute();
-		
-		HashMap<String, String> args = new HashMap<String, String>();
-		for (int i = 1; i < split.length; i++) {
-			String arg = split[i].trim();
-			int len = arg.indexOf(' ');
-			if (len == -1) args.put(arg, "");
-			else args.put(arg.substring(0, len), arg.substring(len + 1));
-		}
-		
-		String result = c.execute(args);
-		return result == null ? "" : result;
+		try {
+			if (split.length < 2) return c.execute();
+			
+			HashMap<String, String> args = new HashMap<String, String>();
+			for (int i = 1; i < split.length; i++) {
+				String arg = split[i].trim();
+				int len = arg.indexOf(' ');
+				if (len == -1) args.put(arg, "");
+				else args.put(arg.substring(0, len), arg.substring(len + 1));
+			}
+			
+			String result = c.execute(args);
+			return result == null ? "" : result;
+		} catch (Exception e) { Log.printErr("执行命令时出错: ".concat(e.getMessage()));}
+		return null;
 	}
 	
 	/**

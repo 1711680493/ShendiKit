@@ -52,6 +52,8 @@ public class ExecuteCommand extends Command {
 	public String execute(HashMap<String, String> params) {
 		String code = params.get("c");
 		
+		if (code == null) return "execute 能执行 Java 语句,方法为 execute /c 语句";
+		
 		FileOutputStream output = null;
 		FileInputStream input = null;
 		

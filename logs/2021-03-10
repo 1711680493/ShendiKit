@@ -1,0 +1,2 @@
+[Error] [2021-03-10 20:09:29] shendi.kit.annotation.scan.ClassScan.<clinit>().75		>获取配置文件 /files/anno_scan.shendi 出错,请检查是否有此文件,如果没有则会影响到注解的使用!
+[Info] [2021-03-10 20:09:30] shendi.kit.annotation.scan.ClassScan.getClasses().247		>Scan 122 file,has kit annotation class number is: 3
