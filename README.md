@@ -7,8 +7,10 @@ QQ:1711680493<br>
 Java工具包,纯Java制作,使用JDK8<br>
 以前版本可在分支中找到
 
-# 测试样例
->样例在源码的 shendi.kit.test 包下.
+# 文档及测试样例
+[在线文档 v1.1](https://1711680493.github.io/doc/SK-1.1)<br>
+
+样例在源码的 shendi.kit.test 包下.
 
 # 目录
 ### [版本变化](#SK-版本变化)
@@ -23,9 +25,13 @@ Java工具包,纯Java制作,使用JDK8<br>
 ### [控制台](#控制台模块)
 >[给自己的程序增加一个控制台模块](#给自己的程序增加一个控制台模块)<br>
 >[添加命令](#添加命令)<br>
+>[命令的使用](#命令的使用)<br>
 >[命令行控制台](#命令行控制台)<br>
 >[窗体控制台](#窗体控制台)<br>
->[自定义控制台](#自定义控制台)
+>[自定义控制台](#自定义控制台)<br>
+>[内置命令](#内置命令)
+>>[execute命令](#execute命令)<br>
+>>[扩展内置命令](#扩展内置命令)
 
 ### [配置文件](#非常简单的使用-properties-配置文件)
 ### [时间工具](#时间工具包)
@@ -67,32 +73,72 @@ Java工具包,纯Java制作,使用JDK8<br>
 >Properties配置,控制台,时间工具,日志,加密工具,路径工具,爬虫工具,util包等.
 
 ## v 1.1
->ConfigurationFactory类新增方法 getProperty(config, name),将两个方法融合,用于简化操作,直接获取properties配置的值.<br>
->>之前使用ConfigurationFactory.getConfig(config).getProperty(name);<br>
-
->新增 shendi.kit.net.http 包,将 HttpUtil 从 util 包中提出
->>修复HttpUtil 1.0的已知问题,比如无法访问接口等<br>
->>>并且增加了遗漏的功能,设置参数,在之前POST请求无法带请求参数,现在可以使用addParameter(key,value)或setParameters(param)来直接设置<br>
->>>增加对HEAD类型支持,以及可从host可携带端口,新增构造 (host, type)
-
->>包内新增HttpDataDispose接口用以处理http响应数据(比如文件下载,具体请参考文档
-
->解决了扫描注解高版本Java无法扫描本项目的问题.<br>
->util包中新增Math类,用于处理单位换算等<br>
->util包中新增IsNullUtil类,用于判断给定的参数是否为空(条件可以自行设定)<br>
->util包中新增ByteUtil类,用于处理对字节的操作<br>
->util包中新增BitUtil类,用于处理对bit的操作<br>
->util包中新增FileUtil类,用于处理对文件的操作<br>
->新增shendi.kit.format.json包,用于处理json.(目前还不完善,详细信息请看对应介绍)<br>
->新增shendi.kit.id包,用于处理id生成<br>
->控制台在创建时可以设置组,命令注解可以设置组,解决之前多个控制台共用所有命令问题.<br>
->解决 SKClassLoader在高版本JDK中找不到类的问题<br>
->优化扫描器,使得扫描时不加载对应类的静态方法<br>
->优化了待发布的Path包,解决高版本,JavaWeb等路径获取问题<br>
->TimeUtils改进,将Time,TimeFormat从内部类提取,且修复已知BUG<br>
->对日志的更改
->>Log日志输出支持格式化输出,且增加两种日志级别 Debug和Exception,并支持新增日志级别,参考 Log.log 函数.<br>
->>新增ALog抽象类,用以对日志进行缓存,新增DefaultLog实现类,新增DebugLog类,用以处理Debug日志缓存
+Small kit
+<ol>
+	<li>
+		ConfigurtaionFactory(配置文件工厂)
+		<ul>
+			<li>ConfigurationFactory类新增方法 getProperty(config, name)<br>
+			等价于 ConfigurationFactory.getConfig(config).getProperty(name);</li>
+		</ul>
+	</li>
+	<li>
+		控制台
+		<ul>
+			<li>控制台在创建时可以设置组,命令注解可以设置组,解决之前多个控制台共用所有命令问题</li>
+			<li>命令可传递参数,对于字段,传递的参数直接设置,对于函数,传递的参数将当作函数参数传递,详细信息请参考控制台文档</li>
+			<li>控制台的职责简化为为接收命令/返回结果,对于执行命令操作已在父类Console实现(execute)</li>
+			<li>新增shendi.kit.console.command包,包含内置命令类</li>
+			<li>控制台内置命令 execute,用以执行Java语句</li>
+		</ul>
+	</li>
+	<li>
+		HTTP工具
+		<ul>
+			<li>新增 shendi.kit.net.http 包,将 HttpUtil 从 util 包中提出</li>
+			<li>修复HttpUtil 1.0的已知问题,比如无法访问接口等</li>
+			<li>在之前POST请求无法带请求参数,现在可以使用addParameter(key,value)或setParameters(param)来直接设置</li>
+			<li>增加对HEAD类型支持,以及可从host可携带端口,新增构造 (host, type)</li>
+			<li>包内新增HttpDataDispose接口用以处理http响应数据(比如文件下载,具体请参考文档)</li>
+			<li>支持重定向与转发</li>
+		</ul>
+	</li>
+	<li>
+		util包
+		<ul>
+			<li>util包中新增Math类,用于处理单位换算等</li>
+			<li>util包中新增IsNullUtil类,用于判断给定的参数是否为空(条件可以自行设定)</li>
+			<li>util包中新增ByteUtil类,用于处理对字节的操作</li>
+			<li>util包中新增BitUtil类,用于处理对bit的操作</li>
+			<li>util包中新增FileUtil类,用于处理对文件的操作</li>
+		</ul>
+	</li>
+	<li>
+		注解
+		<ul>
+			<li>解决了扫描注解高版本Java无法扫描本项目的问题</li>
+			<li>优化扫描器,使得扫描时不加载对应类的静态方法</li>
+		</ul>
+	</li>
+	<li>
+		SKClassLoader
+		<ul>
+			<li>解决 SKClassLoader在高版本JDK中找不到类的问题</li>
+			<li>新增createClass,reload 函数</li>
+		</ul>
+	</li>
+	<li>
+		日志
+		<ul>
+			<li>Log日志输出支持格式化输出,且增加两种日志级别 Debug和Exception,并支持新增日志级别,参考 Log.log 函数</li>
+			<li>新增ALog抽象类,用以对日志进行缓存,新增DefaultLog实现类,新增DebugLog类,用以处理Debug日志缓存</li>
+		</ul>
+	</li>
+	<li>新增shendi.kit.id包,用于处理id生成</li>
+	<li>优化了待发布的Path包,解决高版本,JavaWeb等路径获取问题</li>
+	<li>TimeUtils改进,将Time,TimeFormat从内部类提取,且修复已知BUG</li>
+	<li>StreamUtils新增 readAllByte(input) 函数,用以读取输入流中所有的数据</li>
+</ol>
 
 # 开始配置
 ### 配置文件地址
@@ -117,72 +163,142 @@ Java工具包,纯Java制作,使用JDK8<br>
 >如果不想扫描注解(不用),可以将文件内容改为 No
 
 # 控制台模块
->有的时候我们需要给自己的程序添加一个后端控制来增强交互,这时就可以使用此模块<br>
->我自己也有这一需求,所以此模块就这样诞生了.
->>会不断完善,后续可能会开发出可以实时修改变量的功能,请期待
+你是否想在自己的程序运行时肆意的修改程序?<br>
+又或者想在程序运行时查看某个变量的内容?<br>
+<br>
+对于此种需求,此工具包提供了控制台模块
+>建议你的程序添加此模块,即使使用不到,以备不时之需.
+<br>
 
->提供了一个测试类 shendi.kit.test.TestConsole <br>
+测试样例 shendi.kit.test.TestConsole<br>
 
 ## 给自己的程序增加一个控制台模块
->好处就是增强了交互,时刻观察到当前软件状态等<br><br>
->为了使得开发变得简单,我只提供了注解的方式来使用<br><br>
->分为五个步骤<br>
->1.创建类<br>
->2.创建方法/字段<br>
->3.给类添加 @ConsoleAnno 注解<br>
->>3.1.在JDK9模块化后,需要导出此类所在的包,在module-info.java中exports<br>
+为了使得开发变得简单,提供了注解的方式,且注解方式能满足大部分需求<br>
+<br>
+将控制台模块添加进自己的程序非常的简单(仅需一行代码!)<br>
+控制台有很多种,例如下方的代码将命令行控制台添加进自己的程序
+>new CommandConsole().register();
 
->4.给方法/字段添加 @CommandAnno(name,info) 注解<br>
->5.注册控制台
->>目前只提供了几种控制台,下方会一一列举,后续会增加<br>
->>通过控制台对象的 register() 函数来注册<br>
->>例如: new CommandConsole().register();<br>
+运行程序后,会在控制台中看到输出...<br>
+<br>
+对于控制台的操作大致分为五部分,分别为
+<ol>
+	<li>创建类</li>
+	<li>创建方法/字段</li>
+	<li>给类添加 @ConsoleAnno 注解
+		<ol>
+			<li>在JDK9模块化后,需要导出此类所在的包,在module-info.java中exports</li>
+		</ol>
+	</li>
+	<li>给方法/字段添加 @CommandAnno(name,info) 注解</li>
+	<li>注册控制台(目前只提供了几种控制台,下方会一一列举,后续会增加(当然你也可以自己创建,如何创建请看文档))
+		<ul>
+			<li>通过控制台对象的 register() 函数来注册</li>
+			<li>例如: new CommandConsole().register();</li>
+		</ul>
+	</li>
+</ol>
 
->在1.1版本中新增设置组功能<br>
->>通过给注解添加参数 @ConsoleAnno("group") 来将一个类里所有未设置组的命令设置组<br>
+### 在1.1版本中新增-命令分组
+通过给注解添加参数 @ConsoleAnno("group") 来将一个类里所有未设置组的命令设置组<br>
+在注册控制台时,通过重载的函数来设置控制台所使用的组<br>
+>例如: new CommandConsole().register("group");
 
->在注册控制台时,通过重载的函数来设置控制台所使用的组<br>
->>例如: new CommandConsole().register("group");<br>
-
->如果没有设置组则使用默认组.<br>
+如果没有设置组则使用默认组.
 
 ## 添加命令
->引入注解 import shendi.kit.annotation.CommandAnno;<br>
->使用 @CommandAnno(name,info) 注解来增加一条命令<br>
->>其中,name为String类型,代表命令的名称,info也是String类型,代表命令的附加信息<br>
->>要求: 只能修饰在字段/方法上<br>
->>>如果是方法,必须是public修饰的,方法返回值必须为java.lang.String,必须无参<br>
+引入注解
+>import shendi.kit.annotation.ConsoleAnno;<br>
+>import shendi.kit.annotation.CommandAnno;
 
->><b>并且拥有命令的类必须使用 @ConsoleAnno 注解</b><br>
+<b>将 ConsoleAnno 注解添加到类上,此类则为控制台注解类,接收一个参数 group,代表此类中的命令的默认分组,可为空<br>
+(此步骤为必须的,否则使用注解创建命令则无法被识别)</b>
 
-><br>
->在1.1版本新增设置组功能<br>
->>例如: @CommandAnno(name, info, group="group");<br>
->>命令中设置组优先于控制台组,如果未设置,则使用控制台组.<br>
+使用 @CommandAnno(name,info) 注解来增加一条命令<br>
+>其中,name为String类型,代表命令的名称,info也是String类型,代表命令的附加信息<br>
+>此注解只能修饰在字段或函数上<br>
+>>如果是函数,必须是public修饰的,方法返回值必须为java.lang.String,有一参数为 HashMap<String, String><br>
+>>例如 public String test(HashMap<String, String> args) { return null; }
+
+在1.1版本新增设置组功能<br>
+>例如: @CommandAnno(name, info, group="group");<br>
+>命令中设置组优先于控制台组,如果未设置,则使用控制台组.
+
+## 命令的使用
+对于不同控制台,命令使用方法是一致的,因为我将此操作放到了 Console 类中.<br>
+一个有效的命令字符串格式为:
+>命令名称 [/参数 [参数值]]
+
+例如,使用内置命令 execute(执行java代码)
+>execute /c System.out.print("hello,world");
+
+<br>
+
+对于字段形式创建的命令<br>
+获取字段内容: 直接输入命令名<br>
+设置字段内容: 使用参数 /set<br>
+<br>
+例如以下代码创建的命令
+>@CommandAnno(name="name", info="我的昵称") public String name = null;
+
+输入 name,控制台会输出如下
+>Shendi
+
+输入<br>
+>name /set Shendi<br>
+>name
+
+输出如下,在设置完后也会输出字段的值
+>Shendi<br>
+>Shendi
 
 ## 命令行控制台
->实现类: shendi.kit.console.CommandConsole<br>
->描述: 提供一个可以在命令行控制台进行交互的功能,功能简单的控制台<br>
->自带三个命令 help/reload/exit<br>
->help		显示所有命令<br>
->reload		重新加载命令(可以动态修改)<br>
->exit		退出命令行控制台<br>
+实现类: shendi.kit.console.CommandConsole<br>
+描述: 提供一个可以在命令行控制台进行交互的功能,功能简单的控制台<br>
+自带三个命令 help/reload/exit<br>
+help		显示所有命令<br>
+reload		重新加载命令(可以动态修改)<br>
+exit		退出命令行控制台
 
 ## 窗体控制台
->实现类: shendi.kit.console.DeskAppConsole<br>
->描述: 窗体控制台,内嵌命令行控制台,并提供可以设置实时显示命令的方法<br>
-><b>窗体控制台与程序是绑定在一起的,当控制台被关闭,程序也会被关闭<b><br>
+实现类: shendi.kit.console.DeskAppConsole<br>
+描述: 窗体控制台,内嵌命令行控制台,并提供可以设置实时显示命令的方法<br>
+<b>窗体控制台与程序是绑定在一起的,当控制台被关闭,程序也会被关闭</b><br>
 
 ## 自定义控制台
->如果不满足当前的命令行控制台可以自定义一个,方法如下<br>
->新建一个类继承 shendi.kit.console.Console 类<br>
->实现以下两个方法<br>
->>protected void register(HashMap<String, Command> commands)<br>
->>public void destroy()<br>
+如果不满足当前的命令行控制台可以自定义一个,方法如下<br>
+新建一个类继承 shendi.kit.console.Console 类<br>
+实现以下两个方法
+>protected void register(HashMap<String, Command> commands)<br>
+>public void destroy()
 
->register代表注册,destroy代表销毁<br>
->在register中传递的参数 commands 代表当前已有的所有命令<br>
->>是一个HashMap,键为命令名,值为命令(包含函数/字段),要了解更多可以查阅 shendi.kit.data.Command 类
+register代表注册,destroy代表销毁<br>
+在register中传递的参数 commands 代表当前已有的所有命令<br>
+>命令集合是一个HashMap,键为命令名,值为命令(包含函数/字段),要了解更多可以查阅 shendi.kit.data.Command 类
+
+register函数的职责为启动控制台,并接收命令和返回命令结果,对于处理命令,已封装至 Console.execute 函数中
+
+## 内置命令
+1.1版本新增<br>
+对于控制台,很多时候都需要自带命令,所以在Console类中提供了 extraCommand() 函数以供子类实现来扩展内置命令<br>
+
+### execute命令
+执行输入的 Java 代码<br>
+参数<br>
+/c - 指定要执行的Java语句<br>
+<br>
+使用 execute 命令,将会生成代码对应的源文件以及二进制文件(java and class)<br>
+文件保存在项目根目录的/temp/source 下,名称为 ExecuteTemp<br>
+具体保存路径可以参考 shendi.kit.path.ProjectPath
+
+### 扩展内置命令
+首先需要创建一个命令,对于命令,则需要认识 Command 类<br>
+一个 Command 类代表了一个命令,拥有函数 execute(HashMap<String, String> args);<br>
+执行一个命令时将会调用此函数,通过重写此函数来达到自己想要的效果<br>
+<br>
+对于 Command 类的创建,可以参考 shendi.kit.console.command.ExecuteCommand 类<br>
+<br>
+创建完命令后,在控制台的extraCommand()函数中将命令添加进 commands 命令集合
 
 # 非常简单的使用 Properties 配置文件
 ## 功能介绍
@@ -357,7 +473,9 @@ log.log("End-结束");
 log.commit();
 </pre>
 
-使用方法为,创建对应对象,并给此次操作命名(一般一个类对应一个对象,不要在局部函数中创建)<br>
+使用方法为,创建对应对象,并给此次操作命名
+>一般一个类对应一个对象,有对应缓存池,可以处理并发操作,所以不要在局部函数中创建.
+
 然后使用对象的 log 函数进行日志打印(支持格式化输出)<br>
 最后使用对象的 commit 函数完成此次操作,如果不使用,则缓存不能被刷新到硬盘中,将会造成内存溢出
 
@@ -519,11 +637,11 @@ System.out.println(rs);
 </pre>
 
 # HTTP工具包
->shendi.kit.net.http<br>
->SK 1.1 新增
+shendi.kit.net.http<br>
+SK 1.1 新增
 
 #### 工具类
->shendi.kit.net.http.HttpUtil<br>
+shendi.kit.net.http.HttpUtil
 
 <pre>
 	// 首先创建对象,有以下几个重载,具体请参考 API 文档
@@ -549,15 +667,15 @@ System.out.println(rs);
 </pre>
 
 #### 响应数据处理接口
->shendi.kit.net.http.HttpDataDispose<br>
->实现此接口来用以给 HttpUtil 设置处理函数.<br>
->包含 boolean dispose(byte[] data) 函数,当有响应数据时会被调用.
+shendi.kit.net.http.HttpDataDispose<br>
+实现此接口来用以给 HttpUtil 设置处理函数.<br>
+包含 boolean dispose(byte[] data) 函数,当有响应数据时会被调用.
 
 #### 文件下载
->当我们使用http的方式下载文件时,基础用法已经满足不了需求
->>只有所有数据都读取完成时才会完成send(),这时会程序会卡住,当下载的文件过大时则会遇到内存溢出的问题
+当我们使用http的方式下载文件时,基础用法已经满足不了需求
+>只有所有数据都读取完成时才会完成send(),这时会程序会卡住,当下载的文件过大时则会遇到内存溢出的问题
 
->这时我们需要自行处理响应,于是需要使用到 setDispose() 来设置处理方法
+这时我们需要自行处理响应,于是需要使用到 setDispose() 来设置处理方法
 
 <pre>
 	// 创建对象
@@ -614,9 +732,9 @@ System.out.println(rs);
 </pre>
 
 #### 重定向与转发
->当页面返回结果为重定向内容,我们想要的结果大多都是重定向后的数据,这时需要处理重定向的方法<br>
->当我们访问的网页需要登录才能查看,需要保存session/token等信息时,这时需要使用原有的HttpUtil对象<br>
->HttpUtil提供了 redirect(url) 函数用以进行重定向/转发
+当页面返回结果为重定向内容,我们想要的结果大多都是重定向后的数据,这时需要处理重定向的方法<br>
+当我们访问的网页需要登录才能查看,需要保存session/token等信息时,这时需要使用原有的HttpUtil对象<br>
+HttpUtil提供了 redirect(url) 函数用以进行重定向/转发
 
 <pre>
 	/*

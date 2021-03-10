@@ -7,10 +7,16 @@ package shendi.kit.log;
  */
 public class DefaultLog extends ALog {
 	
+	/** 所有DefaultLog的实例是否显示日志 */
+	private static boolean isLog = true;
+	
 	/** 日志调用层级 */
 	protected final int CALL_LEVEL_LOG = 6;
 	
-	public DefaultLog(String name) { super(name); }
+	public DefaultLog(String name) {
+		super(name);
+		super.isLog = isLog;
+	}
 
 	@Override protected int initSize() { return 1000; }
 
@@ -26,4 +32,9 @@ public class DefaultLog extends ALog {
 	
 	@Override protected void save(String log) { Log.log(log, "[Default]", true, CALL_LEVEL_LOG); }
 	
+	/**
+	 * 设置所有DefualtLog对象打印的日志是否在控制台显示
+	 * @param isLog 是否在控制台显示
+	 */
+	public static void setIsLogDef(boolean isLog) { DefaultLog.isLog = isLog; }
 }

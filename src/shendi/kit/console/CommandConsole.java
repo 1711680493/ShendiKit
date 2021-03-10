@@ -3,9 +3,10 @@ package shendi.kit.console;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import java.util.Scanner;
 
-import shendi.kit.data.Command;
+import shendi.kit.console.command.Command;
+
+import java.util.Scanner;
 
 /**
  * 命令行控制台.<br>
@@ -52,11 +53,11 @@ public class CommandConsole extends Console {
 				System.out.println("*--已关闭...");
 				break;
 			} else {
-				Command c = commands.get(command);
-				if (c != null) {
-					System.out.println(c.execute());
-				} else {
+				String result = execute(command);
+				if (result == null) {
 					System.out.println("*--没有此命令");
+				} else {
+					System.out.println(result);
 				}
 			}
 		}

@@ -10,7 +10,10 @@ module shendi.kit {
 	
 	exports shendi.kit.annotation;
 	exports shendi.kit.config;
+	
 	exports shendi.kit.console;
+	exports shendi.kit.console.command;
+	
 	exports shendi.kit.data;
 	exports shendi.kit.deskapp;
 	exports shendi.kit.deskapp.effect;

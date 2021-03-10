@@ -13,11 +13,11 @@ import shendi.kit.time.TimeUtils.TimeDisposal;
  * 如果需要性能,您应该将日志设置为控制台不显示 {@link #setIsLog(boolean)}.<br>
  * 提供了解析日志的功能,请参考 LogManager.<br>
  * Log save path as Project root/logs.
- * {@link #printDebug(Object)} 打印调试日志<br>
- * {@link #print(Object)} 打印普通日志<br>
- * {@link #printAlarm(Object)} 打印警报日志<br>
- * {@link #printExcept(Object)} 打印异常日志<br>
- * {@link #printErr(Object)} 打印错误日志
+ * {@link #printDebug(Object, Object...)} 打印调试日志<br>
+ * {@link #print(Object, Object...)} 打印普通日志<br>
+ * {@link #printAlarm(Object, Object...)} 打印警报日志<br>
+ * {@link #printExcept(Object, Object...)} 打印异常日志<br>
+ * {@link #printErr(Object, Object...)} 打印错误日志
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @since ShendiKit 1.0
  * @version 1.0
@@ -137,7 +137,8 @@ public final class Log {
 	 * @return 格式化后的字符串形式,最后两个字符为换行符\r\n
 	 */
 	public static String log(Object log, String type, boolean isWrite, int callLevel, Object... objs) {
-		String format = String.format(log.toString(), objs);
+		String format = log.toString();
+		if (objs != null && objs.length > 0) format = String.format(format, objs);
 		return log(format, type, isWrite, callLevel);
 	}
 	
@@ -237,6 +238,9 @@ public final class Log {
 		System.err.println(getString() + "设置了日志是否控制台可见:" + isLog);
 		Log.isLog = isLog;
 	}
+	
+	/** @return 是否在控制台显示调试日志 */
+	public static boolean isLogDebug() { return isLogDebug; }
 	/**
 	 * 设置 {@link LogFactory#LEVEL_DEBUG} 的日志是否在控制台可见 true可见 false不可见
 	 * @param isLog true 可见,false 不可见
@@ -245,6 +249,9 @@ public final class Log {
 		System.err.println(getString() + "设置了信息日志是否控制台可见:" + isLog);
 		Log.isLogDebug = isLog;
 	}
+	
+	/** @return 是否在控制台显示信息日志 */
+	public static boolean isLogInfo() { return isLogInfo; }
 	/**
 	 * 设置 {@link LogFactory#LEVEL_INFO} 的日志是否在控制台可见 true可见 false不可见
 	 * @param isLog true 可见,false 不可见
@@ -253,6 +260,9 @@ public final class Log {
 		System.err.println(getString() + "设置了信息日志是否控制台可见:" + isLog);
 		Log.isLogInfo = isLog;
 	}
+	
+	/** @return 是否在控制台显示警报日志 */
+	public static boolean isLogAlarm() { return isLogAlarm; }
 	/**
 	 * 设置 {@link LogFactory#LEVEL_ALARM} 的日志是否在控制台可见 true可见 false不可见
 	 * @param isLog true 可见,false 不可见
@@ -261,6 +271,9 @@ public final class Log {
 		System.err.println(getString() + "设置了警报日志是否控制台可见:" + isLog);
 		Log.isLogAlarm = isLog;
 	}
+	
+	/** @return 是否在控制台显示异常日志 */
+	public static boolean isLogException() { return isLogException; }
 	/**
 	 * 设置 {@link LogFactory#LEVEL_EXCEPTION} 的日志是否在控制台可见 true可见 false不可见
 	 * @param isLog true 可见,false 不可见
@@ -269,6 +282,9 @@ public final class Log {
 		System.err.println(getString() + "设置了异常日志是否控制台可见:" + isLog);
 		Log.isLogException = isLog;
 	}
+	
+	/** @return 是否在控制台显示错误日志 */
+	public static boolean isLogError() { return isLogError; }
 	/**
 	 * 设置 {@link LogFactory#LEVEL_ERROR} 的日志是否在控制台可见 true可见 false不可见
 	 * @param isLog true 可见,false 不可见

@@ -8,7 +8,7 @@ import java.util.HashMap;
 
 import shendi.kit.annotation.CommandAnno;
 import shendi.kit.annotation.ConsoleAnno;
-import shendi.kit.data.Command;
+import shendi.kit.console.command.Command;
 import shendi.kit.log.Log;
 
 /**
@@ -53,14 +53,10 @@ public class ConsoleScan implements AnnotationScan {
 						if (command != null) {
 							String value = command.name();
 							
-							// 指定了组则加入格外组,1.1新增
+							// 组为默认组则直接添加,指定了组则加入格外组(判断是否存在,不存在则创建),1.1新增
 							if (command.group().equals(ConsoleAnno.DEFAULT_GROUP)) {
 								if (commands.containsKey(value)) {
-									StringBuilder build = new StringBuilder(50);
-									build.append("此字段的命令注解名称已存在,请更改此命令名称 By: ");
-									build.append(k); build.append('.');
-									build.append(f.getName());
-									Log.printErr(build);
+									Log.printErr("此字段的命令注解名称已存在,请更改此命令名称 By: %s.%s", k, f.getName());
 									continue;
 								}
 								commands.put(value, new Command(v, f, obj, command.info()));
@@ -70,11 +66,7 @@ public class ConsoleScan implements AnnotationScan {
 								}
 								
 								if (CONSOLE_GROUP.get(command.group()).containsKey(value)) {
-									StringBuilder build = new StringBuilder(50);
-									build.append("此字段的命令注解名称已存在,请更改此命令名称 By: ");
-									build.append(k); build.append('.');
-									build.append(f.getName());
-									Log.printErr(build);
+									Log.printErr("此字段的命令注解名称已存在,请更改此命令名称 By: %s.%s", k, f.getName());
 									continue;
 								}
 								CONSOLE_GROUP.get(command.group()).put(value, new Command(v, f, obj, command.info()));
@@ -90,53 +82,39 @@ public class ConsoleScan implements AnnotationScan {
 						if (command != null) {
 							String value = command.name();
 							
-							if (m.getParameterCount() == 0) {
-								Class<?> rt = m.getReturnType();
-								if (rt == String.class) {
-									// 指定了组则加入格外组,1.1新增
-									if (command.group().equals(ConsoleAnno.DEFAULT_GROUP)) {
-										if (commands.containsKey(value)) {
-											StringBuilder build = new StringBuilder(50);
-											build.append("此方法的命令注解名称已存在,请更改此命令名称 By: ");
-											build.append(k); build.append('.');
-											build.append(m.getName()); build.append("()");
-											Log.printErr(build);
-											continue;
-										}
-										commands.put(value, new Command(v, m, obj, command.info()));
-									} else {
-										if (!CONSOLE_GROUP.containsKey(command.group())) {
-											CONSOLE_GROUP.put(command.group(), new HashMap<>());
-										}
-										
-										if (CONSOLE_GROUP.get(command.group()).containsKey(value)) {
-											StringBuilder build = new StringBuilder(50);
-											build.append("此方法的命令注解名称已存在,请更改此命令名称 By: ");
-											build.append(k); build.append('.');
-											build.append(m.getName()); build.append("()");
-											Log.printErr(build);
-											continue;
-										}
-										CONSOLE_GROUP.get(command.group()).put(value, new Command(v, m, obj, command.info()));
-									}
-								} else {
-									StringBuilder build = new StringBuilder(50);
-									build.append("试图捕获控制台命令时出错,此方法的返回值必须是java.lang.String: ");
-									build.append(k); build.append('.');
-									build.append(m.getName()); build.append("()");
-									Log.printErr(build);
+							if (m.getParameterCount() != 1 || m.getParameterTypes()[0] != HashMap.class) {
+								Log.printErr("试图捕获控制台命令时出错,此函数有且只能有一参数 HashMap<String,String>: %s.%s()", k, m.getName());
+								continue;
+							}
+							
+							if (m.getReturnType() != String.class) {
+								Log.printErr("试图捕获控制台命令时出错,此方法的返回值必须是java.lang.String: %s.%s()", k, m.getName());
+								continue;
+							}
+							
+							// 组为默认组则直接添加,指定了组则加入格外组(判断是否存在,不存在则创建),1.1新增
+							if (command.group().equals(ConsoleAnno.DEFAULT_GROUP)) {
+								if (commands.containsKey(value)) {
+									Log.printErr("此字段的命令注解名称已存在,请更改此命令名称 By: %s.%s()", k, m.getName());
+									continue;
 								}
+								commands.put(value, new Command(v, m, obj, command.info()));
 							} else {
-								StringBuilder build = new StringBuilder(50);
-								build.append("试图捕获控制台命令时出错,此方法必须是无参的,请移除参数: ");
-								build.append(k); build.append('.');
-								build.append(m.getName()); build.append("()");
-								Log.printErr(build);
+								if (!CONSOLE_GROUP.containsKey(command.group())) {
+									CONSOLE_GROUP.put(command.group(), new HashMap<>());
+								}
+								
+								if (CONSOLE_GROUP.get(command.group()).containsKey(value)) {
+									Log.printErr("此字段的命令注解名称已存在,请更改此命令名称 By: %s.%s()", k, m.getName());
+									continue;
+								}
+								CONSOLE_GROUP.get(command.group()).put(value, new Command(v, m, obj, command.info()));
 							}
 						}
 					}
 				} catch (Exception e) {
-					Log.printErr("试图创建控制台类对象时出错,请检查此类是否有无参构造: " + k + ",错误信息为: " + e.getMessage());
+					Log.printErr("试图创建控制台类对象时出错,请检查此类是否有无参构造: %s, 错误信息为: %s", k, e.getMessage());
+					e.printStackTrace();
 				}
 			}
 		});
@@ -167,6 +145,7 @@ public class ConsoleScan implements AnnotationScan {
 			ConsoleAnno anno = v.getAnnotation(ConsoleAnno.class);
 			
 			if (anno != null) {
+				// 控制台是否有组
 				boolean classGroupOk = anno.value().equals(group);
 				
 				try {
@@ -188,11 +167,7 @@ public class ConsoleScan implements AnnotationScan {
 							}
 							
 							if (commands.containsKey(value)) {
-								StringBuilder build = new StringBuilder(50);
-								build.append("此字段的命令注解名称已存在,请更改此命令名称 By: ");
-								build.append(k); build.append('.');
-								build.append(f.getName());
-								Log.printErr(build);
+								Log.printErr("此字段的命令注解名称已存在,请更改此命令名称 By: %s.%s", k, f.getName());
 								continue;
 							}
 							
@@ -206,6 +181,7 @@ public class ConsoleScan implements AnnotationScan {
 						CommandAnno command = m.getAnnotation(CommandAnno.class);
 						if (command != null) {
 							String value = command.name();
+							
 							if (classGroupOk) {
 								if (!(command.group().equals(group) || command.group().equals(ConsoleAnno.DEFAULT_GROUP)))
 									continue;
@@ -215,36 +191,25 @@ public class ConsoleScan implements AnnotationScan {
 							}
 							
 							if (commands.containsKey(value)) {
-								StringBuilder build = new StringBuilder(50);
-								build.append("此方法的命令注解名称已存在,请更改此命令名称 By: ");
-								build.append(k); build.append('.');
-								build.append(m.getName()); build.append("()");
-								Log.printErr(build);
+								Log.printErr("此字段的命令注解名称已存在,请更改此命令名称 By: %s.%s()", k, m.getName());
 								continue;
 							}
 							
-							if (m.getParameterCount() == 0) {
-								Class<?> rt = m.getReturnType();
-								if (rt == String.class) {
-									commands.put(value, new Command(v, m, obj, command.info()));
-								} else {
-									StringBuilder build = new StringBuilder(50);
-									build.append("试图捕获控制台命令时出错,此方法的返回值必须是java.lang.String: ");
-									build.append(k); build.append('.');
-									build.append(m.getName()); build.append("()");
-									Log.printErr(build);
-								}
-							} else {
-								StringBuilder build = new StringBuilder(50);
-								build.append("试图捕获控制台命令时出错,此方法必须是无参的,请移除参数: ");
-								build.append(k); build.append('.');
-								build.append(m.getName()); build.append("()");
-								Log.printErr(build);
+							if (m.getParameterCount() != 1 || m.getParameterTypes()[0] != HashMap.class) {
+								Log.printErr("试图捕获控制台命令时出错,此函数有且只能有一参数 HashMap<String,String>: %s.%s()", k, m.getName());
+								continue;
 							}
+							
+							if (m.getReturnType() != String.class) {
+								Log.printErr("试图捕获控制台命令时出错,此方法的返回值必须是java.lang.String: %s.%s()", k, m.getName());
+								continue;
+							}
+							
+							commands.put(value, new Command(v, m, obj, command.info()));
 						}
 					}
 				} catch (Exception e) {
-					Log.printErr("试图创建控制台类对象时出错,请检查此类是否有无参构造: " + k + ",错误信息为: " + e.getMessage());
+					Log.printErr("试图创建控制台类对象时出错,请检查此类是否有无参构造: %s, 错误信息为: %s", k, e.getMessage());
 				}
 			}
 		});

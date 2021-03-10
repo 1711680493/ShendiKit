@@ -452,7 +452,7 @@ public class HttpUtil {
 	 * @param key 请求头名
 	 * @param value 请求头值.
 	 */
-	public void setReqHead(String key, String value) { reqHeads.put(key, value); }
+	public void setReqHead(String key, Object value) { reqHeads.put(key, value.toString()); }
 	/**
 	 * 设置请求头集合
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>

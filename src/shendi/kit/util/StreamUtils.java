@@ -11,7 +11,7 @@ import shendi.kit.log.Log;
 /**
  * 对流处理的工具类.
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
- * @version 1.0
+ * @version 1.1
  */
 public class StreamUtils {
 	private StreamUtils() {}
@@ -132,6 +132,21 @@ public class StreamUtils {
 				System.arraycopy(bytes,0,data,temp.length,len);
 			}
 		} catch (IOException e) { Log.printErr(file.getPath() + " 文件读取错误: " + e.getMessage()); }
+		return data;
+	}
+	
+	/**
+	 * 读取指定输入流中的所有数据.
+	 * @param input 输入流
+	 * @return 输入流中的所有数据
+	 * @throws IOException 读取过程中出错
+	 * @since 1.1
+	 */
+	public static byte[] readAllByte(InputStream input) throws IOException {
+		byte[] data = new byte[input.available()];
+		
+		for (int i = 0; i < data.length; data[i] = (byte) input.read(),i++);
+		
 		return data;
 	}
 	

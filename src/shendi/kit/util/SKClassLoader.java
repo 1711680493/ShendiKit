@@ -29,7 +29,7 @@ public final class SKClassLoader extends ClassLoader {
 	public static Class<?> reloadClass(String clazz) throws ClassNotFoundException {
 		if (clazz == null) return null;
 		else {
-			sk = new SKClassLoader();
+			reload();
 			clazz = "/".concat(clazz.replace('.', '/').concat(ShendiKitInfo.CLASS_SUFFIX));
 			byte[] classData = null;
 			
@@ -82,6 +82,25 @@ public final class SKClassLoader extends ClassLoader {
 		}
 		return c;
 	}
+	
+	/**
+	 * defineClass() 函数的封装.
+	 * @param name 二进制类名,不知道则为null
+	 * @param b 类的二进制数据
+	 * @param off 二进制数据起始偏移
+	 * @param len 二进制数据长度
+	 * @return 二进制数据的Class
+	 * @since 1.1
+	 */
+	public static Class<?> createClass(String name, byte[] b, int off, int len) {
+		return sk.defineClass(name, b, off, len);
+	}
+	
+	/**
+	 * 对于已经使用过此类加载器加载的类,将无法重新定义(热更),此时就需要使用到此函数,将创建一个新的类加载器来替换旧类加载器.
+	 * @since 1.1
+	 */
+	public static void reload() { sk = new SKClassLoader(); }
 	
 	/**
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>

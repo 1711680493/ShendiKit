@@ -22,6 +22,8 @@ public class BitUtil {
 	 */
 	public static int sizeOf(long num) {
 		int i = 2;
+		// 绝对值
+		num = java.lang.Math.abs(num);
 		
 		while ((num >>= 1) != 0) i++;
 		

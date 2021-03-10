@@ -1,13 +1,13 @@
 package shendi.kit.log;
 
 /**
- * 调试级别的日志缓存类.
+ * 调试级别的日志缓存类,日志默认是否在控制台显示根据 {@link Log#isLogDebug()}.
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @version 1.0
  */
 public class DebugLog extends DefaultLog {
 
-	public DebugLog(String name) { super(name); }
+	public DebugLog(String name) { super(name); super.setIsLog(Log.isLogDebug()); }
 	
 	@Override
 	protected String format(Object log, Object... objs) {

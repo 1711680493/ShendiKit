@@ -31,7 +31,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
-import shendi.kit.data.Command;
+import shendi.kit.console.command.Command;
 import shendi.kit.log.Log;
 
 /**
@@ -292,12 +292,12 @@ public class DeskAppConsole extends Console {
 		} else if ("exit".equals(text)) {
 			destroy();
 		} else {
-			Command c = commands.get(text);
-			if (c != null) {
-				console.append("\r\n");
-				console.append(c.execute());
-			} else {
+			String result = execute(text);
+			if (result == null) {
 				console.append("\r\n*--没有此命令");
+			} else {
+				console.append("\r\n");
+				console.append(result);
 			}
 		}
 	}
