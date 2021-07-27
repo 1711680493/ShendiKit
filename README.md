@@ -20,6 +20,7 @@ Java工具包,纯Java制作,使用JDK8<br>
 ### [SK 配置](#开始配置)
 >[SK 配置文件地址](#配置文件地址)<br>
 >[SK 默认配置文件](#默认配置文件)<br>
+>
 >>[注解扫描配置](#anno_scan.shendi注解扫描配置)<br>
 
 ### [控制台](#控制台模块)
@@ -76,9 +77,10 @@ Java工具包,纯Java制作,使用JDK8<br>
 Small kit
 <ol>
 	<li>
-		ConfigurtaionFactory(配置文件工厂)
+		配置工具
 		<ul>
-			<li>ConfigurationFactory类新增方法 getProperty(config, name)<br>
+			<li>优化了配置类 PropertiesConfiguration</li>
+			<li>ConfigurationFactory类新增方法 getProperty(config, name, encoding(可选))<br>
 			等价于 ConfigurationFactory.getConfig(config).getProperty(name);</li>
 		</ul>
 	</li>
@@ -134,8 +136,19 @@ Small kit
 			<li>新增ALog抽象类,用以对日志进行缓存,新增DefaultLog实现类,新增DebugLog类,用以处理Debug日志缓存</li>
 		</ul>
 	</li>
+	<li>
+		路径
+		<ul>
+			<li>优化了待发布的Path包,解决高版本,JavaWeb等路径获取问题</li>
+			<li>可以自行设置项目类型以供确定路径,通过修改 ProjectTypeUtils.type<br>
+				这里列举一些常用需要设置的项目类型
+				<ul>
+					<li>SpringBoot: 需要设置为 ProjectType.Java,不然打包后找不到路径(maven项目可能也需要如此)</li>
+				</ul>
+			</li>
+		</ul>
+	</li>
 	<li>新增shendi.kit.id包,用于处理id生成</li>
-	<li>优化了待发布的Path包,解决高版本,JavaWeb等路径获取问题</li>
 	<li>TimeUtils改进,将Time,TimeFormat从内部类提取,且修复已知BUG</li>
 	<li>StreamUtils新增 readAllByte(input) 函数,用以读取输入流中所有的数据</li>
 </ol>
@@ -145,6 +158,7 @@ Small kit
 >普通Java项目以及SpringBoot项目等,配置文件地址在项目根目录的/files下<br>
 >Web项目配置文件地址在WebContent的/files下<br>
 >具体位置以 shendi.kit.path.ProjectPath 为准.
+>
 >>如果没有此目录,则项目可能无法正常运作
 
 ### 默认配置文件
@@ -157,15 +171,15 @@ Small kit
 >当然,为了避免重复,可以加上jar包所在的相对路径,如下<br>
 >/lib/jar1.jar;/lib/jar2.jar<br>
 >根据jar包后缀进行判断,所以如果需要扫描所有jar,配置文件内容可以为 .jar<br>
+>
 >>(*已移除,后续版本不会初始化对应类,也就不会执行静态代码块)在扫描时会触发此类的静态代码块,所以扫描所有jar则可能出现一些问题,例如mysql的jdbc驱动...<br>
 
 >如果不想扫描jar包,可以将文件内容改为 No Jar(大小写等完全一致)<br>
 >如果不想扫描注解(不用),可以将文件内容改为 No
 
 # 控制台模块
-你是否想在自己的程序运行时肆意的修改程序?<br>
-又或者想在程序运行时查看某个变量的内容?<br>
-<br>
+如果你要开发的程序是命令行形式的,则使用此模块可以让你快速开发<br>
+对于一般程序(Java Web等),通常我们会需要查看当前项目有几个用户在线...或者进行调试之类的<br>
 对于此种需求,此工具包提供了控制台模块
 >建议你的程序添加此模块,即使使用不到,以备不时之需.
 <br>
@@ -426,9 +440,11 @@ register函数的职责为启动控制台,并接收命令和返回命令结果,�
 
 # 日志工具包
 >日志打印类 shendi.kit.log.Log<br>
+>
 >>用于打印日志和控制日志是否在控制台可见.<br>
 
 >日志管理类 shendi.kit.log.LogManager<br>
+>
 >>用于获取日志
 
 ## Log类
@@ -455,46 +471,79 @@ shendi.kit.log.Alog抽象类,所有日志缓存的父类<br>
 有一个子类 DefaultLog,其中实现了一些参数的设置,简化了扩展<br>
 
 DefaultLog也有一个子类 DebugLog 类,使用如下(代码取自 shendi.kit.test.TestDebugLog)
-<pre>
+```java
 DebugLog log = new DebugLog("测试调试级日志");
 		
 log.log("Start-开始");
+
 log.log("1. Start get time-开始获取时间");
 long time = System.currentTimeMillis();
 log.log("Time is %s", TimeUtils.getFormatTime().getString(time));
 
 log.log("2. Time is ok-获取到的时间是否正确");
 if (time < 1000000) {
-	log.log("Time no ok, < 1000000");
+    log.log("Time no ok, < 1000000");
 }
 log.log("Time ok, > 1000000");
+
 log.log("End-结束");
 
+// 将日志输出并保存到文件中
 log.commit();
-</pre>
+// close函数本质就是调用了commit函数,出现仅仅为了简化写法,支持try...with...resource
+log.close();
+
+// 一般情况下为了避免异常都会使用try,为了避免日志没有commit,所以出现了close函数
+// 使用方式可以如下,可以不用编写提交操作(commit)
+try (DebugLog tlog = new DebugLog("测试close")) {
+    tlog.log("Start-开始");
+
+    tlog.log("1. Start get time-开始获取时间");
+    time = System.currentTimeMillis();
+    tlog.log("Time is %s", TimeUtils.getFormatTime().getString(time));
+
+    throw new RuntimeException("假设发生异常,日志也会输出并保存到文件中");
+//	log.log("2. Time is ok-获取到的时间是否正确");
+//	if (time < 1000000) {
+//		log.log("Time no ok, < 1000000");
+//	}
+//	log.log("Time ok, > 1000000");
+//	
+//	log.log("End-结束");
+}
+```
+
+
 
 使用方法为,创建对应对象,并给此次操作命名
+
 >一般一个类对应一个对象,有对应缓存池,可以处理并发操作,所以不要在局部函数中创建.
 
 然后使用对象的 log 函数进行日志打印(支持格式化输出)<br>
 最后使用对象的 commit 函数完成此次操作,如果不使用,则缓存不能被刷新到硬盘中,将会造成内存溢出
 
 ### 日志文件
-存在于项目根目录的 logs 文件夹下<br>
+存在于项目根目录的 logs 文件夹下
+
 如果是 Web 项目则为项目的资源路径(WebContent)的logs目录下.
+
+
 
 # 加密工具包
 ## 加密工厂 shendi.kit.encrypt.EncryptFactory
 >通过加密工厂获取对应加密算法类.<br>
 >目前提供了两种加密算法,加一算法(速度快,简单,易破)和密码加密算法<br>
+>
 >>加一算法 EncryptFactory.getEncrypt(EncryptFactory.ADD_ONE);<br>
 
 ### 密码加密算法
 >通过自己提供的密码来对数据进行操作<br>
 >如果没有设置密码,则使用默认的密码<br>
+>
 >>获取密码加密算法类 EncryptFactory.getEncrypt(EncryptFactory.PWD);<br>
 
 >需要设置密码可以使用 EncryptFactory.getPwdEncrypt(密码) 来设置并获取<br>
+>
 >>设置后,下次可直接通过 EncryptFactory.getEncrypt(EncryptFactory.PWD); 来获取已经设置密码的类.<br>
 
 ### 双密码加密算法
@@ -514,7 +563,7 @@ log.commit();
 	class TestEncrypt implements Encrypt {
 		...
 	}
-	
+
 	class Test {
 		main {
 			EncryptFactory.getEncrypt("A");
@@ -532,6 +581,7 @@ log.commit();
 
 ### 简化加密工厂类的操作
 >我们加密一串数据的通常代码形式是这样的<br>
+>
 >>EncryptFactory.getEncrypt(EncryptFactory.ADD_ONE).encrypt(str.getBytes());<br>
 
 >代码有点过于长了,这不是我的预期结果,于是我在加密工具类中新增了几个方法用于简化操作
@@ -564,10 +614,12 @@ System.out.println(rs);
 > 使用 shendi.kit.reptile.Reptile<br>
 > 仅需一行代码,可以获取一个 HTML 页面内容<br>
 > 代码如下:<br>
->> String data = Reptile.index("www.baidu.com");<br>
+>
+> > String data = Reptile.index("www.baidu.com");<br>
 
 > 如果想设置请求类型可以在后方加上<br>
->> String data = Reptile.index("www.baidu.com", "POST");<br>
+>
+> > String data = Reptile.index("www.baidu.com", "POST");<br>
 
 ### 两行代码获取所有的a标签
 > 同样也是使用 Reptile 类<br>
@@ -592,6 +644,7 @@ System.out.println(rs);
 
 ### JSONObject
 >Json对象,格式如下<br>
+>
 >>{key:value,key:value}<br>
 
 >注: 目前还未完善,key和value都不能使用转义字符,并且value不能为JSONObject或JSONArray<br>
@@ -616,6 +669,7 @@ System.out.println(rs);
 >(); 默认构造,使用默认配置<br>
 >(int, int); 通过指定的机房id和机器id<br>
 >(int tBitNum, int gBitNum, int hBitNum, int sBitNum, int groupId, int hostId);
+>
 >>自定义设置,通过指定的时间戳位,机房id位,机器id位,序列号位,机房id,机器id创建.
 
 #### 使用
@@ -792,7 +846,7 @@ HttpUtil提供了 redirect(url) 函数用以进行重定向/转发
 	String[] names = {"厘米", "分米", "米"};
 	String s = Math.unitConvert(names, 10, 10);
 	s == "1分米"
-	
+
 	String s = Math.unitConvert(names, 10, 1011);
 	s == "10米 1分米 1厘米"
 </pre>
@@ -831,11 +885,15 @@ if (IsNullUtil.isNull(new String[] {"", "null"}, account, password)) {
 此函数等价于调用 isNull(null, Object...);
 </pre>
 
-#### ByteUtil
->字节工具类<br>
->SK 1.1中新增
 
-<pre>
+
+#### ByteUtil
+
+字节工具类
+
+SK 1.1中新增
+
+```java
 // 将字节数组插入到另一个字节数组中
 // ByteUtil.insert(byte[], int, byte[], int, int);
 // 参数分别为,字节数组,数组的开始偏移,被插入的字节数组,插入的位置,插入多少个
@@ -843,14 +901,95 @@ byte[] source = {1, 2, 3};
 byte[] data = {4, 5};
 byte[] result = ByteUtil.insert(data, 0, source, source.length, data.length);
 result == {1, 2, 3, 4, 5};
-
 source = {1, 3, 4};
 data = {2};
 result = ByteUtil.insert(data, 0, source, 1, data.length);
 result == {1, 2, 3, 4};
-</pre>
+
+// 查找指定字节数组在字节数组中第一次出现的位置
+// ByteUtil.indexOf(byte[], String);
+// ByteUtil.indexOf(byte[], byte[]);
+byte[] data = "hello,world".getBytes();
+int result = indexOf(data, ",".getBytes());
+result -> 5
+    
+result = indexOf(data, "llo");
+result -> 2
+
+result = indexOf(data, "what are you doing?");
+result -> -1
+
+// 截取字节数组
+// ByteUtil.subByte(byte[], int)
+// ByteUtil.subByte(byte[], int, int)
+byte[] data = "hello,world".getBytes();
+byte[] result = subByte(data, 2);
+result -> "llo,world"
+    
+byte[] result = subByte(data, 2, data.length);
+result -> "llo,world"
+
+// 将字节数组连接成新数组
+// ByteUtil.concat(byte[]...)
+byte[] data1 = "hello".getBytes();
+byte[] data2 = ",world".getBytes();
+byte[] result = concat(data1, data2);
+result -> "hello,world"
+
+result = concat("hello".getBytes(), ",Java.".getBytes(), "I'm".getBytes(), " Shendi".getBytes());
+result -> "hello,Java.I'm Shendi"
+
+data1 = "I like ".getBytes();  
+data2 = new byte[0];
+data3 = "this kit!".getBytes();
+result = concat(data1, data2, data3);
+result -> "I like this kit!"
+    
+// 将字节数组连接成新数组并插入分隔数组
+// ByteUtil.concatSplit(byte[], byte[]...)
+byte[] split = ",".getBytes();
+byte[] data1 = "hello".getBytes();
+byte[] data2 = "world".getBytes();
+byte[] result = concatSplit(split, data1, data2);
+result -> "hello,world"
+
+result = concatSplit(split, "red".getBytes(), "green".getBytes(), "blue".getBytes(), "shendi".getBytes());
+result -> "red,green,blue,shendi"
+
+result = concatStr(split, "hello, world".getBytes());
+result -> "hello, world"
+
+data1 = "I like".getBytes();  
+data2 = new byte[0];
+data3 = "this kit!".getBytes();
+result = concatSplit(split, data1, data2, data3);
+result -> "I like,this kit!"
+    
+// 将字节数组按照指定字节数组进行分割
+// ByteUtil.split(byte[], byte[])
+// ByteUtil.split(byte[], byte[], int)
+byte[] data = "hello,world".getBytes();
+byte[] split = ",".getBytes();
+byte[] result = split(data, split);
+result -> ["hello", "world"]
+
+data = "red,green,blue,shendi".getBytes();
+result = split(data, split);
+result -> ["red", "green", "blue", "shendi"]
+
+data = "I like,,this kit!".getBytes();  
+result = split(data, split);
+result -> ["I like", "this kit!"]
+
+data = "123,456,789,012".getBytes();
+result = split(data, split, 3)
+result -> ["123", "456", "789"]
+```
+
+
 
 #### BitUtil
+
 >位工具类<br>
 >SK 1.1中新增
 
@@ -874,7 +1013,9 @@ int bitNum = BitUtil.sizeOf(1);
  int max = BitUtil.bitMax(1);
 </pre>
 
+
 #### FileUtil
+
 >文件工具类<br>
 >SK 1.1中新增
 

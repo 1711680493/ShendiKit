@@ -14,6 +14,9 @@ public class TwoPasswordEncrypt implements Encrypt {
 	/** 默认的双密码2 */
 	private char[] pwd2 = "Shendi".toCharArray();
 	
+	public TwoPasswordEncrypt() {}
+	public TwoPasswordEncrypt(Object pwd1, Object pwd2) { setPassword(pwd1, pwd2); }
+	
 	/** 10M大小 */
 	private int ten = 10485760;
 	

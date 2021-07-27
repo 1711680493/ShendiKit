@@ -9,12 +9,15 @@ package shendi.kit.project;
  * @see #TYPE
  */
 public class ProjectTypeUtils {
-	/** 代表当前项目的类型 */
-	public static final ProjectType TYPE;
+	/**
+	 * 代表当前项目的类型.
+	 * @since 1.1(有时需要自己设定,改为非final)
+	 */
+	public static ProjectType type;
 	
 	static {
 		//获取项目类型
-		TYPE = new ProjectTypeUtils().getProjectType();
+		type = new ProjectTypeUtils().getProjectType();
 	}
 	
 	/**

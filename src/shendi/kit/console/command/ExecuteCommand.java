@@ -12,6 +12,7 @@ import javax.tools.ToolProvider;
 
 import shendi.kit.console.Console;
 import shendi.kit.path.PathFactory;
+import shendi.kit.util.IsNullUtil;
 import shendi.kit.util.SKClassLoader;
 import shendi.kit.util.StreamUtils;
 
@@ -48,11 +49,15 @@ public class ExecuteCommand extends Command {
 		if (!path.exists()) path.mkdirs();
 	}
 
-	@Override
-	public String execute(HashMap<String, String> params) {
+	@Override public String execute(HashMap<String, String> params) {
 		String code = params.get("c");
+		String file = params.get("f");
+		String help = params.get("?");
 		
-		if (code == null) return "execute 能执行 Java 语句,方法为 execute /c 语句";
+		if (help != null || IsNullUtil.isNull(code, file)) {
+			// TODO
+			return "execute 提供执行Java代码的操作,执行的代码可以直接影响到当前项目,其中可选参数为: \n/c [Java语句] 执行Java 语句,其中可选参数\n\t\n/f [Java文件]";
+		}
 		
 		FileOutputStream output = null;
 		FileInputStream input = null;

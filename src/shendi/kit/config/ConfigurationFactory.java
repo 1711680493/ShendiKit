@@ -45,7 +45,7 @@ public class ConfigurationFactory {
 	 * @param encoding 将内容通过指定编码处理
 	 * @return 返回指定配置文件 null则代表没有此配置,或者 main.properties 不存在.
 	 */
-	public static Properties getConfig(String name,String encoding) {
+	public static Properties getConfig(String name, String encoding) {
 		// 先判断获取的是不是注解配置 name开头为指定字符串则是注解配置,否则直接获取对应配置文件内容.
 		String text = PConfig.NAME + name;
 		Properties anno = CONFIG.getConfigs().get(text);
@@ -105,7 +105,7 @@ public class ConfigurationFactory {
 				
 				return properties;
 			} else {
-				Log.printErr("配置工厂获取不到对应配置文件 文件名,name=" + name);
+				Log.printErr("配置工厂获取不到指定配置文件,name=" + name);
 				return null;
 			}
 		}
@@ -126,7 +126,7 @@ public class ConfigurationFactory {
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param config	配置文件名
 	 * @param name		键名
-	 * @param encode	编码,为null则使用默认编码
+	 * @param encode	属性值的编码,为null则使用默认编码
 	 * @return 指定配置文件内键的值
 	 * @since 1.1
 	 */
@@ -134,7 +134,8 @@ public class ConfigurationFactory {
 		String value = getConfig(config).getProperty(name);
 		if (encode == null) return value;
 		try {
-			return new String(value.getBytes(), encode);
+			// Properties使用ISO-8859-1编码
+			return new String(value.getBytes("ISO-8859-1"), encode);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			Log.printErr("此编码不被支持: " + encode);

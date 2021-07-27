@@ -71,7 +71,7 @@ public class Command {
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @return 命令执行结果
 	 */
-	public String execute() { return execute(null); }
+	public String execute() { return execute(NULL_MAP); }
 	
 	/**
 	 * 使用绑定的对象执行命令,返回函数/字段执行结果 toString() 形式.<br>

@@ -43,6 +43,7 @@ public final class PropertiesConfiguration {
 		//获取项目根路径的文件
 		file = new File(new ProjectPath().getPath("/files/main.properties"));
 		if (!file.exists()) {
+			Log.printErr("主配置文件不存在,请检查 /files/main.properties");
 			return;
 		}
 		
@@ -73,27 +74,9 @@ public final class PropertiesConfiguration {
 	 * @return 主要的配置文件
 	 */
 	public Properties getMain() {
+		if (!file.exists()) return null;
 		
-		// 配置文件为空则先获取
-		if (MAIN == null) {
-			if (file.exists()) {
-				fileLastModified = file.lastModified();
-				try {
-					MAIN.load(new FileInputStream(file));
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-					Log.printErr(e.getMessage());
-				} catch (IOException e) {
-					e.printStackTrace();
-					Log.printErr(e.getMessage());
-				}
-			} else {
-				Log.printErr("配置文件初始化失败！Main.properties不存在 : path=" + file.getPath());
-				return null;
-			}
-		}
-		
-		//判断配置文件有无修改
+		// main.properties 更改则刷新内容
 		if (fileLastModified < file.lastModified()) {
 			//重新加载
 			try {

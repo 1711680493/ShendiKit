@@ -7,13 +7,15 @@ import java.util.Date;
 import shendi.kit.log.Log;
 
 /**
- * 用于处理时间的格式化,拥有将字符串,Date,long处理为时间的函数.<br>
+ * 时间格式化工具,可以将时间在 Date,String(时间字符串),long(时间戳) 三者进行随意转换,具体操作实际封装SimpleDateFormat.<br>
  * 通常我们需要获取当前时间的字符串表示形式,或者将字符串表示为一个Date,或者表示为一串数字<br>
  * 提供了 <b>getString(Date),getDate(String),getNum(Date or String)</b> 三个函数<br>
  * 如果我们需要代表一个时间(比如存储时间的表示形式等) 请关注 {@link Time}<br>
- * 如果我们需要处理时间(比如获取现在到第二天零点的时间差...) 则请关注 {@link TimeDisposal}
+ * 如果我们需要处理时间(比如获取现在到第二天零点的时间差...) 则请关注 {@link TimeDisposal}<br>
+ * 
+ * 1.1新增对 unix 时间戳的转换
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
- * @version 1.0
+ * @version 1.1
  * @since ShendiKit 1.0
  * @see Time
  * @see TimeDisposal
@@ -21,9 +23,7 @@ import shendi.kit.log.Log;
  * @see TimeUtils#addTimeFormat(String, String)
  */
 public final class TimeFormat {
-	/**
-	 * 格式化的内容.
-	 */
+	/** 格式化的内容 */
 	private final SimpleDateFormat format;
 	
 	/**
@@ -35,30 +35,24 @@ public final class TimeFormat {
 	}
 	
 	/**
-	 * 获取 时间 的字符串表示形式.
-	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param date 日期
-	 * @return 字符串的表示形式
+	 * @return Date的字符串表示形式
 	 */
 	public String getString(Date date) {
 		return format.format(date);
 	}
 	
 	/**
-	 * 获取 时间 的字符串表示形式.
-	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
-	 * @param date 日期的时间表示形式
-	 * @return 字符串的表示形式
+	 * @param date 时间戳
+	 * @return 时间戳的字符串表示形式
 	 */
 	public String getString(long date) {
 		return format.format(date);
 	}
 	
 	/**
-	 * 获取字符串的 Date 表示形式.
-	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
-	 * @param time 的时间表示形式
-	 * @return 字符串表示的 Date
+	 * @param time 时间戳
+	 * @return 时间戳的Date表示形式
 	 */
 	public Date getDate(long time) {
 		return new Date(time);
@@ -104,5 +98,23 @@ public final class TimeFormat {
 	 */
 	public long getNum(Date date) {
 		return date.getTime();
+	}
+	
+	/**
+	 * 将时间戳转换为unix时间戳(会损失毫秒).
+	 * @param time 时间戳
+	 * @return 转换后的unix时间戳
+	 */
+	public static long timeToUnixTime(long time) {
+		return time / 1000;
+	}
+	
+	/**
+	 * 将unix时间戳转换为时间戳
+	 * @param time unix时间戳
+	 * @return 转换后的时间戳
+	 */
+	public static long unixTimeToTime(long time) {
+		return time * 1000;
 	}
 }

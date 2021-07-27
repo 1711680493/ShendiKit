@@ -10,6 +10,9 @@ public class PasswordEncrypt implements Encrypt {
 	/** 默认的密码 */
 	private char[] pwd = "Shendi".toCharArray();
 	
+	public PasswordEncrypt() {}
+	public PasswordEncrypt(Object pwd) { setPassword(pwd); }
+	
 	@Override public byte[] encrypt(byte[] data) {
 		byte[] cData = new byte[data.length];
 		for (int i = 0;i < data.length;i++) {

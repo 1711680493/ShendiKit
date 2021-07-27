@@ -29,7 +29,7 @@ public class ResourcePath implements Path {
 //		}
 //		RESOURCE_PATH = path.substring(1, path.indexOf(packageName));
 		String path  = null;
-		switch (ProjectTypeUtils.TYPE) {
+		switch (ProjectTypeUtils.type) {
 		case JavaWeb:
 			Object pathObj = ProjectPath.class.getResource("/");
 			//路径不为空则获取指定文件判断是否有

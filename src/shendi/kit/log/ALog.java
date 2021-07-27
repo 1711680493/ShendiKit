@@ -1,5 +1,6 @@
 package shendi.kit.log;
 
+import java.io.Closeable;
 import java.util.HashMap;
 
 /**
@@ -8,7 +9,7 @@ import java.util.HashMap;
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @version 1.0
  */
-public abstract class ALog {
+public abstract class ALog implements Closeable {
 	/** 当前操作名称 */
 	protected String name;
 	/** 当前操作的日志信息的缓存池,key为线程 */
@@ -60,7 +61,8 @@ public abstract class ALog {
 	}
 	
 	/**
-	 * 格式化日志信息,可使用 Log.log(); 来快速获取处理后的日志信息,其中isWrite参数需为false.
+	 * 格式化日志信息.<br>
+	 * 实现可使用 Log.log(); 其中isWrite参数需为false(不输出到日志文件).
 	 * @param log 日志信息
 	 * @param objs 格式化参数
 	 * @return 格式化后的日志信息
@@ -73,7 +75,10 @@ public abstract class ALog {
 	 */
 	protected abstract void print(String log);
 	
-	/** 保存日志信息 */
+	/**
+	 * 保存日志信息
+	 * @param log 日志缓存,要保存的日志信息
+	 */
 	protected abstract void save(String log);
 	
 	/**
@@ -84,5 +89,8 @@ public abstract class ALog {
 	
 	/** @return 缓存池 */
 	public HashMap<Thread, StringBuilder> getPool() { return bs; }
+	
+	/** 仅仅为了简化提交缓存操作,实际调用commit()函数,支持 try...with...resource 的方式,执行此函数后还可以继续使用. */
+	public void close() { commit(); }
 	
 }

@@ -63,10 +63,4 @@ public class PathFactory {
 		return p.getPath(path);
 	}
 	
-	public static void main(String[] args) {
-		String[] name = null;
-		String path = "";
-		IsNullUtil.isNull(name, path, null);
-	}
-	
 }

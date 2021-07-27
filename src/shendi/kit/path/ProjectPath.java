@@ -39,7 +39,7 @@ public final class ProjectPath implements Path {
 	 */
 	public String getPath(String path) {
 		//根据不同项目 返回不同路径
-		switch (ProjectTypeUtils.TYPE) {
+		switch (ProjectTypeUtils.type) {
 		case JavaWeb:
 			Object pathObj = ProjectPath.class.getResource("/");
 			//路径不为空则获取指定文件判断是否有

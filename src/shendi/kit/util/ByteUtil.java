@@ -159,6 +159,7 @@ public class ByteUtil {
 	
 	/**
 	 * 将两个或多个字节数组拼接,使用可变数组.<br>
+	 * 当字节数组为空或者长度为0时,将忽略此数组<br>
 	 * <pre>
 	 * byte[] data1 = "hello".getBytes();
 	 * byte[] data2 = ",world".getBytes();
@@ -192,6 +193,164 @@ public class ByteUtil {
 			if (datas[i].length == 0) continue;
 			System.arraycopy(datas[i], 0, result, size, datas[i].length);
 			size += datas[i].length;
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 将两个或多个字节数组拼接并在其中间插入分隔数组.<br>
+	 * 当字节数组为空或者长度为0时,将忽略此数组<br>
+	 * <pre>
+	 * byte[] split = ",".getBytes();
+	 * byte[] data1 = "hello".getBytes();
+	 * byte[] data2 = "world".getBytes();
+	 * byte[] result = concatSplit(split, data1, data2);
+	 * result -> "hello,world"
+	 * 
+	 * result = concatSplit(split, "red".getBytes(), "green".getBytes(), "blue".getBytes(), "shendi".getBytes());
+	 * result -> "red,green,blue,shendi"
+	 * 
+	 * result = concatStr(split, "hello, world".getBytes());
+	 * result -> "hello, world"
+	 * 
+	 * data1 = "I like".getBytes();  
+	 * data2 = new byte[0];
+	 * data3 = "this kit!".getBytes();
+	 * result = concatSplit(split, data1, data2, data3);
+	 * result -> "I like,this kit!"
+	 * </pre>
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param split 分隔数组
+	 * @param datas 要拼接的数组
+	 * @return 拼接后的数组
+	 */
+	public static byte[] concatSplit(byte[] split, byte[]... datas) {
+		if (split == null || split.length == 0 || datas == null || datas.length == 0) return null;
+		if (datas.length == 1) return datas[0];
+		
+		int size = datas[0].length;
+		for (int i = 1; i < datas.length; i++)
+			size += datas[i].length;
+		
+		// 加上切割字符的长度
+		size += (datas.length - 1) * split.length;
+		
+		byte[] result = new byte[size];
+		size = 0;
+		// 先拷贝第一个有效数组,然后遍历 + split + data
+		int i = 0;
+		while (i < datas.length) {
+			
+			if (datas[i].length == 0) {
+				++i;
+				continue;
+			}
+			
+			System.arraycopy(datas[i], 0, result, size, datas[i].length);
+			size += datas[i].length;
+			++i;
+			break;
+		}
+		
+		for (; i < datas.length; i++) {
+			if (datas[i].length == 0) continue;
+			System.arraycopy(split, 0, result, size, split.length);
+			size += split.length;
+			System.arraycopy(datas[i], 0, result, size, datas[i].length);
+			size += datas[i].length;
+		}
+		
+		byte[] r = new byte[size];
+		System.arraycopy(result, 0, r, 0, r.length);
+		
+		return r;
+	}
+	
+	/**
+	 * 将字节数组按照指定字节数组进行分割.<br>
+	 * 当分割后的字节数组为空将抛弃此数组<br>
+	 * <pre>
+	 * byte[] data = "hello,world".getBytes();
+	 * byte[] split = ",".getBytes();
+	 * byte[] result = split(data, split);
+	 * result -> ["hello", "world"]
+	 * 
+	 * data = "red,green,blue,shendi".getBytes();
+	 * result = split(data, split);
+	 * result -> ["red", "green", "blue", "shendi"]
+	 * 
+	 * data = "I like,,this kit!".getBytes();  
+	 * result = split(data, split);
+	 * result -> ["I like", "this kit!"]
+	 * </pre>
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param data 要分割的字节数组
+	 * @param split 分割数组
+	 * @return 分割后的数组
+	 */
+	public static byte[][] split(byte[] data, byte[] split) {
+		return split(data, split, 0);
+	}
+	
+	/**
+	 * 将字节数组按照指定字节数组进行分割,并指定分割数量,从左到右.<br>
+	 * 当分割后的字节数组为空将抛弃此数组<br>
+	 * <pre>
+	 * byte[] data = "hello,world".getBytes();
+	 * byte[] split = ",".getBytes();
+	 * byte[] result = split(data, split);
+	 * result -> ["hello", "world"]
+	 * 
+	 * data = "red,green,blue,shendi".getBytes();
+	 * result = split(data, split);
+	 * result -> ["red", "green", "blue", "shendi"]
+	 * 
+	 * data = "I like,,this kit!".getBytes();  
+	 * result = split(data, split);
+	 * result -> ["I like", "this kit!"]
+	 * 
+	 * data = "123,456,789,012".getBytes();
+	 * result = split(data, split, 3)
+	 * result -> ["123", "456", "789"]
+	 * </pre>
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param data 要分割的字节数组
+	 * @param split 分割数组
+	 * @param limit 分割的数量,小于等于0则分割全部.
+	 * @return 分割后的数组
+	 */
+	public static byte[][] split(byte[] data, byte[] split, int limit) {
+		if (split == null) return null;
+		if (split.length == 0) return null;
+		
+		// 复制一份,避免污染源数据
+		byte[] cdata = new byte[data.length];
+		System.arraycopy(data, 0, cdata, 0, data.length);
+		
+		byte[][] datas = new byte[(data.length >> 1) + 1][];
+		
+		int size = 0;
+		for (int i = 0; i < datas.length; i++) {
+			// 找到一个切一个,直到数据为空
+			int index = shendi.kit.util.ByteUtil.indexOf(cdata, split);			
+			if (index == -1) {
+				datas[size++] = cdata;
+				break;
+			}
+			
+			byte[] d = new byte[index];
+			System.arraycopy(cdata, 0, d, 0, index);
+			
+			cdata = shendi.kit.util.ByteUtil.subByte(cdata, index + 1, cdata.length);
+			datas[size++] = d;
+			
+			if (limit > 0 && size >= limit) break;
+		}
+		
+		byte[][] result = new byte[size][];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = datas[i];
 		}
 		
 		return result;
