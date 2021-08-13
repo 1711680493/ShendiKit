@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Properties;
 
 import shendi.kit.log.Log;
-import shendi.kit.path.ProjectPath;
+import shendi.kit.path.PathFactory;
 
 /**
  * Properties配置类,用于获取对应Properties文件.<br>
@@ -41,7 +41,7 @@ public final class PropertiesConfiguration {
 	
 	public PropertiesConfiguration() {
 		//获取项目根路径的文件
-		file = new File(new ProjectPath().getPath("/files/main.properties"));
+		file = new File(PathFactory.getPath(PathFactory.PROJECT, "/files/main.properties"));
 		if (!file.exists()) {
 			Log.printErr("主配置文件不存在,请检查 /files/main.properties");
 			return;

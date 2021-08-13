@@ -10,7 +10,7 @@ import java.util.Properties;
 import shendi.kit.annotation.PConfig;
 import shendi.kit.annotation.scan.PConfigScan;
 import shendi.kit.log.Log;
-import shendi.kit.path.ProjectPath;
+import shendi.kit.path.PathFactory;
 
 /**
  * 配置文件工厂,用于获取指定的存在的配置文件.<br>
@@ -65,7 +65,7 @@ public class ConfigurationFactory {
 				//获取此文件,用于判断文件是否存在/修改
 				File file = CONFIG.getFiles().get(name);
 				if (file == null) {
-					file = new File(new ProjectPath().getPath(configUrl));
+					file = new File(PathFactory.getPath(PathFactory.PROJECT, configUrl));
 					CONFIG.getFiles().put(name, file);
 				}
 				if (!file.exists()) {

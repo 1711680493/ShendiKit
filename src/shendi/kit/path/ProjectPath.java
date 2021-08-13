@@ -44,7 +44,8 @@ public final class ProjectPath implements Path {
 			Object pathObj = ProjectPath.class.getResource("/");
 			//路径不为空则获取指定文件判断是否有
 			if (pathObj != null) {
-				return ProjectPath.class.getResource("/").getPath().concat("../../").concat(path);
+				// 获取到的以斜杠开头了,去掉第一个斜杠,JavaWeb
+				return ProjectPath.class.getResource("/").getPath().substring(1).concat("../../").concat(path);
 			}
 			Log.printErr("从项目路径获取文件路径失败 path=" + pathObj);
 			break;

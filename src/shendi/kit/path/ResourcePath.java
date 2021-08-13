@@ -31,10 +31,10 @@ public class ResourcePath implements Path {
 		String path  = null;
 		switch (ProjectTypeUtils.type) {
 		case JavaWeb:
-			Object pathObj = ProjectPath.class.getResource("/");
+			Object pathObj = ResourcePath.class.getResource("/");
 			//路径不为空则获取指定文件判断是否有
 			if (pathObj != null) {
-				path = ProjectPath.class.getResource("/").getPath().concat("../../");
+				path = ResourcePath.class.getResource("/").getPath().concat("../../");
 			}
 			break;
 		case Java:

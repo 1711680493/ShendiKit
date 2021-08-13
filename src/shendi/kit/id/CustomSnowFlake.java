@@ -5,13 +5,13 @@ import shendi.kit.exception.NumberLessThanZero;
 import shendi.kit.util.BitUtil;
 
 /**
- * 雪花算法,生成唯一id.<br>
+ * 自定义雪花算法,生成唯一id,不受64位限制,可任意调整大小.<br>
  * 标准的雪花算法为,第一位为0,接着41位时间戳,5位机房id,5位机器id,12位序列号.<br>
  * 可通过构造创建时来自定义
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @version 1.0
  */
-public class SnowFlake {
+public class CustomSnowFlake {
 	/** 机房id,默认1 */
     private int groupId = 1;
     
@@ -55,7 +55,7 @@ public class SnowFlake {
     private int ghsBitNum = 22;
     
     /** 使用默认设置创建雪花算法生成器,如果不用于分布式则可使用此创建. */
-    public SnowFlake() {}
+    public CustomSnowFlake() {}
     
     /**
      * 通过使用默认规格来设置机房id和机器id.
@@ -63,7 +63,7 @@ public class SnowFlake {
      * @param hostId 机器id
      * @exception NumberException 当groupId/hostId不正确时抛出
      */
-    public SnowFlake(int groupId, int hostId) {
+    public CustomSnowFlake(int groupId, int hostId) {
     	if (groupId < 0 || groupId > BitUtil.bitMax(gBitNum)) {
     		throw new NumberException("groupId < 0 || groupId > gBitNum!");
     	}
@@ -73,6 +73,29 @@ public class SnowFlake {
     	this.groupId = groupId;
     	this.hostId = hostId;
     	
+    	this.groupValue = groupId << sBitNum << hBitNum;
+    	this.hostValue = hostId << sBitNum;
+    }
+    
+    /**
+     * 通过使用默认规格来设置机房id和机器id.
+     * @param groupId 机房id
+     * @param hostId 机器id
+     * @exception NumberException 当groupId/hostId不正确时抛出
+     */
+    public CustomSnowFlake(int tBitNum, int groupId, int hostId) {
+    	if (tBitNum < 0) throw new NumberLessThanZero("tBitNum < 0");
+    	if (groupId < 0 || groupId > BitUtil.bitMax(gBitNum)) {
+    		throw new NumberException("groupId < 0 || groupId > gBitNum!");
+    	}
+    	if (hostId < 0 || hostId > BitUtil.bitMax(hBitNum)) {
+    		throw new NumberException("hostId < 0 || hostId > hBitNum!");
+    	}
+    	this.tBitNum = tBitNum;
+    	this.groupId = groupId;
+    	this.hostId = hostId;
+    	
+    	this.tMax = ((long)1 << tBitNum) - 1;
     	this.groupValue = groupId << sBitNum << hBitNum;
     	this.hostValue = hostId << sBitNum;
     }
@@ -88,12 +111,9 @@ public class SnowFlake {
      * @throws NumberException		当参数不正确时抛出
      * @throws NumberLessThanZero	当传递的占位参数小于0时抛出
      */
-    public SnowFlake(int tBitNum, int gBitNum, int hBitNum, int sBitNum, int groupId, int hostId) {
+    public CustomSnowFlake(int tBitNum, int gBitNum, int hBitNum, int sBitNum, int groupId, int hostId) {
     	if (tBitNum < 0 || gBitNum < 0 || hBitNum < 0 || sBitNum < 0) {
     		throw new NumberLessThanZero("has args bit num < 0");
-    	}
-    	if (tBitNum + gBitNum + hBitNum + sBitNum != 63) {
-    		throw new NumberException("bit num != 64");
     	}
     	
     	this.tBitNum = tBitNum;

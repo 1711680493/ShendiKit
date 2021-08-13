@@ -1,16 +1,26 @@
-# 简介
-Shendi Kit<br>
-author:Shendi<br>
-version: 1.1<br>
-QQ:1711680493<br>
-[引导页面](https://1711680493.github.io)<br>
-Java工具包,纯Java制作,使用JDK8<br>
+# Shendi Kit
+**author：**Shendi
+
+**版本：**1.1
+
+**最后更改时间：**2021-08-13
+
+
+
+[引导页面](https://1711680493.github.io)
+
+Java工具包,纯Java制作,使用JDK8
+
 以前版本可在分支中找到
+
+
 
 # 文档及测试样例
 [在线文档 v1.1](https://1711680493.github.io/doc/SK-1.1)<br>
 
 样例在源码的 shendi.kit.test 包下.
+
+
 
 # 目录
 ### [版本变化](#SK-版本变化)
@@ -120,6 +130,7 @@ Small kit
 		<ul>
 			<li>解决了扫描注解高版本Java无法扫描本项目的问题</li>
 			<li>优化扫描器,使得扫描时不加载对应类的静态方法</li>
+            <li>解决SpringBoot打包后扫描出错,参考<a href='#anno_scan.shendi'>anno_scan.shendi</a></li>
 		</ul>
 	</li>
 	<li>
@@ -134,6 +145,7 @@ Small kit
 		<ul>
 			<li>Log日志输出支持格式化输出,且增加两种日志级别 Debug和Exception,并支持新增日志级别,参考 Log.log 函数</li>
 			<li>新增ALog抽象类,用以对日志进行缓存,新增DefaultLog实现类,新增DebugLog类,用以处理Debug日志缓存</li>
+            <li>新增 shendi.kit.log.data 包用于格外的日志数据持久化,参考DataLog类</li>
 		</ul>
 	</li>
 	<li>
@@ -153,31 +165,162 @@ Small kit
 	<li>StreamUtils新增 readAllByte(input) 函数,用以读取输入流中所有的数据</li>
 </ol>
 
+
+
 # 开始配置
-### 配置文件地址
+## 配置文件地址
+
 >普通Java项目以及SpringBoot项目等,配置文件地址在项目根目录的/files下<br>
 >Web项目配置文件地址在WebContent的/files下<br>
 >具体位置以 shendi.kit.path.ProjectPath 为准.
 >
 >>如果没有此目录,则项目可能无法正常运作
 
-### 默认配置文件
->在配置文件地址下(/files)<br>
 
-##### anno_scan.shendi(注解扫描配置)
->此文件编码必须为UTF-8,否则无法正常读取<br>
->此文件配置需要扫描的jar,如果当前项目打包则也需要加入<br>
->格式为 jar1.jar;jar2.jar;jar3.jar;jar4.jar 使用分号隔开<br>
->当然,为了避免重复,可以加上jar包所在的相对路径,如下<br>
->/lib/jar1.jar;/lib/jar2.jar<br>
->根据jar包后缀进行判断,所以如果需要扫描所有jar,配置文件内容可以为 .jar<br>
->
->>(*已移除,后续版本不会初始化对应类,也就不会执行静态代码块)在扫描时会触发此类的静态代码块,所以扫描所有jar则可能出现一些问题,例如mysql的jdbc驱动...<br>
 
->如果不想扫描jar包,可以将文件内容改为 No Jar(大小写等完全一致)<br>
->如果不想扫描注解(不用),可以将文件内容改为 No
+## 默认配置文件
+
+在配置文件地址下(/files)
+
+
+
+### anno_scan.shendi
+
+注解扫描配置
+
+
+
+**编码：**UTF-8
+
+**描述：**配置需要扫描的jar以及类路径
+
+
+
+**文件内容(不支持注释)**
+
+```
+jar文件路径
+jar文件路径=此jar文件中要扫描的类的路径
+jar文件路径=此jar文件中要扫描的类的路径;路径2;路径3
+...
+```
+
+
+
+其中jar文件路径可以为相对路径，也可以为jar包名，应携带后缀(.jar)
+
+例如
+
+```
+shendi-kit-1.1.jar
+/lib/shendi-kit-1.1.jar
+```
+
+
+
+类路径为需要扫描的类所在指定文件夹下，当指定后，不是此文件夹下的类将不会被解析
+
+**当使用SpringBoot或Maven**，打包后我们的类文件将会在子文件夹下
+
+普通项目打包，jar 文件结构一般如下
+
+```
+|-META-INF
+	|-MANIFEST.MF
+包名,例如
+|-shendi
+	|-kit
+```
+
+
+
+SpringBoot jar文件结构
+
+```
+|-BOOT-INF
+	|-classes
+		|-包名
+	|-lib
+|-META-INF
+	|-maven
+	|-MANIFEST.MF
+|-org
+```
+
+
+
+于是为了找到包名所在路径，在 anno_scan.shendi 文件里需要指定，否则打包后将会运行出错，指定方式如下
+
+```
+jar文件路径=BOOT-INF/classes
+```
+
+有多个路径使用分号分隔，且结尾不能为斜杠（BOOT-INF/classes/ 这种将不会被扫描）
+
+
+
+如果不需要使用 SK 注解，则可将此文件内容改为(大小写一致)
+
+```
+No
+```
+
+
+
+如果不需要扫描 Jar 包，则可将此文件内容改为(内容需完全一模一样)
+
+```
+No Jar
+```
+
+
+
+**当项目打包后，且使用到了SK注解，则打包后的jar需要写入此文件里，否则将扫描不到**
+
+
+
+
+
+#### 以前版本使用
+
+**SK 1.0**
+
+使用分号分隔，不支持 jar 包的类在子文件夹下
+
+```
+jar1.jar;jar2.jar
+```
+
+为了避免重复,可以加上jar包所在的相对路径,如下
+
+/lib/jar1.jar;/lib/jar2.jar
+
+根据jar包后缀进行判断,所以如果需要扫描所有jar,配置文件内容可以为 .jar
+
+
+
+在扫描时会触发此类的静态代码块,所以扫描所有jar则可能出现一些问题,例如mysql的jdbc驱动...
+
+文件内容也可为以下内容(大小写需一致)
+
+```
+No
+```
+
+```
+No Jar
+```
+
+No代表移除注解扫描，No Jar则不扫描jar
+
+**jar文件内的jar将不会被扫描**
+
+
+
+
 
 # 控制台模块
+
 如果你要开发的程序是命令行形式的,则使用此模块可以让你快速开发<br>
 对于一般程序(Java Web等),通常我们会需要查看当前项目有几个用户在线...或者进行调试之类的<br>
 对于此种需求,此工具包提供了控制台模块
@@ -526,6 +669,25 @@ try (DebugLog tlog = new DebugLog("测试close")) {
 存在于项目根目录的 logs 文件夹下
 
 如果是 Web 项目则为项目的资源路径(WebContent)的logs目录下.
+
+
+
+## 数据日志类
+
+shendi.kit.log.data.DataLog
+
+> kit 1.1新增，用于格外的日志数据持久化
+
+功能与 Log 类相似，不同的是可以给日志命名，且会在格外的文件夹中存储
+
+```java
+public class TestDataLog {
+	public static void main(String[] args) {	
+		DataLog dl = new DataLog("给日志文件夹命名,文件夹会保存在项目根目录");
+		dl.log("日志信息");
+	}
+}
+```
 
 
 

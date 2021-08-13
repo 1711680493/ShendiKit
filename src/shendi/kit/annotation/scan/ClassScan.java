@@ -16,7 +16,8 @@ import shendi.kit.annotation.ConsoleAnno;
 import shendi.kit.annotation.EncryptAnno;
 import shendi.kit.annotation.PConfig;
 import shendi.kit.log.Log;
-import shendi.kit.path.ProjectPath;
+import shendi.kit.path.PathFactory;
+import shendi.kit.util.Entry;
 import shendi.kit.util.SKClassLoader;
 
 /**
@@ -32,8 +33,8 @@ public class ClassScan {
 	/** 扫描了多少个文件 */
 	private static int scanNum;
 	
-	/** 需要处理的 jar 包数组 */
-	private static String[] jars;
+	/** 需要处理的 jar 包数组[[jar文件后缀],[此jar的类所在目录]],泛型为?则不会爆警报 */
+	private static Entry<?, ?>[] jars;
 	
 	/** 是否初始化了. */
 	private static boolean isInit;
@@ -49,7 +50,7 @@ public class ClassScan {
 		ANNOS[3] = CommandAnno.class;
 		
 		// 获取需要处理的 jar 包名.
-		File scanFile = new File(new ProjectPath().getPath(File.separatorChar + "files" + File.separatorChar + "/anno_scan.shendi"));
+		File scanFile = new File(PathFactory.getPath(PathFactory.PROJECT, File.separatorChar + "files" + File.separatorChar + "/anno_scan.shendi"));
 		if (scanFile.exists() && scanFile.isFile()) {
 			try (FileInputStream input = new FileInputStream(scanFile)) {
 				byte[] data = new byte[input.available()];
@@ -65,7 +66,15 @@ public class ClassScan {
 					} else if ("No Jar".equals(d)) {
 						jars = null;
 					} else {
-						jars = d.split(";");
+						String[] split = d.split(System.lineSeparator());
+						jars = new Entry[split.length];
+						for (int i = 0; i < split.length; i++) {
+							int len = split[i].indexOf('=');
+							if (len == -1 || len == split[i].length() - 1) jars[i] = new Entry<>(split[i], null);
+							else {
+								jars[i] = new Entry<>(split[i].substring(0, len), split[i].substring(len + 1));
+							}
+						}
 					}
 				}
 			} catch (IOException e) {
@@ -139,7 +148,6 @@ public class ClassScan {
 		try {
 			className = classPath.substring(0, classPath.length() - ShendiKitInfo.CLASS_SUFFIX.length())
 					.replace(File.separatorChar, '.').replace('/', '.');
-			
 			Class<?> clazz = cl.loadClass(className);
 			
 			// 将类添加进集合
@@ -173,20 +181,36 @@ public class ClassScan {
 	private static void disposeJar(String jarPath) {
 		if (jars == null || jarPath == null) return;
 		
-		for (String s : jars) {
-			if (jarPath.endsWith(s.trim())) {
+		for (Entry<?, ?> jar : jars) {
+			if (jarPath.endsWith(jar.key.toString().trim())) {
 				if (jarPath.endsWith(ShendiKitInfo.EXPORT_JAR_NAME)) return;
 				if (jarPath.endsWith(ShendiKitInfo.JAR_SUFFIX)) {
 					try {
-						JarFile jar = new JarFile(jarPath);
-						Enumeration<JarEntry> entry = jar.entries();
+						JarFile jarFile = new JarFile(jarPath);
+						Enumeration<JarEntry> entry = jarFile.entries();
+						
+						// 要处理的类的所在文件夹集合,只有在此文件夹内的类才会被解析,解析出来的类全路径不带此路径
+						String[] classOkPath = jar.value.toString().trim().split(";");
 						
 						while (entry.hasMoreElements()) {
 							String name = entry.nextElement().getName();
-							if (name.endsWith(ShendiKitInfo.CLASS_SUFFIX)) disposeClass(name);
+							// 只处理指定文件夹内的类文件
+							if (name.endsWith(ShendiKitInfo.CLASS_SUFFIX)) {
+								if (jar.value == null) disposeClass(name);
+								else {
+									for (String ok : classOkPath) {
+										if (name.startsWith(ok)) {
+											// anno_scan中的路径不能携带斜杠等
+											disposeClass(name.substring(ok.length() + 1));
+											break;
+										}
+									}
+								}
+							}
+							
 						}
 						
-						jar.close();
+						jarFile.close();
 					} catch (IOException e) {
 						e.printStackTrace();
 						Log.printErr("扫描Jar包进行处理时出错: " + e.getMessage());

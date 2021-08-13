@@ -7,6 +7,7 @@
  */
 module shendi.kit {
 	requires transitive java.desktop;
+	requires transitive java.compiler;
 	
 	exports shendi.kit.annotation;
 	exports shendi.kit.config;
@@ -20,6 +21,7 @@ module shendi.kit {
 	exports shendi.kit.encrypt;
 	exports shendi.kit.exception;
 	exports shendi.kit.log;
+	exports shendi.kit.log.data;
 	exports shendi.kit.log.interpreter;
 	exports shendi.kit.path;
 	exports shendi.kit.project;
