@@ -330,11 +330,13 @@ public class HttpUtil {
 						Log.printErr("请求头的Content-Length的值不为数字！" + respHeads.get("CONTENT-LENGTH"));
 					}
 				} else {
+					// TODO 当没有Content-Length,获取到的数据开头可能会被加上一些未知的字节
 					if (dispose == null) {
 						body = StreamUtils.readByEnd(input, END_BODY);
 						if (body != null) {
 							int size = body.length - END_BODY.length;
-							if (size >= 0) respBody = new String(body, 0, size);
+							body = ByteUtil.subByte(body, 0, size);
+							if (size >= 0) respBody = new String(body);
 						}
 						if (respBody == null) Log.printAlarm("响应数据应有响应体,但是没有.");
 					} else {

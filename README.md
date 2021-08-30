@@ -883,9 +883,13 @@ shendi.kit.net.http.HttpUtil
 </pre>
 
 #### 响应数据处理接口
-shendi.kit.net.http.HttpDataDispose<br>
-实现此接口来用以给 HttpUtil 设置处理函数.<br>
+shendi.kit.net.http.HttpDataDispose
+
+实现此接口来用以给 HttpUtil 设置处理函数.
+
 包含 boolean dispose(byte[] data) 函数,当有响应数据时会被调用.
+
+
 
 #### 文件下载
 当我们使用http的方式下载文件时,基础用法已经满足不了需求
@@ -901,8 +905,11 @@ shendi.kit.net.http.HttpDataDispose<br>
 		HttpDataDispose dispose = new HttpDataDispose() {
 			@Override
 			public boolean dispose(byte[] data) {
-				// 处理数据,data为接收到的数据,return false代表处理还未完成,将继续读取数据
-				// 当处理数据遇到问题时,应return true来终止此次 HTTP.
+				// 处理数据,data为接收到的数据
+				// 需要注意的是,此函数为处理数据函数,当接收完一定大小的响应数据后就会调用此函数来进行下一步操作,所以此函数会被调用多次(根据响应数据大小).
+				// return false 代表处理还未完成,将继续读取后续数据
+				// return true 代表提前结束响应数据处理,即使还有后续数据也将进行丢弃
+				// 当处理数据遇到问题时,应return true来终止此次响应处理.
 				return false;
 			}
 		};
@@ -1001,19 +1008,24 @@ HttpUtil提供了 redirect(url) 函数用以进行重定向/转发
 >在 SK 1.1 中,此类被移至 shendi.kit.net.http 包中,文档也移动,请参考 [HTTP工具](#HTTP工具包)
 
 #### Math
->数学工具类<br>
->SK 1.1中新增
-<pre>
-	// 单位转换,如果后两参数传递的浮点型则返回的结果也带小数
-	String[] names = {"厘米", "分米", "米"};
-	String s = Math.unitConvert(names, 10, 10);
-	s == "1分米"
+数学工具类
 
-	String s = Math.unitConvert(names, 10, 1011);
-	s == "10米 1分米 1厘米"
-</pre>
+SK 1.1中新增
+```java
+// 单位转换,如果后两参数传递的浮点型则返回的结果也带小数
+String[] names = {"厘米", "分米", "米"};
+// 第一个参数为单位,从小到大,第二个参数为进制,第三个为实际数值
+String s = Math.unitConvert(names, 10, 10);
+s == "1分米"
+
+String s = Math.unitConvert(names, 10, 1011);
+s == "10米 1分米 1厘米"
+```
+
+
 
 #### IsNullUtil
+
 >判空工具类<br>
 >SK 1.1中新增
 
