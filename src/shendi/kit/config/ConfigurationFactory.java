@@ -154,4 +154,19 @@ public class ConfigurationFactory {
 		return CONFIG.getClasses().get(config + name);
 	}
 	
+	/**
+	 * 配置文件是否修改,一般用于自行保存的数据结构进行判断更新.
+	 * @param name 配置文件名称
+	 * @return true则有修改,false无修改
+	 * @since 1.1
+	 */
+	public static boolean configIsChange(String name) {
+		if (CONFIG.getFiles().containsKey(name)) {
+			if (CONFIG.getFileLastModified().get(name) < CONFIG.getFiles().get(name).lastModified()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }
