@@ -96,7 +96,7 @@ public class StreamUtils {
 	 * @return true is yes,false is no.
 	 */
 	public static boolean endsWith(byte[] data, int len, byte[] end) {
-		if (len > end.length) {
+		if (len >= end.length) {
 			for (int i = 1; i <= end.length; i++) {
 				if (end[end.length - i] != data[len - i]) return false;
 			}

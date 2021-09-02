@@ -27,6 +27,8 @@ public class HttpUtil {
 	public static final byte[] END_HEAD = "\r\n\r\n".getBytes();
 	/** 体的结尾 */
 	public static final byte[] END_BODY = "\r\n0\r\n\r\n".getBytes();
+	/** 数据分隔符(换行符) **/
+	public static final byte[] DATA_SPLIT = "\r\n".getBytes();
 	
 	/** 地址/主机名 */
 	private String host;
@@ -329,16 +331,57 @@ public class HttpUtil {
 					} catch (NumberFormatException e) {
 						Log.printErr("请求头的Content-Length的值不为数字！" + respHeads.get("CONTENT-LENGTH"));
 					}
+				} else if (respHeads.containsKey("TRANSFER-ENCODING") && respHeads.get("TRANSFER-ENCODING").equalsIgnoreCase("chunked")) {
+					// 没有Content-Length,且http版本为1.1响应头一般都有Transfer-Encoding: chunked
+					// 如果有,则采用分块编码方式读取,格式为: 数据大小\r\n数据内容\r\n数据大小\r\n数据内容...0\r\n\r\n
+					if (dispose == null) {
+						int len = 0;
+						body = new byte[0];
+						do {
+							// 读取到长度
+							byte[] tmp = StreamUtils.readByEnd(input, DATA_SPLIT);
+							len = Integer.parseInt(new String(tmp, 0, tmp.length - DATA_SPLIT.length), 16);
+							
+							if (len != 0) {
+								// 读取指定长度的数据并复制进body
+								tmp = new byte[len];
+								input.read(tmp, 0, len);
+								body = ByteUtil.concat(body, tmp);
+							}
+							
+							// 读取数据结尾(\r\n)
+							StreamUtils.readByEnd(input, DATA_SPLIT);
+						} while (len != 0);
+						
+						if (body != null) respBody = new String(body);
+						else Log.printAlarm("响应数据应有响应体,但是没有.");
+					} else {
+						int len = 0;
+						do {
+							// 读取到长度
+							byte[] tmp = StreamUtils.readByEnd(input, DATA_SPLIT);
+							len = Integer.parseInt(new String(tmp, 0, tmp.length - DATA_SPLIT.length), 16);
+							
+							if (len != 0) {
+								// 读取指定长度的数据传递给函数
+								tmp = new byte[len];
+								input.read(tmp, 0, len);
+								
+								dispose.dispose(tmp);
+							}
+							
+							// 读取数据结尾(\r\n)
+							StreamUtils.readByEnd(input, DATA_SPLIT);
+						} while (len != 0);
+					}
 				} else {
-					// TODO 当没有Content-Length,获取到的数据开头可能会被加上一些未知的字节
 					if (dispose == null) {
 						body = StreamUtils.readByEnd(input, END_BODY);
 						if (body != null) {
 							int size = body.length - END_BODY.length;
 							body = ByteUtil.subByte(body, 0, size);
 							if (size >= 0) respBody = new String(body);
-						}
-						if (respBody == null) Log.printAlarm("响应数据应有响应体,但是没有.");
+						} else Log.printAlarm("响应数据应有响应体,但是没有.");
 					} else {
 						byte[] tmp = new byte[dataDisposeLen];
 						int l = -1;

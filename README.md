@@ -109,6 +109,7 @@ Small kit
 		<ul>
 			<li>新增 shendi.kit.net.http 包,将 HttpUtil 从 util 包中提出</li>
 			<li>修复HttpUtil 1.0的已知问题,比如无法访问接口等</li>
+			<li>新增对HttpUtil 1.1的chunket处理</li>
 			<li>在之前POST请求无法带请求参数,现在可以使用addParameter(key,value)或setParameters(param)来直接设置</li>
 			<li>增加对HEAD类型支持,以及可从host可携带端口,新增构造 (host, type)</li>
 			<li>包内新增HttpDataDispose接口用以处理http响应数据(比如文件下载,具体请参考文档)</li>

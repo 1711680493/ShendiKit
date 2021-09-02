@@ -169,4 +169,12 @@ public class ConfigurationFactory {
 		return false;
 	}
 	
+	/**
+	 * 删除缓存内的指定配置文件,用于自行保存的数据结构节省内存.
+	 * @param name 配置文件名
+	 */
+	public static void delConfig(String name) {
+		CONFIG.getConfigs().remove(name);
+	}
+	
 }
