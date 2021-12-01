@@ -27,27 +27,6 @@ public class ThreadManager {
 	/** 管理线程,守护线程 */
 	private static Thread manager;
 	
-	public static void main(String[] args) {
-		
-		ThreadManager.open();
-		
-		Thread t = new Thread(() -> {
-			Object obj = new Object();
-			
-			try {
-				synchronized (obj) {
-					obj.wait();
-				}
-			} catch (Throwable e) {
-				
-			}
-			
-			System.out.println("我从等待中出来了");
-		});
-		ThreadManager.add("测试线程", t, ThreadType.NO_WATTING);
-		
-	}
-	
 	/** 守护线程的具体执行 */
 	private static class DaemonThread extends Thread {
 		@Override
@@ -61,6 +40,7 @@ public class ThreadManager {
 							if (v.value == ThreadType.NO_WATTING) {
 								if (v.key.getState() == State.WAITING) {
 									v.key.interrupt();
+									Log.printAlarm("线程 %s 状态变为了等待,已中断.", k);
 								}
 							}
 						});

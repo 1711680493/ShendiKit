@@ -85,10 +85,4 @@ public class Element {
 	
 	@Override public String toString() { return element; }
 	
-	public static void main(String[] args) {
-		Element e = ElementFactory.createElement("<a href=\"/vod/10.html\" title=\"酒店情趣炮房偷拍猥琐锅盖头男和好身材妹子啪啪 战斗力不够要靠用手来满足妹子\">酒店情趣炮房偷拍猥琐锅盖头男和好身材妹子啪啪 战斗力不够要靠用手来满足妹子</a>");
-		System.out.println(e);
-		System.out.println(e.attr("href"));
-	}
-	
 }
