@@ -30,6 +30,10 @@ public class HttpUtil {
 	/** 数据分隔符(换行符) **/
 	public static final byte[] DATA_SPLIT = "\r\n".getBytes();
 	
+	public static final String REQ_TYPE_GET = "GET";
+	public static final String REQ_TYPE_POST = "POST";
+	public static final String REQ_TYPE_HEAD = "HEAD";
+	
 	/** 地址/主机名 */
 	private String host;
 	/** 端口 */
@@ -59,7 +63,7 @@ public class HttpUtil {
 	private String respBody;
 	/** 响应体的字节形式 */
 	private byte[] respBodyData;
-	/** 响应的所有数据 */
+	/** 响应的所有数据,如果有分块编码,那么也将带有分块编码的信息 */
 	private byte[] respData;
 	/** 响应状态 */
 	private int state;
@@ -298,7 +302,8 @@ public class HttpUtil {
 			// 没有响应体则不获取
 			// 有响应体则判断响应头是否有 Content-Length,是则读取指定大小,否则判断结尾
 			byte[] body = null;
-			
+			// 如果数据体编码为分块编码,则此变量将有数据(不为0),且会将完整的响应信息存储(包括分块编码信息),用于最后respData的数据完整性
+			byte[] bodyAllData = new byte[0];
 			// 如果需要格外处理响应则不会将响应数据保存
 			if (!("HEAD".equalsIgnoreCase(reqType) || state == 204 || state == 205 || state == 302 || state == 304)) {
 				// 获取响应体
@@ -339,14 +344,19 @@ public class HttpUtil {
 						body = new byte[0];
 						do {
 							// 读取到长度
-							byte[] tmp = StreamUtils.readByEnd(input, DATA_SPLIT);
-							len = Integer.parseInt(new String(tmp, 0, tmp.length - DATA_SPLIT.length), 16);
+							byte[] tmpLen = StreamUtils.readByEnd(input, DATA_SPLIT);
+							len = Integer.parseInt(new String(tmpLen, 0, tmpLen.length - DATA_SPLIT.length), 16);
 							
 							if (len != 0) {
 								// 读取指定长度的数据并复制进body
-								tmp = new byte[len];
+								byte[] tmp = new byte[len];
 								input.read(tmp, 0, len);
 								body = ByteUtil.concat(body, tmp);
+								
+								// 加入到局部变量完整响应中
+								bodyAllData = ByteUtil.concat(bodyAllData, tmpLen, tmp, DATA_SPLIT);
+							} else {
+								bodyAllData = ByteUtil.concat(bodyAllData, tmpLen, DATA_SPLIT, DATA_SPLIT);
 							}
 							
 							// 读取数据结尾(\r\n)
@@ -387,7 +397,7 @@ public class HttpUtil {
 						int l = -1;
 						while ((l = input.read(tmp)) != -1) {
 							// 判断是否结尾
-							if (StreamUtils.endsWith(tmp, l, END_BODY)) {
+							if (ByteUtil.endsWith(tmp, l, END_BODY)) {
 								dispose.dispose(ByteUtil.subByte(tmp, 0, l - END_BODY.length));
 								break;
 							} else {
@@ -419,14 +429,18 @@ public class HttpUtil {
 			// 合并数据,完成响应
 			int size = bState.length + bHeads.length;
 			if (body != null) {
-				size += body.length;
+				size += bodyAllData.length != 0 ? bodyAllData.length : body.length;
 			}
 			respData = new byte[size];
 			System.arraycopy(bState, 0, respData, 0, bState.length);
 			System.arraycopy(bHeads, 0, respData, bState.length, bHeads.length);
 			
 			if (body != null) {
-				System.arraycopy(body, 0, respData, bHeads.length + bState.length, body.length);
+				if (bodyAllData.length != 0) {
+					System.arraycopy(bodyAllData, 0, respData, bHeads.length + bState.length, bodyAllData.length);
+				} else {
+					System.arraycopy(body, 0, respData, bHeads.length + bState.length, body.length);
+				}
 			}
 		} catch (IOException e) {
 			throw e;

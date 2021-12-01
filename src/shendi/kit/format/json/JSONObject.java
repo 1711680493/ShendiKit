@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -11,7 +12,7 @@ import shendi.kit.log.Log;
 
 /**
  * JSON 格式对象.<br>
- * 一个JSON对象格式为 {a:b,b:c},在创建对象后可通过 isJson 来判断当前字符串是否为JSONObject.
+ * 一个JSON对象格式为 {a:b,b:c},直接使用字符串创建JSON对象后可通过 isJson 来判断当前字符串是否为JSONObject.
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @version 1.1
  * @since 1.1
@@ -19,13 +20,16 @@ import shendi.kit.log.Log;
 public class JSONObject {
 	
 	/** 当前 json 的数据 */
-	private String json;
+	private String json = "{}";
 	
 	/** 解析后的键值对集合 */
 	private HashMap<String, String> jsons = new HashMap<>();
 	
-	/** 当前对象的Json是否为 JSONObject(是否解析成功) */
-	private boolean isJson;
+	/** 当前对象的Json是否为 JSONObject(是否解析成功),用于使用字符串创建json时判断 */
+	private boolean isJson = true;
+	
+	/** 创建一个JSON结构 */
+	public JSONObject() {}
 	
 	/**
 	 * 使用 Json 数据来创建 JSONObject 对象.
@@ -172,6 +176,28 @@ public class JSONObject {
 	public boolean has(String name) { return jsons.containsKey(name); }
 	
 	/**
+	 * 添加键值对.
+	 * @param key 键
+	 * @param value 值
+	 */
+	public void put(Object key, Object value) {
+		if (key == null || value == null) return;
+		jsons.put(key.toString(), value.toString());
+		json = null;
+	}
+	
+	/**
+	 * 删除指定键值对.
+	 * @param key 键
+	 * @return 键对应的值
+	 */
+	public String del(Object key) {
+		if (key == null) return null;
+		json = null;
+		return jsons.remove(key.toString());
+	}
+	
+	/**
 	 * 获取指定键对应的值,以String的形式
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param name 键
@@ -247,5 +273,27 @@ public class JSONObject {
 	public boolean isJson() { return isJson; }
 	
 	/** @return 当前对象的源JSON数据 */
-	@Override public String toString() { return json; }
+	@Override public String toString() {
+		if (json == null) {
+			int size = jsons.size();
+			if (size == 0) return "{}";
+			
+			StringBuilder b = new StringBuilder(size << 4);
+			Iterator<Entry<String, String>> it = jsons.entrySet().iterator();
+			Entry<String, String> kv = it.next();
+			b.append("{\""); b.append(kv.getKey()); b.append('"');
+			b.append(":\""); b.append(kv.getValue()); b.append('"');
+			
+			while (it.hasNext()) {
+				kv = it.next();
+				b.append(",\""); b.append(kv.getKey()); b.append('"');
+				b.append(":\""); b.append(kv.getValue()); b.append('"');
+			}
+			b.append('}');
+			
+			return b.toString();
+		}
+		return json;
+	}
+	
 }

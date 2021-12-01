@@ -190,7 +190,7 @@ public class ByteUtil {
 		byte[] result = new byte[size];
 		size = 0;
 		for (int i = 0; i < datas.length; i++) {
-			if (datas[i].length == 0) continue;
+			if (datas[i] == null || datas[i].length == 0) continue;
 			System.arraycopy(datas[i], 0, result, size, datas[i].length);
 			size += datas[i].length;
 		}
@@ -273,8 +273,12 @@ public class ByteUtil {
 	 * <pre>
 	 * byte[] data = "hello,world".getBytes();
 	 * byte[] split = ",".getBytes();
-	 * byte[] result = split(data, split);
-	 * result -> ["hello", "world"]
+	 * byte[][] result = split(data, split);
+	 * result[0] -> "hello"
+	 * result[1] -> "world"
+	 * 
+	 * data = "hello,world,,,,,,,,123".getBytes();
+	 * result -> ["hello", "world", "123"]
 	 * 
 	 * data = "red,green,blue,shendi".getBytes();
 	 * result = split(data, split);
@@ -299,8 +303,12 @@ public class ByteUtil {
 	 * <pre>
 	 * byte[] data = "hello,world".getBytes();
 	 * byte[] split = ",".getBytes();
-	 * byte[] result = split(data, split);
-	 * result -> ["hello", "world"]
+	 * byte[][] result = split(data, split);
+	 * result[0] -> "hello"
+	 * result[1] -> "world"
+	 * 
+	 * data = "hello,world,,,,,,,,123".getBytes();
+	 * result -> ["hello", "world", "123"]
 	 * 
 	 * data = "red,green,blue,shendi".getBytes();
 	 * result = split(data, split);
@@ -338,11 +346,18 @@ public class ByteUtil {
 				datas[size++] = cdata;
 				break;
 			}
+			if (index == 0) {
+				cdata = shendi.kit.util.ByteUtil.subByte(cdata, split.length);
+				continue;
+			}
 			
 			byte[] d = new byte[index];
 			System.arraycopy(cdata, 0, d, 0, index);
 			
-			cdata = shendi.kit.util.ByteUtil.subByte(cdata, index + 1, cdata.length);
+			int nextLen = index + split.length;
+			if (nextLen >= cdata.length) break;
+			
+			cdata = shendi.kit.util.ByteUtil.subByte(cdata, nextLen);
 			datas[size++] = d;
 			
 			if (limit > 0 && size >= limit) break;
@@ -354,6 +369,115 @@ public class ByteUtil {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * 判断指定字节数组前缀是否为指定数组,与String.startsWith使用方法一致.<br>
+	 * <pre>
+	 * byte[] data = {1,2,3,4,5,6,7,1,2,3,4};
+	 * byte[] start = {1,2,3};
+	 * 
+	 * boolean isStartsWith = ByteUtil.startsWith(data, start);
+	 * isStartsWith -> true
+	 * 
+	 * data = {2,1,2,3,4,5,6,7,1,2,3,4};
+	 * isStartsWith = ByteUtil.startsWith(data, start);
+	 * isStartsWith -> false
+	 * </pre>
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param data		要判断的数组
+	 * @param start		前缀数组
+	 * @return true则代表data的前缀为start.
+	 */
+	public static boolean startsWith(byte[] data, byte[] start) {
+		return startsWith(data, start, 0);
+	}
+	
+	/**
+	 * 判断指定字节数组前缀是否为指定数组,与String.startsWith使用方法一致.<br>
+	 * <pre>
+	 * byte[] data = {1,2,3,4,5,6,7,1,2,3,4};
+	 * byte[] start = {1,2,3};
+	 * 
+	 * boolean isStartsWith = ByteUtil.startsWith(data, start, 0);
+	 * isStartsWith -> true
+	 * 
+	 * isStartsWith = ByteUtil.startsWith(data, start, 7);
+	 * isStartsWith -> true
+	 * 
+	 * isStartsWith = ByteUtil.startsWith(data, start, -1);
+	 * isStartsWith -> false
+	 * </pre>
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param data		要判断的数组
+	 * @param start		前缀数组
+	 * @param offset	数据起始偏移
+	 * @return true则代表data的前缀为start.
+	 */
+	public static boolean startsWith(byte[] data, byte[] start, int offset) {
+		if (data == null || start == null || offset < 0) return false;
+		if (offset >= data.length || data.length + offset < start.length) return false;
+		
+		for (int i = 0; i < start.length; i++) {
+			if (data[i + offset] != start[i]) return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * 判断指定数据是否以指定数据结尾.
+	 * <pre>
+	 * byte[] data = {1,2,3,4,5,6,7,1,2,3,4};
+	 * byte[] end = {2,3,4};
+	 * 
+	 * boolean isEndWith = ByteUtil.endsWith(data, end);
+	 * isEndWith ->true
+	 * 
+	 * data = {1,2,3,4,5,6,7,1,2,3,4,5};
+	 * isEndWith = ByteUtil.endsWith(data, end);
+	 * isEndWith -> false
+	 * </pre>
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param data	被判断的数据
+	 * @param end	结尾的数据
+	 * @return true代表data以end结尾
+	 */
+	public static boolean endsWith(byte[] data, byte[] end) {
+		return endsWith(data, data.length, end);
+	}
+	
+	/**
+	 * 判断指定数据是否以指定数据结尾.
+	 * <pre>
+	 * byte[] data = {1,2,3,4,5,6,7,1,2,3,4};
+	 * byte[] end = {2,3,4};
+	 * 
+	 * boolean isEndWith = ByteUtil.endsWith(data, data.length, end);
+	 * isEndWith -> true
+	 * 
+	 * isEndWith = ByteUtil.endsWith(data, 4, end);
+	 * isEndWith -> true
+	 * 
+	 * isEndWith = ByteUtil.endsWith(data, -1, end);
+	 * isEndWith -> false
+	 * </pre>
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param data	被判断的数据
+	 * @param len	数据的有效长度
+	 * @param end	结尾的数据
+	 * @return true代表data从len之前的数据end个数据与end相等
+	 */
+	public static boolean endsWith(byte[] data, int len, byte[] end) {
+		if (data == null || end == null || len < 0) return false;
+		if (len >= end.length) {
+			for (int i = 1; i <= end.length; i++) {
+				if (end[end.length - i] != data[len - i]) return false;
+			}
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 }

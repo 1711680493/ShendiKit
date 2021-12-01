@@ -190,7 +190,8 @@ public class ClassScan {
 						Enumeration<JarEntry> entry = jarFile.entries();
 						
 						// 要处理的类的所在文件夹集合,只有在此文件夹内的类才会被解析,解析出来的类全路径不带此路径
-						String[] classOkPath = jar.value.toString().trim().split(";");
+						String[] classOkPath = null;
+						if (jar.value != null) classOkPath = jar.value.toString().trim().split(";");
 						
 						while (entry.hasMoreElements()) {
 							String name = entry.nextElement().getName();

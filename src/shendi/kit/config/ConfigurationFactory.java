@@ -177,4 +177,8 @@ public class ConfigurationFactory {
 		CONFIG.getConfigs().remove(name);
 	}
 	
+	/** @return 内置配置文件 */
+	public static PropertiesConfiguration getPropertiesConfiguration() {
+		return CONFIG;
+	}
 }

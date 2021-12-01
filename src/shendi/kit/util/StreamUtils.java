@@ -66,44 +66,46 @@ public class StreamUtils {
 	 * @throws IOException 读取过程中出现错误
 	 */
 	public static byte[] readByEnd(InputStream input, byte[] end) throws IOException {
+		return readByEnd(input, end, -1);
+	}
+	
+	/**
+	 * 从指定的输入流中读取以指定字节结尾的数据(读取到的数据包含结尾).<br>
+	 * 如果可能读取不到,则请给输入流设置超时时间.
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param input 要操作的输入流
+	 * @param end 数据的结尾,例如以 \r\n结尾则数组为 {'\r','\n'}
+	 * @param max 读取数据的最大长度,-1则不限制.
+	 * @return 读取的数据,如果没有则返回null
+	 * @throws IOException 读取过程中出现错误
+	 * @since 1.1
+	 */
+	public static byte[] readByEnd(InputStream input, byte[] end, int max) throws IOException {
 		int value = -1, len = 0;
-		byte[] data = new byte[1024];
+		byte[] data = new byte[4096];
 		
 		while ((value = input.read()) != -1) {
-			//如果数组长度不够则增长
+			//如果数组长度不够则增长,翻倍增长
 			if (len >= data.length) {
 				byte[] temp = data;
-				data = new byte[len+1024];
+				data = new byte[len<<1];
 				System.arraycopy(temp, 0, data, 0, temp.length);
 			}
 			data[len] = (byte) value;
 			len++;
 			
-			if (endsWith(data, len, end)) break;
+			if (ByteUtil.endsWith(data, len, end)) break;
+			
+			// 长度大于最大长度则直接返回数据
+			if (max != -1 && len >= max) {
+				Log.print("本地读取数据已超过设置的最大数(%s),跳出读取", max);
+				break;
+			}
 		}
 		if (len == 0) return null;
 		byte[] d = new byte[len];
 		System.arraycopy(data, 0, d, 0, len);
 		return d;
-	}
-	
-	/**
-	 * 判断指定数据是否以指定数据结尾.
-	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
-	 * @param data 被判断的数据
-	 * @param len 被判断数据的长度
-	 * @param end 结尾的数据
-	 * @return true is yes,false is no.
-	 */
-	public static boolean endsWith(byte[] data, int len, byte[] end) {
-		if (len >= end.length) {
-			for (int i = 1; i <= end.length; i++) {
-				if (end[end.length - i] != data[len - i]) return false;
-			}
-			return true;
-		} else {
-			return false;
-		}
 	}
 	
 	/**
@@ -143,9 +145,27 @@ public class StreamUtils {
 	 * @since 1.1
 	 */
 	public static byte[] readAllByte(InputStream input) throws IOException {
+		return readAllByte(input, -1);
+	}
+	
+	/**
+	 * 读取指定输入流中的所有数据.
+	 * @param input 输入流
+	 * @param max 数据最大长度,当读取的数据缓存达到此长度将直接返回数据,-1为不限制.
+	 * @return 输入流中的所有数据
+	 * @throws IOException 读取过程中出错
+	 * @since 1.1
+	 */
+	public static byte[] readAllByte(InputStream input, int max) throws IOException {
 		byte[] data = new byte[input.available()];
 		
-		for (int i = 0; i < data.length; data[i] = (byte) input.read(),i++);
+		for (int i = 0; i < data.length; i++) {
+			data[i] = (byte) input.read();
+			if (max != -1 && data.length >= max) {
+				Log.print("本地读取数据已超过设置的最大数(%s),跳出读取", max);
+				break;
+			}
+		}
 		
 		return data;
 	}

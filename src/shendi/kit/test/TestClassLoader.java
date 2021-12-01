@@ -12,7 +12,7 @@ public class TestClassLoader {
 		new TestClassLoader().a();
 		Thread.sleep(5000);
 		Class<?> rc = SKClassLoader.reloadClass("shendi.kit.test.TestClassLoader");
-		rc.getMethod("a").invoke(rc.newInstance());
+		rc.getMethod("a").invoke(rc.getConstructor().newInstance());
 	}
 	
 	public void a() {

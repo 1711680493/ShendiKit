@@ -78,6 +78,12 @@ Java工具包,纯Java制作,使用JDK8
 >[位工具类](#BitUtil)<br>
 >[文件工具类](#FileUtil)<br>
 
+### [线程工具](#线程管理器)
+
+
+
+
+
 # SK 版本变化
 ## v 1.0
 >起航,包含以下<br>
@@ -162,9 +168,11 @@ Small kit
 		</ul>
 	</li>
 	<li>新增shendi.kit.id包,用于处理id生成</li>
+    <li>新增shendi.kit.thread包,用于处理线程</li>
 	<li>TimeUtils改进,将Time,TimeFormat从内部类提取,且修复已知BUG</li>
 	<li>StreamUtils新增 readAllByte(input) 函数,用以读取输入流中所有的数据</li>
 </ol>
+
 
 
 
@@ -349,13 +357,15 @@ No代表移除注解扫描，No Jar则不扫描jar
 		</ol>
 	</li>
 	<li>给方法/字段添加 @CommandAnno(name,info) 注解</li>
-	<li>注册控制台(目前只提供了几种控制台,下方会一一列举,后续会增加(当然你也可以自己创建,如何创建请看文档))
+	<li>注册/销毁控制台(目前只提供了几种控制台,下方会一一列举,后续会增加(当然你也可以自己创建,如何创建请看文档))
 		<ul>
 			<li>通过控制台对象的 register() 函数来注册</li>
+            <li>通过控制台对象的 destroy() 函数来进行销毁(销毁后还可以通过register来注册,所以一个对象可以重复使用)</li>
 			<li>例如: new CommandConsole().register();</li>
 		</ul>
 	</li>
 </ol>
+
 
 ### 在1.1版本中新增-命令分组
 通过给注解添加参数 @ConsoleAnno("group") 来将一个类里所有未设置组的命令设置组<br>
@@ -801,7 +811,10 @@ System.out.println(rs);
 > Set<String> attrNames();			获取所有元素的名称<br>
 > HashMap<String, String> attrs()	获取所有元素<br>
 
+
+
 # JSON工具包
+
 >位于 shendi.kit.format.json 下<br>
 >SK 1.1新增<br>
 
@@ -860,30 +873,34 @@ SK 1.1 新增
 #### 工具类
 shendi.kit.net.http.HttpUtil
 
-<pre>
-	// 首先创建对象,有以下几个重载,具体请参考 API 文档
-	/* 
-		HttpUtil([String]host),用主机名创建,其余的可以在创建后进行设置
-			(host, [int]port),主机名+端口创建
-			(host, [String]reqType),主机名+请求类型创建
-			(host, port, [String]reqType),主机名+端口+请求类型
-			(host, port, [byte[]]data) 将请求类型更换成了一个http的数据,通常此构造用于将获取的http数据发送给服务器使用
-	*/
-	// host参数可以携带端口等信息,与浏览器url对应
-	HttpUtil http = new HttpUtil("http://localhost:8080", "POST");
-	// 可以设置一些请求头 端口等信息,端口默认80(setPort)
-	http.setReqHead("req", "hh");
-	// 然后可以直接获取到数据,例如,获取当前http的全部数据(包含协议头,响应头响应体)
-	System.out.print(new String(http.getRespData()));
-	// 添加请求参数
-	http.addParameter("a", "b");
-	// 设置请求参数
-	http.setParameters("a=b&c=d");
-	// 最终要使用 send 方法来完成请求,注意,设置操作必须在send()之前使用.
-	http.sned();
-</pre>
+```java
+// 首先创建对象,有以下几个重载,具体请参考 API 文档
+/* 
+	HttpUtil([String]host),用主机名创建,其余的可以在创建后进行设置
+		(host, [int]port),主机名+端口创建
+		(host, [String]reqType),主机名+请求类型创建
+		(host, port, [String]reqType),主机名+端口+请求类型
+		(host, port, [byte[]]data) 将请求类型更换成了一个http的数据,通常此构造用于将获取的http数据发送给服务器使用
+*/
+// host参数可以携带端口等信息,与浏览器url对应
+HttpUtil http = new HttpUtil("http://localhost:8080", "POST");
+// 可以设置一些请求头 端口等信息,端口默认80(setPort)
+http.setReqHead("req", "hh");
+// 添加请求参数
+http.addParameter("a", "b");
+// 设置请求参数
+http.setParameters("a=b&c=d");
+// 最终要使用 send 方法来完成请求,注意,设置参数等操作必须在send()之前使用.
+http.send();
+// 然后可以通过 http.getResp 开头的函数获取到各种响应数据
+// 例如,获取当前http的全部数据(包含协议头,响应头响应体)
+System.out.print(new String(http.getRespData()));
+```
+
+
 
 #### 响应数据处理接口
+
 shendi.kit.net.http.HttpDataDispose
 
 实现此接口来用以给 HttpUtil 设置处理函数.
@@ -898,107 +915,162 @@ shendi.kit.net.http.HttpDataDispose
 
 这时我们需要自行处理响应,于是需要使用到 setDispose() 来设置处理方法
 
-<pre>
-	// 创建对象
-	HttpUtil http = new HttpUtil("localhost/down");
-	/*
-		设置响应处理,列举三种使用方式
-		HttpDataDispose dispose = new HttpDataDispose() {
-			@Override
-			public boolean dispose(byte[] data) {
-				// 处理数据,data为接收到的数据
-				// 需要注意的是,此函数为处理数据函数,当接收完一定大小的响应数据后就会调用此函数来进行下一步操作,所以此函数会被调用多次(根据响应数据大小).
-				// return false 代表处理还未完成,将继续读取后续数据
-				// return true 代表提前结束响应数据处理,即使还有后续数据也将进行丢弃
-				// 当处理数据遇到问题时,应return true来终止此次响应处理.
-				return false;
-			}
-		};
-		http.setDispose(dispose);
-		// 第二种
-		http.setDispose(new HttpDataDispose() {
-			@Override
-			public boolean dispose(byte[] data) {
-				return false;
-			}
-		});
-		// 第三种,lambda表达式
-		http.setDispose((data) -> {
+```java
+// 创建对象
+HttpUtil http = new HttpUtil("localhost/down");
+/*
+	设置响应处理,列举三种使用方式
+	HttpDataDispose dispose = new HttpDataDispose() {
+		@Override
+		public boolean dispose(byte[] data) {
+			// 处理数据,data为接收到的数据
+			// 需要注意的是,此函数为处理数据函数,当接收完一定大小的响应数据后就会调用此函数来进行下一步操作,所以此函数会被调用多次(根据响应数据大小).
+			// return false 代表处理还未完成,将继续读取后续数据
+			// return true 代表提前结束响应数据处理,即使还有后续数据也将进行丢弃
+			// 当处理数据遇到问题时,应return true来终止此次响应处理.
 			return false;
-		});
-	这里使用最简洁的lambda表达式
-	*/
-	// 需要注意的是,当使用了 setDispose 方法设置处理响应,则此 HttpUtil 对象的 respBody和respBodyData将为空(这样做是为了节省开销)
-	OutputStream output = new FileOutputStream("C:/1.txt");
-	http.setDispose((data) -> {
-		try {
-			output.write(data);
-			output.flush();
-		} catch (Exception e) {
-			return true;
 		}
+	};
+	http.setDispose(dispose);
+	// 第二种
+	http.setDispose(new HttpDataDispose() {
+		@Override
+		public boolean dispose(byte[] data) {
+			return false;
+		}
+	});
+	// 第三种,lambda表达式
+	http.setDispose((data) -> {
 		return false;
 	});
-	// 通常我们还需要自行设置超时时间,0为不超时
-	http.setTimeout(0);
-	// 在 send 的时候可能会发生一些错误,最常见的有 Connection reset
-	// 这时可以出错后再次执行一次
-	try {
-		http.send();
-	} catch (Exception e) {
-		try {
-			http.send();
-		} catch (Exception e) {
-			// exception dispose
-		}
-	}
-	output.close();
-</pre>
+这里使用最简洁的lambda表达式
+*/
+// 需要注意的是,当使用了 setDispose 方法设置处理响应,则此 HttpUtil 对象的 respBody和respBodyData将为空(这样做是为了节省开销)
+OutputStream output = new FileOutputStream("C:/1.txt");
+http.setDispose((data) -> {
+    try {
+        output.write(data);
+        output.flush();
+    } catch (Exception e) {
+        return true;
+    }
+    return false;
+});
+// 通常我们还需要自行设置超时时间,0为不超时
+http.setTimeout(0);
+// 在 send 的时候可能会发生一些错误,最常见的有 Connection reset
+// 这时可以出错后再次执行一次
+try {
+    http.send();
+} catch (Exception e) {
+    try {
+        http.send();
+    } catch (Exception e) {
+        // exception dispose
+    }
+}
+output.close();
+```
+
+
+
 
 #### 重定向与转发
 当页面返回结果为重定向内容,我们想要的结果大多都是重定向后的数据,这时需要处理重定向的方法<br>
 当我们访问的网页需要登录才能查看,需要保存session/token等信息时,这时需要使用原有的HttpUtil对象<br>
 HttpUtil提供了 redirect(url) 函数用以进行重定向/转发
 
-<pre>
-	/*
-		对于重定向,也就是上面说到的那种情况,可以使用HttpUtil的 setRedirect(true);
-		设置过后,当我们执行send()函数,页面需要重定向则会自行重定向,最后的结果为重定向的结果
-		有的时候会遇到重定向后又一个重定向的情况(可能无限重定向),则可通过设置最大重定向次数来进行限制
-		setRedirectMaxSize(int) 重定向的最大次数,默认为5
-		setRedirect 内部实现使用 redirect 函数.
-	*/
-	HttpUtil http = new HttpUtil("localhost/redirect");
-	http.setRedirect(true);
-	try {
-		http.send();
-	} catch (Exception e) {
-	}
-	// 获取到的结果为重定向后的结果
-	System.out.println(http.getRespBody());
-	/*
-		对于转发,使用对象的 redirect 方法,与重定向一致,也可使用setRedirectMaxSize(int)设置转发次数
-	*/
-	http.redirect("localhost/index");
-	/******************
-	转发也可以自行重新send,redirect会保留请求信息并重新请求,拥有转发的效果,重定向默认也使用redirect函数.
-	*******************/
-</pre>
+```java
+/*
+	对于重定向,也就是上面说到的那种情况,可以使用HttpUtil的 setRedirect(true);
+	设置过后,当我们执行send()函数,页面需要重定向则会自行重定向,最后的结果为重定向的结果
+	有的时候会遇到重定向后又一个重定向的情况(可能无限重定向),则可通过设置最大重定向次数来进行限制
+	setRedirectMaxSize(int) 重定向的最大次数,默认为5
+	setRedirect 内部实现使用 redirect 函数.
+*/
+HttpUtil http = new HttpUtil("localhost/redirect");
+http.setRedirect(true);
+try {
+    http.send();
+} catch (Exception e) {
+}
+// 获取到的结果为重定向后的结果
+System.out.println(http.getRespBody());
+/*
+	对于转发,使用对象的 redirect 方法,与重定向一致,也可使用setRedirectMaxSize(int)设置转发次数
+*/
+http.redirect("localhost/index");
+/******************
+转发也可以自行重新send,redirect会保留请求信息并重新请求,拥有转发的效果,重定向默认也使用redirect函数.
+*******************/
+```
+
+
+
+
+
+# 线程管理器
+
+> 此部分诞生是因为本人写程序遇到了一些不能解决的问题，且非代码问题。
+>
+> 我使用到了 JVisualVM 工具观察到我程序的某个线程状态从正常运行变为了等待（在我程序稳定运行一个月后出现）
+>
+> 代码内无任何关于线程等待的代码，因为是死循环，所以想到了使用守护线程的方式来监测，当线程等待自动中断让此线程继续运行。
+
+
+
+shendi.kit.thread
+
+SK 1.1新增
+
+目前此包仅用于处理线程状态莫名变成等待的情况，后续扩展
+
+
+
+```java
+// 打开线程管理器
+ThreadManager.open();
+// 将需要被管理的线程添加进管理器,且设置期望被管理的类型(目前只提供永不等待类型,参考枚举 ThreadType)
+Thread t = new Thread(() -> {
+    Object obj = new Object();
+
+    try {
+        synchronized (obj) {
+            // 线程状态变为等待后会被线程管理器中断
+            obj.wait();
+        }
+    } catch (Throwable e) {
+
+    }
+
+    System.out.println("我从等待中出来了");
+});
+ThreadManager.add("测试线程", t, ThreadType.NO_WATTING);
+// 线程管理器是以守护线程的方式运行,所以程序内必须要有一个存活的用户线程,否则将自行结束.
+```
+
+
 
 # 工具类
+
 #### StreamUtils
 >流处理工具类<br>
 >下面演示此类的少量方法,更多请直接参考此类<br>
-<pre>
-	// 读取一行,String readLine(InputStream);
-	String line = StreamUtils.readLine(input);
-	// 读取一行,字节形式 bybte[] readLineRByte(InputStream)
-	byte[] bLine = StreamUtils.readLineRByte(input);
-	// 读取数据直到指定结尾,byte[] readByEnd(InputStream, byte[]);,其中第二个 参数是要指定的结尾
-	byte[] data = StreamUtils.readByEnd(input, "\n".getBytes());
-	// 读取一个文件的数据,byte[] getFile(String)或getFile(File)
-	byte[] fData = StreamUtils.getFile("C:/1.txt");
-</pre>
+```java
+// 读取一行,String readLine(InputStream);
+String line = StreamUtils.readLine(input);
+// 读取一行,字节形式 bybte[] readLineRByte(InputStream)
+byte[] bLine = StreamUtils.readLineRByte(input);
+/* 读取数据直到指定结尾,byte[] readByEnd(InputStream, byte[]);,其中第二个 参数是要指定的结尾 */
+/* 其中支持设置读取的最大数据长度(在网络编程中会接收到一些爬虫等连接,假设一直发送数据则会导致一直读取数据,导致内存占用过高)
+ * StreamUtils.readByEnd(input, byte[], int 设置接受数据的最大大小); */
+byte[] data = StreamUtils.readByEnd(input, "\n".getBytes());
+
+/* 读取一个文件的数据,byte[] getFile(String)或getFile(File) */
+byte[] fData = StreamUtils.getFile("C:/1.txt");
+
+```
+
 
 #### SKClassLoader
 >类加载器<br>
@@ -1159,6 +1231,42 @@ result -> ["I like", "this kit!"]
 data = "123,456,789,012".getBytes();
 result = split(data, split, 3)
 result -> ["123", "456", "789"]
+    
+// 字节数组是否以指定数据开头
+// ByteUtil.startsWith(byte[], byte[])
+// ByteUtil.startsWith(byte[], byte[], int)
+byte[] data = {1,2,3,4,5,6,7,1,2,3,4};
+byte[] start = {1,2,3};
+
+boolean isStartsWith = ByteUtil.startsWith(data, start);
+isStartsWith -> true
+
+isStartsWith = ByteUtil.startsWith(data, start, 0);
+isStartsWith -> true
+
+isStartsWith = ByteUtil.startsWith(data, start, 7);
+isStartsWith -> true
+    
+isStartsWith = ByteUtil.startsWith(data, start, -1);
+isStartsWith -> false
+    
+// 字节数组是否以指定数据结尾
+// ByteUtil.endsWith(byte[], byte[])
+// ByteUtil.endsWith(byte[], int, byte[])
+byte[] data = {1,2,3,4,5,6,7,1,2,3,4};
+byte[] end = {2,3,4};
+
+boolean isEndWith = ByteUtil.endsWith(data, end);
+isEndWith -> true
+    
+isEndWith = ByteUtil.endsWith(data, data.length, end);
+isEndWith -> true
+    
+isEndWith = ByteUtil.endsWith(data, 4, end);
+isEndWith -> true
+    
+isEndWith = ByteUtil.endsWith(data, -1, end);
+isEndWith -> false
 ```
 
 
