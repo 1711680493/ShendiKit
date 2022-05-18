@@ -3,10 +3,9 @@ package shendi.kit.console;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Scanner;
 
 import shendi.kit.console.command.Command;
-
-import java.util.Scanner;
 
 /**
  * 命令行控制台.<br>
@@ -18,11 +17,7 @@ public class CommandConsole extends Console {
 
 	private static Scanner sc = new Scanner(System.in);
 	
-	private boolean isStart = false;
-	
 	@Override protected void register(HashMap<String, Command> commands) {
-		if (isStart) return;
-		
 		System.out.println("************************");
 		System.out.println("******命令行控制台******");
 		System.out.println("-自带命令---------------");
@@ -65,8 +60,6 @@ public class CommandConsole extends Console {
 				}
 			}
 		}
-		
-		isStart = true;
 	}
 
 	@Override public void destroy() {}

@@ -38,5 +38,5 @@ module shendi.kit {
 	exports shendi.kit.net;
 	exports shendi.kit.net.http;
 	
-	exports shendi.kit.thread;
+//	exports shendi.kit.thread;
 }

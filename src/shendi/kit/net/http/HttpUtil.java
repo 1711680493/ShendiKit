@@ -23,6 +23,9 @@ import shendi.kit.util.StreamUtils;
  * @version 1.1
  */
 public class HttpUtil {
+	/** http中一行的最后一个字符,\n */
+	public static final byte[] LINE_END = "\n".getBytes();
+	
 	/** 头的结尾 */
 	public static final byte[] END_HEAD = "\r\n\r\n".getBytes();
 	/** 体的结尾 */
@@ -50,7 +53,9 @@ public class HttpUtil {
 	private int timeout = 5000;
 	/** 请求头 */
 	private Map<String,String> reqHeads = new HashMap<>();
-	/** 请求参数 */
+	/** 请求头的字符串形式 */
+	private String reqHeadStr;
+	/** 请求参数,格式为 key=value&key=value&... */
 	private StringBuilder parameters;
 	/** 请求的数据 */
 	private byte[] data;
@@ -78,6 +83,9 @@ public class HttpUtil {
 	private boolean isRedirect = false;
 	/** 重定向所支持的最大次数,默认5,有时候可能页面会无限的重定向,这样就会造成程序卡死的局面,通过设置此变量来控制次数 */
 	private int redirectMaxSize = 5;
+	
+	/** 仅用于处理请求响应 */
+	public HttpUtil() {}
 	
 	/**
 	 * 根据指定的地址创建
@@ -267,186 +275,532 @@ public class HttpUtil {
 			output.write(data); output.flush();
 			
 			// 处理响应
-			// 先获取第一行,类型为 HEAD 或状态是204,205,304则没有响应体,以\r\n\r\n结尾
-			byte[] bState = StreamUtils.readLineRByte(input);
-			if (bState == null) {
-				Log.printErr("处理Http响应失败,获取状态信息(第一行)为空");
-				throw new NullHttpResponseException();
-			}
-			stateInfo = new String(bState, 0, bState.length - 2);
-			try { state = Integer.parseInt(stateInfo.split(" ")[1]); }
-			catch (Exception e) {
-				Log.printErr("获取响应状态失败,格式化出错: " + stateInfo);
-				throw new HttpResponseException(e);
-			}
-			
-			// 获取响应头并解析
-			byte[] bHeads = StreamUtils.readByEnd(input, END_HEAD);
-			if (bHeads == null || bHeads.length < 4) {
-				Log.printErr("获取响应头为空!");
-				throw new HttpResponseException("获取响应头为空!");
-			}
-			
-			respHeadStr = new String(bHeads, 0, bHeads.length - 4);
-			String[] heads = respHeadStr.split("\r\n");
-			for (String head : heads) {
-				int index = head.indexOf(':');
-				if (index == -1) {
-					Log.printAlarm("遍历响应头,某个响应头不是键值对形式: " + head);
-				} else {
-					// 键统一大写存储
-					respHeads.put(head.substring(0, index).trim().toUpperCase(), head.substring(index + 1).trim());
-				}
-			}
-			
-			// 没有响应体则不获取
-			// 有响应体则判断响应头是否有 Content-Length,是则读取指定大小,否则判断结尾
-			byte[] body = null;
-			// 如果数据体编码为分块编码,则此变量将有数据(不为0),且会将完整的响应信息存储(包括分块编码信息),用于最后respData的数据完整性
-			byte[] bodyAllData = new byte[0];
-			// 如果需要格外处理响应则不会将响应数据保存
-			if (!("HEAD".equalsIgnoreCase(reqType) || state == 204 || state == 205 || state == 302 || state == 304)) {
-				// 获取响应体
-				if (respHeads.containsKey("CONTENT-LENGTH")) {
-					try {
-						int len = Integer.parseInt(respHeads.get("CONTENT-LENGTH"));
-						if (dispose == null) {
-							body = new byte[len];
-							for (int i = 0, value = -1; i < body.length; i++) {
-								value = input.read();
-								body[i] = (byte) value;
-							}
-							respBody = new String(body);
-						} else {
-							if (len == 0) {
-								Log.print("HttpUtil 处理响应: Content-Length=0,无响应数据");
-							} else {
-								byte[] tmp = new byte[dataDisposeLen];
-								int l = -1;
-								while ((l = input.read(tmp)) != -1) {
-									if (dispose.dispose(ByteUtil.subByte(tmp, 0, l))) {
-										break;
-									}
-									
-									len -= l;
-									if (len <= 0) break;
-								}
-							}
-						}
-					} catch (NumberFormatException e) {
-						Log.printErr("请求头的Content-Length的值不为数字！" + respHeads.get("CONTENT-LENGTH"));
-					}
-				} else if (respHeads.containsKey("TRANSFER-ENCODING") && respHeads.get("TRANSFER-ENCODING").equalsIgnoreCase("chunked")) {
-					// 没有Content-Length,且http版本为1.1响应头一般都有Transfer-Encoding: chunked
-					// 如果有,则采用分块编码方式读取,格式为: 数据大小\r\n数据内容\r\n数据大小\r\n数据内容...0\r\n\r\n
-					if (dispose == null) {
-						int len = 0;
-						body = new byte[0];
-						do {
-							// 读取到长度
-							byte[] tmpLen = StreamUtils.readByEnd(input, DATA_SPLIT);
-							len = Integer.parseInt(new String(tmpLen, 0, tmpLen.length - DATA_SPLIT.length), 16);
-							
-							if (len != 0) {
-								// 读取指定长度的数据并复制进body
-								byte[] tmp = new byte[len];
-								input.read(tmp, 0, len);
-								body = ByteUtil.concat(body, tmp);
-								
-								// 加入到局部变量完整响应中
-								bodyAllData = ByteUtil.concat(bodyAllData, tmpLen, tmp, DATA_SPLIT);
-							} else {
-								bodyAllData = ByteUtil.concat(bodyAllData, tmpLen, DATA_SPLIT, DATA_SPLIT);
-							}
-							
-							// 读取数据结尾(\r\n)
-							StreamUtils.readByEnd(input, DATA_SPLIT);
-						} while (len != 0);
-						
-						if (body != null) respBody = new String(body);
-						else Log.printAlarm("响应数据应有响应体,但是没有.");
-					} else {
-						int len = 0;
-						do {
-							// 读取到长度
-							byte[] tmp = StreamUtils.readByEnd(input, DATA_SPLIT);
-							len = Integer.parseInt(new String(tmp, 0, tmp.length - DATA_SPLIT.length), 16);
-							
-							if (len != 0) {
-								// 读取指定长度的数据传递给函数
-								tmp = new byte[len];
-								input.read(tmp, 0, len);
-								
-								dispose.dispose(tmp);
-							}
-							
-							// 读取数据结尾(\r\n)
-							StreamUtils.readByEnd(input, DATA_SPLIT);
-						} while (len != 0);
-					}
-				} else {
-					if (dispose == null) {
-						body = StreamUtils.readByEnd(input, END_BODY);
-						if (body != null) {
-							int size = body.length - END_BODY.length;
-							body = ByteUtil.subByte(body, 0, size);
-							if (size >= 0) respBody = new String(body);
-						} else Log.printAlarm("响应数据应有响应体,但是没有.");
-					} else {
-						byte[] tmp = new byte[dataDisposeLen];
-						int l = -1;
-						while ((l = input.read(tmp)) != -1) {
-							// 判断是否结尾
-							if (ByteUtil.endsWith(tmp, l, END_BODY)) {
-								dispose.dispose(ByteUtil.subByte(tmp, 0, l - END_BODY.length));
-								break;
-							} else {
-								if (dispose.dispose(ByteUtil.subByte(tmp, 0, l))) {
-									break;
-								}
-							}
-						}
-					}
-				}
-				respBodyData = body;
-			} else if (isRedirect && (state == 301 || state == 302)) {
-				String location = respHeads.get("LOCATION");
-				if (location == null) {
-					Log.printErr("页面重定向时失败,响应头location为空,此次数据为当前页面数据,请检查.");
-				} else {
-					StringBuilder b = new StringBuilder(100);
-					b.append("页面由 ");
-					b.append(host); b.append(port); b.append(reqPath);
-					b.append(" 重定向至 ");
-					b.append(location);
-					Log.print(b);
-					
-					redirect(location);
-					return;
-				}
-			}
-			
-			// 合并数据,完成响应
-			int size = bState.length + bHeads.length;
-			if (body != null) {
-				size += bodyAllData.length != 0 ? bodyAllData.length : body.length;
-			}
-			respData = new byte[size];
-			System.arraycopy(bState, 0, respData, 0, bState.length);
-			System.arraycopy(bHeads, 0, respData, bState.length, bHeads.length);
-			
-			if (body != null) {
-				if (bodyAllData.length != 0) {
-					System.arraycopy(bodyAllData, 0, respData, bHeads.length + bState.length, bodyAllData.length);
-				} else {
-					System.arraycopy(body, 0, respData, bHeads.length + bState.length, body.length);
-				}
-			}
+			disposeResp(input);
 		} catch (IOException e) {
 			throw e;
 		}
 	}
-
+	
+	/**
+	 * 通过指定输入流处理http请求.
+	 * 创建时间 2022年3月23日
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param input http数据输入流
+	 * @return 从输入流获取的是否为有效的http请求,true为有效
+	 * @throws IOException
+	 */
+	public boolean disposeReq(InputStream input) throws IOException {
+		if (input == null) return false;
+		
+		// 获取第一行
+		String request = StreamUtils.readLine(input);
+		if (request == null || request.length() < 3) return false;
+		
+		String[] title = request.substring(0, request.length() - 2).split(" ");
+		if (title.length < 2) return false;
+		reqType = title[0];
+		reqPath = title[1];
+		httpV = title[2];
+		
+		// 除开POST,其余类型参数都在url中
+		int index = -1;
+		if(!reqType.equalsIgnoreCase(REQ_TYPE_POST)) {
+			index = reqPath.indexOf('?');
+			if (index != -1) {
+				parameters = new StringBuilder(reqPath.substring(index+1, reqPath.length()));
+			}
+		}
+		
+		// 请求头
+		reqHeadStr = new String(StreamUtils.readByEnd(input, END_HEAD));
+		reqHeads = new HashMap<>();
+		
+		int contentLen = -1;
+		
+		String[] tmpHeads = reqHeadStr.split("\r\n");
+		for (String head : tmpHeads) {
+			
+			index = head.indexOf(':');
+			if (index == -1) continue;
+			
+			String key = head.substring(0, index).trim();
+			String value = head.substring(index + 1, head.length()).trim();
+			
+			// 存储需要的请求头
+			if (contentLen == -1 && key.equalsIgnoreCase("CONTENT-LENGTH"))
+				contentLen = Integer.parseInt(value);
+			
+			if (key.equalsIgnoreCase("HOST")) host = value;
+			
+			reqHeads.put(key, value);
+		}
+		
+		// POST 请求参数在请求体中, 请求头有Content-Length 代表有请求体
+		if (contentLen != -1) {
+			byte[] body = new byte[contentLen];
+			input.read(body, 0, contentLen);
+			
+			parameters = new StringBuilder(new String(body));
+			
+			data = ByteUtil.concat(request.getBytes(), reqHeadStr.getBytes(), body);
+		} else {
+			data = ByteUtil.concat(request.getBytes(), reqHeadStr.getBytes());
+		}
+		// 将请求头最后的\r\n\r\n去掉
+		reqHeadStr = reqHeadStr.substring(0, reqHeadStr.length() - END_HEAD.length);
+		
+		return true;
+	}
+	
+	/**
+	 * 通过HTTP请求字符串处理.
+	 * 创建时间 2022年3月23日
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param reqData 请求的字符串
+	 * @return 请求字符串是否为有效的http请求,true则代表处理成功
+	 */
+	public boolean disposeReq(String reqData) {
+		if (reqData == null) return false;
+		
+		data = reqData.getBytes();
+		// 第一行为请求描述 TYPE PATH VERSION\r\n
+		int index = reqData.indexOf('\n');
+		if (index == -1) return false;
+		
+		String[] title = reqData.substring(0, index - 1).split(" ");
+		if (title.length < 2) return false;
+		reqType = title[0];
+		reqPath = title[1];
+		httpV = title[2];
+		
+		reqData = reqData.substring(index + 1, reqData.length());
+		
+		// 除开POST,其余类型参数都在url中
+		if(!reqType.equalsIgnoreCase(REQ_TYPE_POST)) {
+			index = reqPath.indexOf('?');
+			if (index != -1) {
+				parameters = new StringBuilder(reqPath.substring(index+1, reqPath.length()));
+			}
+		}
+		
+		// 请求头
+		index = reqData.indexOf("\r\n\r\n");
+		if (index == -1) return false;
+		
+		reqHeadStr = reqData.substring(0, index);
+		reqHeads = new HashMap<>();
+		
+		reqData = reqData.substring(index + 4, reqData.length());
+		
+		int contentLen = -1;
+		
+		String[] tmpHeads = reqHeadStr.split("\r\n");
+		for (String head : tmpHeads) {
+			
+			index = head.indexOf(':');
+			if (index == -1) continue;
+			
+			String key = head.substring(0, index).trim();
+			String value = head.substring(index + 1, head.length()).trim();
+			
+			// 存储需要的请求头
+			if (contentLen == -1 && key.equalsIgnoreCase("CONTENT-LENGTH"))
+				contentLen = Integer.parseInt(value);
+			
+			if (key.equalsIgnoreCase("HOST")) host = value;
+			
+			reqHeads.put(key, value);
+		}
+		
+		// POST 请求参数在请求体中, 请求头有Content-Length 代表有请求体
+		if (contentLen != -1) {
+			parameters = new StringBuilder(reqData);
+		}
+		return true;
+	}
+	
+	/**
+	 * 处理响应,通过输入流,线程阻塞,可通过设置 input 对应的套接字来设置对应超时时间.<br>
+	 * <br>
+	 * 通过TCP套接字等接收输入流为HTTP数据形式则可使用此函数.<br>
+	 * <br>
+	 * 使用此函数处理成功后可使用 getResp 开头的函数获取响应内容.
+	 * 创建时间 2022年3月22日
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param input 输入流
+	 * @throws NullHttpResponseException	当处理响应时,数据为空则抛出
+	 * @throws HttpResponseException		在解析响应数据过程中出现问题则抛出
+	 */
+	public void disposeResp(InputStream input) throws IOException, NullHttpResponseException, HttpResponseException {
+		// 先获取第一行,类型为 HEAD 或状态是204,205,304则没有响应体,以\r\n\r\n结尾
+		byte[] bState = StreamUtils.readLineRByte(input);
+		if (bState == null) {
+			Log.printErr("处理Http响应失败,获取状态信息(第一行)为空");
+			throw new NullHttpResponseException();
+		}
+		stateInfo = new String(bState, 0, bState.length - 2);
+		try { state = Integer.parseInt(stateInfo.split(" ")[1]); }
+		catch (Exception e) {
+			Log.printErr("获取响应状态失败,格式化出错: " + stateInfo);
+			throw new HttpResponseException(e);
+		}
+		
+		// 获取响应头并解析
+		byte[] bHeads = StreamUtils.readByEnd(input, END_HEAD);
+		if (bHeads == null || bHeads.length < 4) {
+			Log.printErr("获取响应头为空!");
+			throw new HttpResponseException("获取响应头为空!");
+		}
+		
+		respHeadStr = new String(bHeads, 0, bHeads.length - 4);
+		String[] heads = respHeadStr.split("\r\n");
+		for (String head : heads) {
+			int index = head.indexOf(':');
+			if (index == -1) {
+				Log.printAlarm("遍历响应头,某个响应头不是键值对形式: " + head);
+			} else {
+				// 键统一大写存储
+				respHeads.put(head.substring(0, index).trim().toUpperCase(), head.substring(index + 1).trim());
+			}
+		}
+		
+		// 没有响应体则不获取
+		// 有响应体则判断响应头是否有 Content-Length,是则读取指定大小,否则判断结尾
+		byte[] body = null;
+		// 如果数据体编码为分块编码,则此变量将有数据(不为0),且会将完整的响应信息存储(包括分块编码信息),用于最后respData的数据完整性
+		byte[] bodyAllData = new byte[0];
+		// 如果需要格外处理响应则不会将响应数据保存
+		if (!("HEAD".equalsIgnoreCase(reqType) || state == 204 || state == 205 || state == 302 || state == 304)) {
+			// 获取响应体,包含Content-Length 代表响应数据,一般不会以结尾符结尾
+			if (respHeads.containsKey("CONTENT-LENGTH")) {
+				try {
+					int len = Integer.parseInt(respHeads.get("CONTENT-LENGTH"));
+					if (dispose == null) {
+						body = new byte[len];
+						for (int i = 0, value = -1; i < body.length; i++) {
+							value = input.read();
+							body[i] = (byte) value;
+						}
+						respBody = new String(body);
+					} else {
+						if (len == 0) {
+							Log.print("HttpUtil 处理响应: Content-Length=0,无响应数据");
+						} else {
+							byte[] tmp = new byte[dataDisposeLen];
+							int l = -1;
+							while ((l = input.read(tmp)) != -1) {
+								if (dispose.dispose(ByteUtil.subByte(tmp, 0, l))) {
+									break;
+								}
+								
+								len -= l;
+								if (len <= 0) break;
+							}
+						}
+					}
+				} catch (NumberFormatException e) {
+					Log.printErr("请求头的Content-Length的值不为数字！" + respHeads.get("CONTENT-LENGTH"));
+				}
+			} else if (respHeads.containsKey("TRANSFER-ENCODING") && respHeads.get("TRANSFER-ENCODING").equalsIgnoreCase("chunked")) {
+				// 没有Content-Length,且http版本为1.1响应头一般都有Transfer-Encoding: chunked
+				// 如果有,则采用分块编码方式读取,格式为: 数据大小\r\n数据内容\r\n数据大小\r\n数据内容...0\r\n\r\n
+				if (dispose == null) {
+					int len = 0;
+					body = new byte[0];
+					do {
+						// 读取到长度
+						byte[] tmpLen = StreamUtils.readByEnd(input, DATA_SPLIT);
+						len = Integer.parseInt(new String(tmpLen, 0, tmpLen.length - DATA_SPLIT.length), 16);
+						
+						if (len != 0) {
+							// 读取指定长度的数据并复制进body
+							byte[] tmp = new byte[len];
+							input.read(tmp, 0, len);
+							body = ByteUtil.concat(body, tmp);
+							
+							// 加入到局部变量完整响应中
+							bodyAllData = ByteUtil.concat(bodyAllData, tmpLen, tmp, DATA_SPLIT);
+						} else {
+							bodyAllData = ByteUtil.concat(bodyAllData, tmpLen, DATA_SPLIT, DATA_SPLIT);
+						}
+						
+						// 读取数据结尾(\r\n)
+						StreamUtils.readByEnd(input, DATA_SPLIT);
+					} while (len != 0);
+					
+					if (body != null) respBody = new String(body);
+					else Log.printAlarm("响应数据应有响应体,但是没有.");
+				} else {
+					int len = 0;
+					do {
+						// 读取到长度
+						byte[] tmp = StreamUtils.readByEnd(input, DATA_SPLIT);
+						len = Integer.parseInt(new String(tmp, 0, tmp.length - DATA_SPLIT.length), 16);
+						
+						if (len != 0) {
+							// 读取指定长度的数据传递给函数
+							tmp = new byte[len];
+							input.read(tmp, 0, len);
+							
+							dispose.dispose(tmp);
+						}
+						
+						// 读取数据结尾(\r\n)
+						StreamUtils.readByEnd(input, DATA_SPLIT);
+					} while (len != 0);
+				}
+			} else {
+				if (dispose == null) {
+					body = StreamUtils.readByEnd(input, END_BODY);
+					if (body != null) {
+						int size = body.length - END_BODY.length;
+						
+						// 有的 http 响应既没有 content-length,也没有 http 协议结尾符,所以这里对于截取操作需要判断
+						if (size > 0) body = ByteUtil.subByte(body, 0, size);
+						
+						respBody = new String(body);
+					} else Log.printAlarm("响应数据应有响应体,但是没有.");
+				} else {
+					byte[] tmp = new byte[dataDisposeLen];
+					int l = -1;
+					while ((l = input.read(tmp)) != -1) {
+						// 判断是否结尾
+						if (ByteUtil.endsWith(tmp, l, END_BODY)) {
+							dispose.dispose(ByteUtil.subByte(tmp, 0, l - END_BODY.length));
+							l = -1;
+							break;
+						} else {
+							if (dispose.dispose(ByteUtil.subByte(tmp, 0, l))) {
+								l = -1;
+								break;
+							}
+						}
+					}
+					// 有的 http 响应既没有 content-length,也没有 http 协议结尾符,所以这里收尾
+					if (l != -1) {
+						dispose.dispose(ByteUtil.subByte(tmp, 0, l));
+					}
+				}
+			}
+			respBodyData = body;
+		} else if (isRedirect && (state == 301 || state == 302)) {
+			String location = respHeads.get("LOCATION");
+			if (location == null) {
+				Log.printErr("页面重定向时失败,响应头location为空,此次数据为当前页面数据,请检查.");
+			} else {
+				StringBuilder b = new StringBuilder(100);
+				b.append("页面由 ");
+				b.append(host); b.append(port); b.append(reqPath);
+				b.append(" 重定向至 ");
+				b.append(location);
+				Log.print(b);
+				
+				redirect(location);
+				return;
+			}
+		}
+		
+		// 合并数据,完成响应
+		int size = bState.length + bHeads.length;
+		if (body != null) {
+			size += bodyAllData.length != 0 ? bodyAllData.length : body.length;
+		}
+		respData = new byte[size];
+		System.arraycopy(bState, 0, respData, 0, bState.length);
+		System.arraycopy(bHeads, 0, respData, bState.length, bHeads.length);
+		
+		if (body != null) {
+			if (bodyAllData.length != 0) {
+				System.arraycopy(bodyAllData, 0, respData, bHeads.length + bState.length, bodyAllData.length);
+			} else {
+				System.arraycopy(body, 0, respData, bHeads.length + bState.length, body.length);
+			}
+		}
+	}
+	
+	/**
+	 * 处理响应,当已经接收完http数据时可使用此函数进行解析获取.
+	 * 创建时间 2022年3月22日
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param data http数据字节
+	 * @throws NullHttpResponseException	当处理响应时,数据为空则抛出
+	 * @throws HttpResponseException		在解析响应数据过程中出现问题则抛出
+	 */
+	public void disposeResp(byte[] data) throws NullHttpResponseException, HttpResponseException {
+		// 先获取第一行,类型为 HEAD 或状态是204,205,304则没有响应体,以\r\n\r\n结尾
+		int dataIndex = ByteUtil.indexOf(data, LINE_END);
+		if (dataIndex == -1) {
+			Log.printErr("处理Http响应失败,获取状态信息(第一行)为空");
+			throw new NullHttpResponseException();
+		}
+		
+		byte[] bState = ByteUtil.subByte(data, 0, dataIndex + LINE_END.length);
+		stateInfo = new String(bState, 0, bState.length - 2);
+		try { state = Integer.parseInt(stateInfo.split(" ")[1]); }
+		catch (Exception e) {
+			Log.printErr("获取响应状态失败,格式化出错: " + stateInfo);
+			throw new HttpResponseException(e);
+		}
+		
+		byte[] tmpData = ByteUtil.subByte(data, dataIndex + LINE_END.length);
+		// 获取响应头并解析
+		dataIndex = ByteUtil.indexOf(tmpData, END_HEAD);
+		if (dataIndex == -1 || dataIndex < 4) {
+			Log.printErr("获取响应头为空!");
+			throw new HttpResponseException("获取响应头为空!");
+		}
+		byte[] bHeads = ByteUtil.subByte(data, 0, dataIndex + END_HEAD.length);
+		
+		respHeadStr = new String(bHeads, 0, bHeads.length - 4);
+		String[] heads = respHeadStr.split("\r\n");
+		for (String head : heads) {
+			int index = head.indexOf(':');
+			if (index == -1) {
+				Log.printAlarm("遍历响应头,某个响应头不是键值对形式: " + head);
+			} else {
+				// 键统一大写存储
+				respHeads.put(head.substring(0, index).trim().toUpperCase(), head.substring(index + 1).trim());
+			}
+		}
+		
+		// 没有响应体则不获取
+		// 有响应体则判断响应头是否有 Content-Length,是则读取指定大小,否则判断结尾
+		byte[] body = null;
+		// 如果数据体编码为分块编码,则此变量将有数据(不为0),且会将完整的响应信息存储(包括分块编码信息),用于最后respData的数据完整性
+		byte[] bodyAllData = new byte[0];
+		// 如果需要格外处理响应则不会将响应数据保存
+		if (!("HEAD".equalsIgnoreCase(reqType) || state == 204 || state == 205 || state == 302 || state == 304)) {
+			tmpData = ByteUtil.subByte(data, dataIndex + END_HEAD.length);
+			
+			// 获取响应体
+			if (respHeads.containsKey("CONTENT-LENGTH")) {
+				try {
+					int len = Integer.parseInt(respHeads.get("CONTENT-LENGTH"));
+					if (dispose == null) {
+						body = ByteUtil.subByte(tmpData, 0, len);
+						respBody = new String(body);
+					} else {
+						if (len == 0) {
+							Log.print("HttpUtil 处理响应: Content-Length=0,无响应数据");
+						} else {
+							dispose.dispose(ByteUtil.subByte(tmpData, 0, len));
+						}
+					}
+				} catch (NumberFormatException e) {
+					Log.printErr("请求头的Content-Length的值不为数字！" + respHeads.get("CONTENT-LENGTH"));
+				}
+			} else if (respHeads.containsKey("TRANSFER-ENCODING") && respHeads.get("TRANSFER-ENCODING").equalsIgnoreCase("chunked")) {
+				// 没有Content-Length,且http版本为1.1响应头一般都有Transfer-Encoding: chunked
+				// 如果有,则采用分块编码方式读取,格式为: 数据大小\r\n数据内容\r\n数据大小\r\n数据内容...0\r\n\r\n
+				if (dispose == null) {
+					int len = 0;
+					body = new byte[0];
+					do {
+						// 读取到长度
+						dataIndex = ByteUtil.indexOf(tmpData, DATA_SPLIT);
+						byte[] tmpLen = ByteUtil.subByte(tmpData, 0, dataIndex + DATA_SPLIT.length);
+						len = Integer.parseInt(new String(tmpLen, 0, tmpLen.length - DATA_SPLIT.length), 16);
+						
+						tmpData = ByteUtil.subByte(tmpData, dataIndex + DATA_SPLIT.length);
+						
+						if (len != 0) {
+							// 读取指定长度的数据并复制进body
+							byte[] tmp = ByteUtil.subByte(tmpData, 0, len);
+							body = ByteUtil.concat(body, tmp);
+							
+							tmpData = ByteUtil.subByte(tmpData, len);
+							
+							// 加入到局部变量完整响应中
+							bodyAllData = ByteUtil.concat(bodyAllData, tmpLen, tmp, DATA_SPLIT);
+						} else {
+							bodyAllData = ByteUtil.concat(bodyAllData, tmpLen, DATA_SPLIT, DATA_SPLIT);
+						}
+						
+						// 读取数据结尾(\r\n)
+						tmpData = ByteUtil.subByte(tmpData, DATA_SPLIT.length);
+					} while (len != 0);
+					
+					if (body != null) respBody = new String(body);
+					else Log.printAlarm("响应数据应有响应体,但是没有.");
+				} else {
+					int len = 0;
+					do {
+						// 读取到长度
+						dataIndex = ByteUtil.indexOf(tmpData, DATA_SPLIT);
+						byte[] tmp = ByteUtil.subByte(tmpData, 0, dataIndex + DATA_SPLIT.length);
+						len = Integer.parseInt(new String(tmp, 0, tmp.length - DATA_SPLIT.length), 16);
+						
+						if (len != 0) {
+							// 读取指定长度的数据传递给函数
+							tmp = ByteUtil.subByte(tmpData, 0, len);
+							
+							tmpData = ByteUtil.subByte(tmpData, len);
+							
+							dispose.dispose(tmp);
+						}
+						
+						// 读取数据结尾(\r\n)
+						tmpData = ByteUtil.subByte(tmpData, DATA_SPLIT.length);
+					} while (len != 0);
+				}
+			} else {
+				if (dispose == null) {
+					dataIndex = ByteUtil.indexOf(tmpData, END_BODY);
+					if (dataIndex != -1) {
+						body = ByteUtil.subByte(tmpData, 0, dataIndex + END_BODY.length);
+						
+						int size = body.length - END_BODY.length;
+						
+						// 有的 http 响应既没有 content-length,也没有 http 协议结尾符,所以这里对于截取操作需要判断
+						if (size > 0) body = ByteUtil.subByte(body, 0, size);
+						
+						respBody = new String(body);
+					} else Log.printAlarm("响应数据应有响应体,但是没有.");
+				} else {
+					dataIndex = ByteUtil.indexOf(tmpData, END_BODY);
+					if (dataIndex == -1) {
+						dispose.dispose(tmpData);
+					} else {
+						dispose.dispose(ByteUtil.subByte(tmpData, 0, dataIndex));
+					}
+				}
+			}
+			respBodyData = body;
+		} else if (isRedirect && (state == 301 || state == 302)) {
+			String location = respHeads.get("LOCATION");
+			if (location == null) {
+				Log.printErr("页面重定向时失败,响应头location为空,此次数据为当前页面数据,请检查.");
+			} else {
+				StringBuilder b = new StringBuilder(100);
+				b.append("页面由 ");
+				b.append(host); b.append(port); b.append(reqPath);
+				b.append(" 重定向至 ");
+				b.append(location);
+				Log.print(b);
+				
+				redirect(location);
+				return;
+			}
+		}
+		
+		// 合并数据,完成响应
+		int size = bState.length + bHeads.length;
+		if (body != null) {
+			size += bodyAllData.length != 0 ? bodyAllData.length : body.length;
+		}
+		respData = new byte[size];
+		System.arraycopy(bState, 0, respData, 0, bState.length);
+		System.arraycopy(bHeads, 0, respData, bState.length, bHeads.length);
+		
+		if (body != null) {
+			if (bodyAllData.length != 0) {
+				System.arraycopy(bodyAllData, 0, respData, bHeads.length + bState.length, bodyAllData.length);
+			} else {
+				System.arraycopy(body, 0, respData, bHeads.length + bState.length, body.length);
+			}
+		}
+	}
+	
 	/** @return 当前请求的地址 */
 	public String getHost() { return host; }
 
@@ -505,6 +859,14 @@ public class HttpUtil {
 	 */
 	public Map<String, String> getReqHeads() { return reqHeads; }
 
+	/**
+	 * 获取字符串形式的请求头,仅在自行处理请求时有效,其他则使用 {@link #getReqHeads()}.<br>
+	 * 创建时间 2022年3月23日
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @return 请求头
+	 */
+	public String getReqHeadStr() { return reqHeadStr; }
+	
 	/**
 	 * 设置请求头.
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
@@ -583,7 +945,9 @@ public class HttpUtil {
 	 * @return 请求参数
 	 * @since 1.1
 	 */
-	public String getParameters() { return parameters.toString(); }
+	public String getParameters() {
+		return parameters == null ? null : parameters.toString();
+	}
 	
 	/** @return 响应体的字节形式 */
 	public byte[] getRespBodyData() { return respBodyData; }

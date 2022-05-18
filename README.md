@@ -1,9 +1,9 @@
 # Shendi Kit
 **author：** Shendi
 
-**版本：** 1.1
+**版本：** 1.1.0
 
-**最后更改时间：** 2021-12-01
+**最后更改时间：** 2022-03-23
 
 
 
@@ -16,69 +16,118 @@ Java工具包,纯Java制作,使用JDK8
 
 
 # 文档及测试样例
-[在线文档 v1.1](https://1711680493.github.io/doc/SK-1.1)<br>
+[在线文档 v1.1](https://1711680493.github.io/doc/SK-1.1)
 
-样例在源码的 shendi.kit.test 包下.
+样例在源码的 shendi.kit.test 包下
+
+
 
 
 
 # 目录
-### [版本变化](#SK-版本变化)
->[1.1 Start](#v-10)<br>
->[1.1 Small Kit](#v-11)
+## [版本变化](#SK-版本变化)
+[1.0 Start](#v-10)
+[1.1 Small Kit](#v-11)
 
-### [SK 配置](#开始配置)
->[SK 配置文件地址](#配置文件地址)<br>
->[SK 默认配置文件](#默认配置文件)<br>
+
+
+## [SK 配置](#开始配置)
+[SK 配置文件地址](#配置文件地址)
+
+[SK 默认配置文件](#默认配置文件)
+
+[注解扫描配置](#anno_scan.shendi注解扫描配置)
+
+
+
+## [控制台](#控制台模块)
+[给自己的程序增加一个控制台模块](#给自己的程序增加一个控制台模块)
+
+[添加命令](#添加命令)
+
+[命令的使用](#命令的使用)
+
+[命令行控制台](#命令行控制台)
+
+[窗体控制台](#窗体控制台)
+
+[自定义控制台](#自定义控制台)
+
+[内置命令](#内置命令)
+
+>[execute命令](#execute命令)
 >
->>[注解扫描配置](#anno_scan.shendi注解扫描配置)<br>
+>[扩展内置命令](#扩展内置命令)
 
-### [控制台](#控制台模块)
->[给自己的程序增加一个控制台模块](#给自己的程序增加一个控制台模块)<br>
->[添加命令](#添加命令)<br>
->[命令的使用](#命令的使用)<br>
->[命令行控制台](#命令行控制台)<br>
->[窗体控制台](#窗体控制台)<br>
->[自定义控制台](#自定义控制台)<br>
->[内置命令](#内置命令)
->>[execute命令](#execute命令)<br>
->>[扩展内置命令](#扩展内置命令)
 
-### [配置文件](#非常简单的使用-properties-配置文件)
-### [时间工具](#时间工具包)
-### [日志工具](#日志工具包)
-### [加密工具](#加密工具包)
-### [爬虫工具](#爬虫工具包)
->此包待完善,目前只提供了一些简单地功能<br>
->[获取网页数据](#获取网页数据)<br>
->[两行代码获取所有的a标签](#两行代码获取所有的a标签)<br>
->[元素标签](#元素标签)<br>
 
-### [JSON工具](#JSON工具包)
->待完善<br>
->[JSONObject](#JSONObject)<br>
+## [配置文件](#非常简单的使用-properties-配置文件)
 
-### [id工具](#id工具包)
->[雪花算法](#SnowFlake)
+## [时间工具](#时间工具包)
 
-### [HTTP工具](#HTTP工具包)
->[工具类](#工具类)<br>
->[响应数据处理接口](#响应数据处理接口)<br>
->[文件下载(处理响应体)](#文件下载)<br>
->[重定向/转发(保留session等)](#重定向与转发)
+## [日志工具](#日志工具包)
 
-### [线程工具](#线程管理器)
+## [加密工具](#加密工具包)
+## [爬虫工具](#爬虫工具包)
+>此包待完善,目前只提供了一些简单地功能
 
-### [简洁实用工具包-shendi.kit.util](#工具类)
->统一在 shendi.kit.util 包下<br>
->[流处理工具类](#StreamUtils)<br>
->[自定义类加载器](#SKClassLoader)<br>
->[HTTP工具类](#HttpUtil) *已移动至 shendi.kit.net.http, 具体请参考文档[HTTP工具](#HTTP工具包)<br>
->[数学工具类](#Math)<br>
->[判空工具类](#IsNullUtil)<br>
->[字节工具类](#ByteUtil)<br>
->[位工具类](#BitUtil)<br>
->[文件工具类](#FileUtil)<br>
+[获取网页数据](#获取网页数据)
+
+[两行代码获取所有的a标签](#两行代码获取所有的a标签)
+
+[元素标签](#元素标签)
+
+
+
+## [JSON工具](#JSON工具包)
+>待完善
+
+[JSONObject](#JSONObject)
+
+
+
+## [id工具](#id工具包)
+[雪花算法](#SnowFlake)
+
+
+
+## [HTTP工具](#HTTP工具包)
+[工具类](#工具类)
+
+[响应数据处理接口](#响应数据处理接口)
+
+[文件下载(处理响应体)](#文件下载)
+
+[重定向/转发(保留session等)](#重定向与转发)
+
+
+
+## [线程工具](#线程管理器)
+
+
+
+## [简洁实用工具包-shendi.kit.util](#工具类)
+>统一在 shendi.kit.util 包下
+
+[流处理工具类](#StreamUtils)
+
+[自定义类加载器](#SKClassLoader)
+
+[HTTP工具类](#HttpUtil)
+
+> 已移动至 shendi.kit.net.http, 具体请参考文档[HTTP工具](#HTTP工具包)
+
+
+
+[数学工具类](#Math)
+
+[判空工具类](#IsNullUtil)
+
+[字节工具类](#ByteUtil)
+
+[位工具类](#BitUtil)
+
+[文件工具类](#FileUtil)
 
 
 
@@ -94,8 +143,10 @@ Small kit
 		配置工具
 		<ul>
 			<li>优化了配置类 PropertiesConfiguration</li>
-			<li>ConfigurationFactory类新增方法 getProperty(config, name, encoding(可选))<br>
-			等价于 ConfigurationFactory.getConfig(config).getProperty(name);</li>
+			<li>
+                ConfigurationFactory 类新增函数 getProperty 简化获取配置文件操作<br>
+				函数支持参数注入,默认使用的编码为UTF-8
+            </li>
 		</ul>
 	</li>
 	<li>
@@ -118,6 +169,7 @@ Small kit
 			<li>增加对HEAD类型支持,以及可从host可携带端口,新增构造 (host, type)</li>
 			<li>包内新增HttpDataDispose接口用以处理http响应数据(比如文件下载,具体请参考文档)</li>
 			<li>支持重定向与转发</li>
+            <li>增加处理请求与响应的函数,可通过函数直接解析http请求/响应数据</li>
 		</ul>
 	</li>
 	<li>
@@ -174,7 +226,14 @@ Small kit
 
 
 
+
+
 # 开始配置
+
+如果使用到注解，配置工具，则首先需要进行此步骤，未使用到则可忽略此部分
+
+
+
 ## 配置文件地址
 
 >普通Java项目以及SpringBoot项目等,配置文件地址在项目根目录的/files下<br>
@@ -466,85 +525,129 @@ register函数的职责为启动控制台,并接收命令和返回命令结果,�
 <br>
 创建完命令后,在控制台的extraCommand()函数中将命令添加进 commands 命令集合
 
+
+
 # 非常简单的使用 Properties 配置文件
 ## 功能介绍
->可以轻松获取到Properties配置文件<br>
->可以达到实时的效果<br>
->可以使用注解的方式标记一个类,从配置文件里获取到对应类和类的全路径(本人用策略模式较多,所以就封装了这样的功能).
-## main.properties
->在使用之前我们需要在项目的根目录下新增一个名为 files 的文件夹,并在文件夹下新建一个 main.properties 文件.<br>
->Maven 项目也是放到根目录下<br>
->如果使用的是Web项目,将 files/main.properties 放到 WebContent 下<br>
->main.properties 中存放其他配置文件的路径,例如:
->>有一配置文件 config.properties 在项目根目录下,并且我们想给这个配置文件命名为 config
->>那么 main.properties 的内容为config=/config.properties
-## 使用注解的方式
->使用注解的方式可以不用上面那一步,但是只能获取到类的全路径,或者类<br>
->有的时候我们喜欢使用 策略+配置 来取代 if...else,这种情况就可以使用注解的方式来取代对应的配置文件.<br>
-### 如何使用?
->这里举个常用的多态取代多分支的例子<br>
-<pre>
-	class TestMain {
-		public static void main(String[] args) {
-			// 这里我们可以让用户输入信息,然后通过信息调用对应类
-			// 如果我们不用配置文件,我们的代码就如下
-			String input = "用户输入的";
-			if ("A".equals(input)) {
-				System.out.println("A");
-			} else if ("B".equals(input)) {
-				System.out.println("B");
-			}
-			// 上面这种方法可以实现效果,但是当需求扩展,用户可以输入C,D,E之类的,上面这串代码也要跟着新增
-		}
-	}
-	// 解决方法就是使用多态 + 配置文件
-	interface Test {
-		void run();
-	}
-	class TestA implements Test {
-		void run() {
-			System.out.println("A");
-		}
-	}
-	class TestB implements Test {
-		void run() {
-			System.out.println("B");
-		}
-	}
-	class TestMain {
-		public static void main(String[] args) {
-			String input = "用户输入的";
-			// 通过用户输入的从配置文件中获取对应类(这里应有异常和需要强转,请自行操作,伪代码)
-			Test test = Class.forName(配置文件获取(input)).newInstance();
-			test.run();
-			// 上面这种方法较于之前那种方法的区别就是,当需求需要扩展,比如需要新增C,D,E等等类,当前类都不需要改动了
-			// 只需要在配置文件里新增一条配置,和新增一个类继承/实现就可以完成扩展了
-		}
-	}
-	// 上面的方法需要配置一下配置文件,我们可以使用注解的方式取而代之.
-	// 通过在类上增加注解 @PConfig(config="",name=""),来实现
-	// 上面的 config 代表分组,name 代表类在这个组中的名称
-	// 同一个组不能有重复 name
-	interface TestS {
-		void run();
-	}
-	@PConfig(config = "A", name = "a")
-	class TestA implements TestS {
-		@Override public void run() {
-			System.out.println("A");
-		}
-	}
-	@PConfig(config = "A", name = "b")
-	class TestB implements TestS {
-		@Override public void run() {
-			System.out.println("B");
-		}
-	}
-	// 至于如何获取到指定类,则需要先学习ConfigurationFactory类
-</pre>
 
-## shendi.kit.config.ConfigurationFactory
->ConfigurationFactory 是一个配置文件工厂类,里面提供了一些方法让我们非常简单的获取配置文件<br>
+Properties配置文件工具
+
+当配置文件修改后，获取到的数据为修改后的数据
+
+
+
+可以使用注解的方式标记一个类，从配置文件里获取到对应类和类的全路径
+
+(本人用策略模式较多，所以就封装了这样的功能)
+
+
+
+## 主配置文件
+
+
+
+首先为了知道配置文件存放位置，需要创建一个主配置文件，存放于项目根目录的 files 文件夹下
+
+文件命名为 **main.properties**
+
+> JavaWeb 项目放到WebContent的files文件夹下
+
+
+
+其中，主配置文件内内容为
+
+```properties
+# 配置文件名称(自己命名,获取时候用到)=配置文件相对地址(相对于项目根目录,JavaWeb项目则为WebContent下)
+# 例如 项目结构为
+# |-项目
+#	|-files
+#		|-main.properties
+#		|-config.properties
+# 其中 config.properties 为需要使用的,命名为config,在 main.properties 添加如下内容即可
+config=/files/config.properties
+```
+
+
+
+## 使用注解的方式
+使用注解的方式可以不用上面那一步,但是只能获取到类的全路径,或者类
+
+有的时候我们喜欢使用 策略+配置 来取代 if...else,这种情况就可以使用注解的方式来取代对应的配置文件.
+
+
+
+### 如何使用?
+这里举个常用的多态取代多分支的例子
+
+```java
+class TestMain {
+	public static void main(String[] args) {
+		// 这里举例实现让用户输入信息,然后通过信息调用对应类
+		// 如果不用配置文件,我们的代码一般如下
+        String input = "用户输入的";
+        if ("A".equals(input)) {
+            System.out.println("A");
+        } else if ("B".equals(input)) {
+            System.out.println("B");
+        }
+        // 上面这种方法可以实现效果,但是当需求扩展,用户可以输入C,D,E之类的,上面这串代码也要跟着新增
+    }
+}
+
+// 解决方法就是使用多态 + 配置文件
+interface Test {
+    void run();
+}
+class TestA implements Test {
+    void run() {
+        System.out.println("A");
+    }
+}
+class TestB implements Test {
+    void run() {
+        System.out.println("B");
+    }
+}
+class TestMain {
+    public static void main(String[] args) {
+        String input = "用户输入的";
+        // 通过用户输入的从配置文件中获取对应类(这里应有异常和需要强转,请自行操作,伪代码)
+        Test test = Class.forName(配置文件获取(input)).newInstance();
+        test.run();
+        // 好处是,当需求需要扩展,比如需要新增C,D,E等等类,当前类都不需要改动
+        // 只需要在配置文件里新增一条配置,和新增一个类继承/实现就可以完成扩展了
+    }
+}
+
+// 上面的方法需要配置一下配置文件,我们可以使用注解的方式取而代之.
+// 通过在类上增加注解 @PConfig(config="",name=""),来实现
+// 上面的 config 代表分组,name 代表类在这个组中的名称
+// 同一个组不能有重复 name
+interface TestS {
+    void run();
+}
+@PConfig(config = "A", name = "a")
+class TestA implements TestS {
+    @Override public void run() {
+        System.out.println("A");
+    }
+}
+@PConfig(config = "A", name = "b")
+class TestB implements TestS {
+    @Override public void run() {
+        System.out.println("B");
+    }
+}
+// 至于如何获取到指定类,则查看ConfigurationFactory类
+```
+
+
+
+## 配置文件工厂
+
+ConfigurationFactory 是一个配置文件工厂类，简化了配置文件的使用
+
+
 
 ### getConfig(String);
 >上面说到了在 main.properties 中配置其他配置文件的路径,那么我们如何获取?<br>
@@ -564,11 +667,109 @@ register函数的职责为启动控制台,并接收命令和返回命令结果,�
 >在之前说到可以通过注解的方式,获取到指定类,使用的就是此方法了<br>
 >参数与注解的两个参数对应,返回值为Class<?>,所以需要自己进行强转.
 
-### getProperty(String config, String name)
->在1.1版本增加了此函数,在之前我们获取Properties配置文件并获取值需要如下代码<br>
->ConfigurationFactroy.getConfig("xxx").getProperty("xx");<br>
->这样显得很长,于是添加了此方法,将 getConfig和getProperty融合.<br>
->返回值为String,并有一重载可以设置编码getProperty(config,name,encode)<br>
+
+
+### 获取指定配置文件的指定值，支持参数注入
+
+> SK 1.1 新增
+
+
+
+**getProperty() 函数**
+
+简化了1.0获取配置文件的方式，默认编码为 UTF-8，有以下几个重载
+
+```java
+(String config, String name)
+(String config, String name, String encode)
+(String config, String name, Entry<String, String>[] params)
+(String config, String name, String encode, Entry<String, String>[] params)
+
+/*
+	其中
+	config(配置文件名称),name(配置文件内键名),encode(编码),params(注入参数)
+	Entry 使用的是 shendi.kit.util.Entry
+*/
+```
+
+
+
+新增此函数可以注入参数，其中语法为 ${注入参数名称}
+
+例如 config.properties 配置文件内容如下
+
+```properties
+welcome=你好，我是 ${name}
+```
+
+
+
+使用以上几个重载获取分别为
+
+```java
+ConfigurationFactory.getProperty("config", "welcome");
+->你好，我是 ${name}
+
+ConfigurationFactory.getProperty("config", "welcome", "UTF-8");
+->你好，我是 ${name}
+
+ConfigurationFactory.getProperty("config", "welcome", new Entry[]{new Entry<String, String>("welcome", "Shendi")});
+->你好，我是 Shendi
+
+ConfigurationFactory.getProperty("config", "welcome", "UTF-8", new Entry[]{new Entry<String, String>("welcome", "Test")});
+->你好，我是 Test
+```
+
+需要注意的是，${} 花括号中间的为命名名称，包括空格等
+
+
+
+### 配置文件是否修改
+
+> SK 1.1 新增
+
+
+
+在使用配置文件的时候，对于一些需要频繁操作处理的数据，通过缓存的方式能够更加节省开销
+
+于是提供了判断配置文件是否更改了的函数，当更改后再去刷新缓存即可
+
+```java
+/*
+	boolean ConfigurationFactory.configIsChange(String name);
+	当修改后返回 true, 否则 false
+*/
+// 例如配置文件 config 中有一个 key 为某 token 超时时间,我们获取到的为字符串形式,每一次操作都需要转成 int
+// 则可以如下使用
+/*
+	目录结构
+	Project
+		|-files
+			|-main.properties
+			|-config.properties
+	
+	配置文件内容
+	main.properties
+		config=/files/config.properties
+	config.properties
+		timeout=1000
+*/
+public static final String CONFIG = "config";
+// 初始化
+long timeout = Integer.parseInt(ConfigurationFactory.getProperty(CONFIG, "timeout"));
+
+public long getTimeout() {
+   	// 当配置文件有修改再去更改变量
+    if (ConfigurationFactory.configIsChange(CONFIG)) {
+        timeout = Integer.parseInt(ConfigurationFactory.getProperty(CONFIG, "timeout"));
+    }
+	return timeout;
+}
+```
+
+
+
+
 
 # 时间工具包
 >shendi.kit.time.TimeUtils<br>
@@ -590,14 +791,21 @@ register函数的职责为启动控制台,并接收命令和返回命令结果,�
 >>此方法参数为年,月,日,时分秒毫秒,如果值为-1则代表当前日期<br>
 >此类中方法都是静态的,如需了解更多,请参阅JavaDoc.
 
-# 日志工具包
->日志打印类 shendi.kit.log.Log<br>
->
->>用于打印日志和控制日志是否在控制台可见.<br>
 
->日志管理类 shendi.kit.log.LogManager<br>
->
->>用于获取日志
+
+# 日志工具包
+
+日志打印类 shendi.kit.log.Log
+
+> 用于打印日志和控制日志是否在控制台可见
+
+
+
+日志管理类 shendi.kit.log.LogManager
+
+>用于获取日志
+
+
 
 ## Log类
 有以下几种级别的日志
@@ -609,18 +817,25 @@ register函数的职责为启动控制台,并接收命令和返回命令结果,�
 	<li>错误日志 Log.printErr();</li>
 </ol>
 
-使用 setIsLog(false) 来隐藏日志在控制台的显示<br>
-对于某种级别的日志也提供了对应的隐藏方法,例如 setIsLogDebug,setIsLogInfo...<br>
+
+使用 setIsLog(false) 来隐藏日志在控制台的显示
+
+对于某种级别的日志也提供了对应的隐藏方法,例如 setIsLogDebug,setIsLogInfo...
 
 支持格式化输出日志,参考 printf 函数,例如日志内容为12345
->Log.print("1%s345", "2");
+
+```java
+Log.print("1%s345", "2");
+```
+
+
 
 ## 日志缓存
-使用 Log 类进行输出则是没有缓存的,对于需要很详细的日志时(debug),则性能会比较低下,于是提供了缓存类来解决此问题<br>
+使用 Log 类进行输出则是没有缓存的,对于需要很详细的日志时(debug),则性能会比较低下,于是提供了缓存类来解决此问题
 
-shendi.kit.log.Alog抽象类,所有日志缓存的父类<br>
+shendi.kit.log.Alog抽象类,所有日志缓存的父类
 
-有一个子类 DefaultLog,其中实现了一些参数的设置,简化了扩展<br>
+有一个子类 DefaultLog,其中实现了一些参数的设置,简化了扩展
 
 DefaultLog也有一个子类 DebugLog 类,使用如下(代码取自 shendi.kit.test.TestDebugLog)
 ```java
@@ -671,8 +886,13 @@ try (DebugLog tlog = new DebugLog("测试close")) {
 
 >一般一个类对应一个对象,有对应缓存池,可以处理并发操作,所以不要在局部函数中创建.
 
-然后使用对象的 log 函数进行日志打印(支持格式化输出)<br>
+
+
+然后使用对象的 log 函数进行日志打印(支持格式化输出)
+
 最后使用对象的 commit 函数完成此次操作,如果不使用,则缓存不能被刷新到硬盘中,将会造成内存溢出
+
+
 
 ### 日志文件
 存在于项目根目录的 logs 文件夹下
@@ -686,6 +906,8 @@ try (DebugLog tlog = new DebugLog("测试close")) {
 shendi.kit.log.data.DataLog
 
 > kit 1.1新增，用于格外的日志数据持久化
+
+
 
 功能与 Log 类相似，不同的是可以给日志命名，且会在格外的文件夹中存储
 
@@ -868,7 +1090,9 @@ System.out.println(rs);
 shendi.kit.net.http<br>
 SK 1.1 新增
 
-#### 工具类
+
+
+## 工具类
 shendi.kit.net.http.HttpUtil
 
 ```java
@@ -897,7 +1121,7 @@ System.out.print(new String(http.getRespData()));
 
 
 
-#### 响应数据处理接口
+## 响应数据处理接口
 
 shendi.kit.net.http.HttpDataDispose
 
@@ -907,7 +1131,7 @@ shendi.kit.net.http.HttpDataDispose
 
 
 
-#### 文件下载
+## 文件下载
 当我们使用http的方式下载文件时,基础用法已经满足不了需求
 >只有所有数据都读取完成时才会完成send(),这时会程序会卡住,当下载的文件过大时则会遇到内存溢出的问题
 
@@ -973,7 +1197,7 @@ output.close();
 
 
 
-#### 重定向与转发
+## 重定向与转发
 当页面返回结果为重定向内容,我们想要的结果大多都是重定向后的数据,这时需要处理重定向的方法<br>
 当我们访问的网页需要登录才能查看,需要保存session/token等信息时,这时需要使用原有的HttpUtil对象<br>
 HttpUtil提供了 redirect(url) 函数用以进行重定向/转发
@@ -1001,6 +1225,108 @@ http.redirect("localhost/index");
 /******************
 转发也可以自行重新send,redirect会保留请求信息并重新请求,拥有转发的效果,重定向默认也使用redirect函数.
 *******************/
+```
+
+
+
+## 处理请求
+
+在 SK1.1 中加入了处理请求的函数，当有HTTP请求数据的字符串或输入流时，则可通过以下函数进行处理
+
+```java
+// 提供了无参构造用于只处理响应的情况
+
+// 通过输入流处理请求
+boolean disposeReq(InputStream);
+// 通过字符串数据处理请求
+boolean disposeReq(String);
+// 其中处理请求成功(请求有效)则返回 true,否则 false
+```
+
+
+
+例如编写一个只获取http请求的服务器
+
+```java
+ServerSocket server = new ServerSocket(1711);
+while (true) {
+    try {
+        Socket socket = server.accept();
+        HttpUtil http = new HttpUtil();
+        boolean isOk = http.disposeReq(socket.getInputStream());
+        System.out.println(isOk);
+        if (isOk) {
+            System.out.println("接收到的原封不动的所有数据:");
+            System.out.println(new String(http.getData()));
+
+            System.out.println("-------------");
+            System.out.println("拼装:");
+            System.out.println(http.getReqType() + " " + http.getReqPath() + " " + http.getHttpV());
+            System.out.println(http.getReqHeadStr());
+            System.out.println(http.getParameters());
+            System.out.println("***********************************************");
+        }
+    } catch (Exception e) { e.printStackTrace(); }
+}
+```
+
+
+
+将以上代码放到main函数运行，打开浏览器，输入 localhost:1711 即可看到浏览器发送的请求数据
+
+
+
+
+
+## **处理响应**
+
+在 SK1.1 中加入了处理响应的函数，当有HTTP响应数据的字符串或输入流时，则可通过以下函数进行处理
+
+```java
+// 提供了无参构造用于只处理响应的情况
+
+// 通过输入流处理响应
+disposeResp(InputStream);
+// 通过字节数据处理响应
+disposeResp(byte[]);
+// 因响应数据可能过大或可能是图片数据,所以未提供参数为字符串的函数
+```
+
+
+
+处理完后通过前缀为 getResp 的函数获取响应内容
+
+
+
+```java
+// http响应数据
+byte[] respData = ...;
+// http响应数据流
+InputStream input = socket.getInputStream();
+
+HttpUtil http = new HttpUtil();
+// 通过响应数据直接解析响应
+http.disposeResp(respData);
+// 通过响应数据流解析响应,读取超时时间通过socket等进行设置
+http.disposeResp(input);
+
+/* 当函数执行成功,则http对象拥有了响应数据,可进行如下操作 */
+// 所以响应数据内容(包括分块编码等,原封不动)
+byte[] allRespData = http.getRespData();
+// 获取响应状态
+int state = http.getState();
+// 获取响应状态的附加信息,例如 HTTP/1.1 200 OK 这里的OK为附加信息
+String stateInfo = httpgetStateInfo();
+
+// 获取所有响应头,字符串形式
+String headStr = http.getRespHeadStr();
+// 获取所有响应头,Map形式,其中key都为大写形式
+Map<String, String> heads = http.getRespHeads();
+// 获取指定响应头,例如HOST
+String host = http.getRespHead("HOST");
+
+// 获取响应体
+String body = http.getRespBody();
 ```
 
 

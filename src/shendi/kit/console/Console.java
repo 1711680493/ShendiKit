@@ -12,7 +12,8 @@ import shendi.kit.log.Log;
  * 控制台抽象类,实现此类来实现一个控制台视图<br>
  * <br>
  * 一个控制台类的主要职责为传递命令与显示命令执行结果<br>
- * 
+ * <br>
+ * <b>一个控制台对象只允许被注册一次</b>
  * <br>
  * 使用 {@link #register()} 来注册一个控制台<br>
  * 命令行控制台: {@link CommandConsole}<br>
@@ -53,6 +54,9 @@ public abstract class Console {
 	
 	/** 当前控制台命令所在组 */
 	protected String group;
+
+	/** 一个对象只允许注册一次 */
+	private boolean isInit;
 	
 	/** 默认控制台命令,默认组. */
 	public Console() {}
@@ -69,6 +73,9 @@ public abstract class Console {
 	 * @param group 命令组
 	 */
 	public void register(String group) {
+		if (isInit) return;
+		isInit = true;
+		
 		this.group = group;
 		
 		cs.init();

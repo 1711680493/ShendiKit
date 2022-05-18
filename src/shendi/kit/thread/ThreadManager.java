@@ -21,8 +21,11 @@ public class ThreadManager {
 	/** 线程管理器是否已打开 */
 	private static boolean isOpen = false;
 	
-	/** 需要被管理的线程列表 [线程命名:[线程:线程类型]] */
-	private static HashMap<String, Entry<Thread, ThreadType>> ts = new HashMap<>();
+	/** 需要被管理的线程列表 [唯一标识:线程信息] */
+	static final HashMap<String, SKThread> THREADS = new HashMap<>();
+	
+	/** 线程管理策略列表 [唯一标识:策略信息] */
+	static final HashMap<String, ThreadTactic> TACTICS = new HashMap<>(); 
 	
 	/** 管理线程,守护线程 */
 	private static Thread manager;

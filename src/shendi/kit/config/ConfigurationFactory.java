@@ -11,11 +11,15 @@ import shendi.kit.annotation.PConfig;
 import shendi.kit.annotation.scan.PConfigScan;
 import shendi.kit.log.Log;
 import shendi.kit.path.PathFactory;
+import shendi.kit.util.Entry;
 
 /**
- * 配置文件工厂,用于获取指定的存在的配置文件.<br>
- * 如需使用此类,请在项目根目录(Web项目则为WebContent)下新建一个files文件夹,并在files文件夹中新建 main.properties 文件.<br>
- * main.properties用于存储其他配置文件的路径.<br>
+ * 配置文件工厂,简化配置文件操作.
+ * <br>
+ * 如需使用此类,请在项目根目录(Web项目则为WebContent)下新建一个files文件夹,并在files文件夹中新建 main.properties 文件.
+ * <br>
+ * main.properties用于存储其他配置文件的路径.
+ * <br>
  * 例: 普通Java项目的根目录的files目录下有 config.properties 配置文件,我们需要在 main.properties 中添加以下内容才能获取到config.properties文件
  * <b>config=/files/config.properties</b><br>
  * 通过 {@link #getConfig(String)} 来获取一个在main.properties中对应的另一个Properties的文件,默认处理编码UTF-8.
@@ -24,6 +28,9 @@ import shendi.kit.path.PathFactory;
  * @version 1.1
  */
 public class ConfigurationFactory {
+	
+	/** 默认编码 */
+	public static final String ENCODE_DEFAULT = "UTF-8";
 	
 	/** Properties 配置的对象 */
 	private static final PropertiesConfiguration CONFIG = new PropertiesConfiguration();
@@ -42,10 +49,10 @@ public class ConfigurationFactory {
 	 * 获取 Properties 配置文件根据指定的编码
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param name main.properties中配置的配置文件名,不能出现中文
-	 * @param encoding 将内容通过指定编码处理
+	 * @param encode 将内容通过指定编码处理
 	 * @return 返回指定配置文件 null则代表没有此配置,或者 main.properties 不存在.
 	 */
-	public static Properties getConfig(String name, String encoding) {
+	public static Properties getConfig(String name, String encode) {
 		// 先判断获取的是不是注解配置 name开头为指定字符串则是注解配置,否则直接获取对应配置文件内容.
 		String text = PConfig.NAME + name;
 		Properties anno = CONFIG.getConfigs().get(text);
@@ -56,7 +63,7 @@ public class ConfigurationFactory {
 			//配置文件读取的是ISO-8859-1 转码
 			String configUrl = CONFIG.getMain().getProperty(name);
 			if (configUrl != null) {
-				try { configUrl = new String(configUrl.getBytes("ISO-8859-1"),encoding); }
+				try { configUrl = new String(configUrl.getBytes("ISO-8859-1"), encode); }
 				catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 					Log.printErr("在配置工厂中获取配置文件失败!获取配置文件转码出错! configUrl=" + configUrl);
@@ -112,35 +119,79 @@ public class ConfigurationFactory {
 	}
 	
 	/**
-	 * 对于 properties 配置文件,使用此方法可直接简易获取.
+	 * 简化Properties配置文件值的获取,使用UTF-8编码.
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param config 配置文件名
 	 * @param name 键名
 	 * @return 指定配置文件内键的值
 	 * @since 1.1
 	 */
-	public static String getProperty(String config, String name) { return getProperty(config, name, null); }
+	public static String getProperty(String config, String name) { return getProperty(config, name, "UTF-8"); }
 	
 	/**
-	 * 对于 properties 配置文件,可直接设置编码.
+	 * 简化Properties配置文件值的获取,使用指定编码.
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param config	配置文件名
 	 * @param name		键名
-	 * @param encode	属性值的编码,为null则使用默认编码
+	 * @param encode	属性值的编码,为null则使用properties默认编码(ISO-8859-1)
 	 * @return 指定配置文件内键的值
 	 * @since 1.1
 	 */
-	public static String getProperty(String config, String name, String encode) {
-		String value = getConfig(config).getProperty(name);
-		if (encode == null) return value;
-		try {
-			// Properties使用ISO-8859-1编码
-			return new String(value.getBytes("ISO-8859-1"), encode);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			Log.printErr("此编码不被支持: " + encode);
-			return value;
+	public static String getProperty(String config, String name, String encode) { return getProperty(config, name, encode, null); }
+	
+	/**
+	 * 简化Properties配置文件值的获取,使用UTF-8编码,支持参数注入,参考文档.
+	 * 创建时间 2022年2月23日
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param config	配置文件名称
+	 * @param name		配置文件内键名称
+	 * @param params	键对应的值的参数注入
+	 * @return 配置文件被指定参数注入的值
+	 * @since 1.1
+	 */
+	public static String getProperty(String config, String name, Entry<?,?>[] params) { return getProperty(config, name, ENCODE_DEFAULT, params); }
+	
+	/**
+	 * 简化Properties配置文件值的获取,使用指定编码,支持参数注入,参考文档.
+	 * 创建时间 2022年2月23日
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param config	配置文件名称
+	 * @param name		配置文件内键名称
+	 * @param encode	编码,为空则使用properties默认编码
+	 * @param params	键对应的值的参数注入
+	 * @return 配置文件被指定参数注入的值
+	 * @since 1.1
+	 */
+	public static String getProperty(String config, String name, String encode, Entry<?,?>[] params) {
+		String value = getConfig(config, encode).getProperty(name);
+		if (value == null) return null;
+		
+		if (encode != null) {
+			try {
+				// Properties使用ISO-8859-1编码
+				value = new String(value.getBytes("ISO-8859-1"), encode);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				Log.printExcept("此编码不被支持: ".concat(encode));
+			}
 		}
+		
+		// 注入参数
+		if (params != null && params.length > 0) {
+			for (Entry<?,?> param : params) {
+				if (param.key != null) {
+					String key = new StringBuilder(param.key.toString().length() + 6)
+							.append("\\$\\{").append(param.key.toString()).append("\\}")
+							.toString();
+					
+					value = param.value == null
+							? value.replaceAll(key, "")
+							: value.replaceAll(key, param.value.toString());
+				}
+			}
+		}
+		
+		return value;
 	}
 	
 	/**

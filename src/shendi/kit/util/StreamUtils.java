@@ -9,7 +9,7 @@ import java.io.InputStream;
 import shendi.kit.log.Log;
 
 /**
- * 对流处理的工具类.
+ * 对流处理的工具类.<br>
  * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
  * @version 1.1
  */
@@ -23,7 +23,8 @@ public class StreamUtils {
 	 * @throws IOException 在读取的过程中出现错误
 	 */
 	public static String readLine(InputStream input) throws IOException {
-		return new String(readLineRByte(input));
+		byte[] result = readLineRByte(input);
+		return result == null ? null : new String(result);
 	}
 	
 	/**

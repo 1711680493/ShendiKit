@@ -13,6 +13,7 @@ public final class Time {
 	private final String sTime;
 	private final Date dTime;
 	private final long lTime;
+	
 	/**
 	 * 用字符串的时间格式进行初始化.
 	 * @param time 字符串类型的时间表示
@@ -23,6 +24,7 @@ public final class Time {
 		dTime = format.getDate(sTime);
 		lTime = format.getNum(dTime);
 	}
+	
 	/**
 	 * 用 Date 的时间格式进行初始化.
 	 * @param time Date类型的时间表示
@@ -33,6 +35,7 @@ public final class Time {
 		sTime = format.getString(dTime);
 		lTime = format.getNum(dTime);
 	}
+	
 	/**
 	 * 用 long 的时间格式进行初始化.
 	 * @param time long类型的时间表示

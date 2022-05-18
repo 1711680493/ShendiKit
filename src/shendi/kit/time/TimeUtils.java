@@ -47,6 +47,10 @@ import shendi.kit.log.Log;
  * @see TimeDisposal
  */
 public final class TimeUtils {
+	
+	/** 一天的时间戳 */
+	public static final long TIMESTAMP_ONE_DAY = 86400000;
+	
 	/** 代表一个精确到秒的Time */
 	public static final String DATE_TIME = "date_time";
 	/** 代表一个精确到秒的Time 适用于文件名 */
