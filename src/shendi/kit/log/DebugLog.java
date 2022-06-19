@@ -7,13 +7,24 @@ package shendi.kit.log;
  */
 public class DebugLog extends DefaultLog {
 
-	public DebugLog(String name) { super(name); super.setIsLog(Log.isLogDebug()); }
+	/**
+	 * 是否为调试模式, 当非调试模式, 不做任何操作
+	 * @since SK 1.1
+	 */
+	public boolean isDebug = true;
+	
+	public DebugLog(String name) {
+		super(name);
+		super.setIsLog(Log.isLogDebug());
+	}
 	
 	@Override
 	protected String format(Object log, Object... objs) {
-		return Log.log(log, LogFactory.LEVEL_DEBUG, false, Log.CALL_LEVEL_LOG, objs);
+		return isDebug ? Log.log(log, LogFactory.LEVEL_DEBUG, false, Log.CALL_LEVEL_LOG, objs) : null;
 	}
 	
-	@Override protected void save(String log) { Log.log(log, LogFactory.LEVEL_DEBUG, true, CALL_LEVEL_LOG); }
+	@Override protected void save(String log) {
+		if (isDebug) Log.log(log, LogFactory.LEVEL_DEBUG, true, CALL_LEVEL_LOG);
+	}
 	
 }

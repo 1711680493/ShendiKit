@@ -894,7 +894,51 @@ try (DebugLog tlog = new DebugLog("测试close")) {
 
 
 
-### 日志文件
+## 调试日志
+
+> SK 1.1 新增
+
+调试日志用于测试环境，当生产环境时，调试日志将不做任何操作
+
+基于 [日志缓存](#日志缓存)
+
+shendi.kit.log.DebugLog
+
+
+
+```java
+public class TestDebugLog {
+	
+	/** 可以定义成全局变量统一控制, 也可多对象细分名称(需自行管理所有调试日志对象,当生产环境需要将所有对象都设置为非调试模式) */
+	public static final DebugLog DLOG = new DebugLog("调试日志");
+	
+	public static void main(String[] args) {
+		
+		// 是否为调试模式, 默认true, 当非调试模式则不做任何操作
+		DLOG.isDebug = true;
+		/* 
+			是否在控制台显示, 默认true, 不在控制台显示也会保存到文件
+			当非调试模式, 此项无效
+		*/
+		DLOG.setIsLog(true);
+		
+		DLOG.log("第一条日志: xxxx, 账号=%s", "123456");
+		DLOG.log("第二条日志: xxxx, 密码=%s", "654321");
+		DLOG.log("第三条日志: xxxx, 成功");
+		
+		// 因为是基于日志缓存, 最后需要手动保存到文件, 非调试模式下此项不做任何操作
+		// 或者使用 try-with resource
+		DLOG.commit();
+	}
+	
+}
+```
+
+
+
+
+
+## 日志文件
 存在于项目根目录的 logs 文件夹下
 
 如果是 Web 项目则为项目的资源路径(WebContent)的logs目录下.
@@ -1377,7 +1421,10 @@ ThreadManager.add("测试线程", t, ThreadType.NO_WATTING);
 
 # 工具类
 
-#### StreamUtils
+
+
+## StreamUtils
+
 >流处理工具类<br>
 >下面演示此类的少量方法,更多请直接参考此类<br>
 ```java
@@ -1396,18 +1443,31 @@ byte[] fData = StreamUtils.getFile("C:/1.txt");
 ```
 
 
-#### SKClassLoader
+
+## SKClassLoader
+
 >类加载器<br>
 >用于将外部class文件定义可使用的类
 
-#### HttpUtil
+
+
+## HttpUtil
+
 >Http工具类<br>
 >在 SK 1.1 中,此类被移至 shendi.kit.net.http 包中,文档也移动,请参考 [HTTP工具](#HTTP工具包)
 
-#### Math
+
+
+## Math
+
 数学工具类
 
 SK 1.1中新增
+
+
+
+### 单位转换
+
 ```java
 // 单位转换,如果后两参数传递的浮点型则返回的结果也带小数
 String[] names = {"厘米", "分米", "米"};
@@ -1421,7 +1481,28 @@ s == "10米 1分米 1厘米"
 
 
 
-#### IsNullUtil
+### 计算指定字符数的指定最大长度可排列数
+
+```java
+// 例如计算指定字符列表可生成的最大随机字符数
+// 例如字符0和1, 最大长度2, 可排列为 0,1,00,01,10,11
+// 参数1为字符数量,0和1是两个, 参数2为最大长度,两位数就2, 因为计算结果值可能会非常大,所以使用BigDecimal
+BigDecimal num = Math.charLenComposeNum(2, 2);
+// num == 6
+
+// 计算数字字母(大小写) 32长度可排列的数
+String chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+num = Math.charLenComposeNum(chars.length(), 32);
+// num == 2309914571127845629705327490900126861476998063576338098410
+```
+
+
+
+
+
+
+
+## IsNullUtil
 
 >判空工具类<br>
 >SK 1.1中新增
@@ -1458,7 +1539,7 @@ if (IsNullUtil.isNull(new String[] {"", "null"}, account, password)) {
 
 
 
-#### ByteUtil
+## ByteUtil
 
 字节工具类
 
@@ -1595,7 +1676,7 @@ isEndWith -> false
 
 
 
-#### BitUtil
+## BitUtil
 
 >位工具类<br>
 >SK 1.1中新增
@@ -1621,7 +1702,7 @@ int bitNum = BitUtil.sizeOf(1);
 </pre>
 
 
-#### FileUtil
+## FileUtil
 
 >文件工具类<br>
 >SK 1.1中新增

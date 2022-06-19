@@ -40,6 +40,10 @@ public abstract class ALog implements Closeable {
 	 */
 	public void log(Object log, Object... objs) {
 		String fl = format(log, objs);
+		
+		// 用于调试日志, 非调试模式则不做任何操作
+		if (fl == null) return;
+		
 		Thread t = Thread.currentThread();
 		
 		if (!bs.containsKey(t)) {
