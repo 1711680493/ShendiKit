@@ -44,7 +44,7 @@ public class IsNullUtil {
 	 * <pre>
 	 * String a = "123";
 	 * Object b = null;
-	 * isNull(new Object(){}, );
+	 * isNull(IsNullUtil.STR_NULL, a, b); // true
 	 * 
 	 * </pre>
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
@@ -79,6 +79,51 @@ public class IsNullUtil {
 	public static boolean isNull(Object... objs) {
 		if (objs == null) return true;
 		return isNull(null, objs);
+	}
+	
+	/**
+	 * 通过指定条件判断元素集合是否全符合.
+	 * <br>
+	 * 创建时间 2022年7月2日
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param nul	条件列表
+	 * @param objs	元素集合
+	 * @return 元素集合是否全为空(匹配所有条件列表)
+	 */
+	public static boolean isAllNull(Object[] nul, Object... objs) {
+		if (objs == null) return true;
+		if (nul == null) {
+			for (Object o : objs) {
+				if (o != null) return false;
+			}
+		} else {
+			for (Object o : objs) {
+				if (o == null) continue;
+				
+				boolean isNull = false;
+				for (Object n : nul) {
+					if (o.equals(n)) {
+						isNull = true;
+						break;
+					}
+				}
+				
+				if (!isNull) return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * 元素列表是否全为空.
+	 * <br>
+	 * 创建时间 2022年7月2日
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param objs 元素列表
+	 * @return true为空
+	 */
+	public static boolean isAllNull(Object... objs) {
+		return isAllNull(null, objs);
 	}
 	
 	/**

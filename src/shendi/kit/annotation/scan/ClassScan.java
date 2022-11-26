@@ -43,11 +43,13 @@ public class ClassScan {
 	private static final ClassLoader cl = ClassScan.class.getClassLoader();
 	
 	static {
-		ANNOS = new Class[4];
-		ANNOS[0] = PConfig.class;
-		ANNOS[1] = EncryptAnno.class;
-		ANNOS[2] = ConsoleAnno.class;
-		ANNOS[3] = CommandAnno.class;
+		ANNOS = new Class[] {
+			PConfig.class,
+//			Init.class,
+			EncryptAnno.class,
+			ConsoleAnno.class,
+			CommandAnno.class
+		};
 		
 		// 获取需要处理的 jar 包名.
 		File scanFile = new File(PathFactory.getPath(PathFactory.PROJECT, File.separatorChar + "files" + File.separatorChar + "/anno_scan.shendi"));

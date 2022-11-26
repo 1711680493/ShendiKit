@@ -67,6 +67,12 @@ Java工具包,纯Java制作,使用JDK8
 
 ## [日志工具](#日志工具包)
 
+
+
+## [路径工具](#Path工具包)
+
+
+
 ## [加密工具](#加密工具包)
 ## [爬虫工具](#爬虫工具包)
 >此包待完善,目前只提供了一些简单地功能
@@ -76,6 +82,12 @@ Java工具包,纯Java制作,使用JDK8
 [两行代码获取所有的a标签](#两行代码获取所有的a标签)
 
 [元素标签](#元素标签)
+
+
+
+## [缓存工具](#缓存工具 Cache)
+
+>待完善，目前只提供磁盘缓存，文件读写功能
 
 
 
@@ -99,6 +111,10 @@ Java工具包,纯Java制作,使用JDK8
 [文件下载(处理响应体)](#文件下载)
 
 [重定向/转发(保留session等)](#重定向与转发)
+
+[处理请求-http服务器](#处理请求)
+
+[处理响应](#处理响应)
 
 
 
@@ -219,6 +235,7 @@ Small kit
 	</li>
 	<li>新增shendi.kit.id包,用于处理id生成</li>
     <li>新增shendi.kit.thread包,用于处理线程</li>
+    <li>新增shendi.kit.cache包,缓存工具</li>
 	<li>TimeUtils改进,将Time,TimeFormat从内部类提取,且修复已知BUG</li>
 	<li>StreamUtils新增 readAllByte(input) 函数,用以读取输入流中所有的数据</li>
 </ol>
@@ -228,7 +245,8 @@ Small kit
 
 
 
-# 开始配置
+
+# 开始配置（使用注解则此步骤必须）
 
 如果使用到注解，配置工具，则首先需要进行此步骤，未使用到则可忽略此部分
 
@@ -966,6 +984,34 @@ public class TestDataLog {
 
 
 
+
+
+# Path工具包
+
+位于 shendi.kit.path 包
+
+SK 1.0时编写，于1.1优化，目前支持获取项目路径和源路径（class）
+
+这里使用 PathFactory 做个简单的演示
+
+```java
+// 获取项目根目录下的 test.txt 文件,例如项目根目录在 D:/Project
+String path = PathFactory.getPath(PathFactory.PROJECT, "/test.txt");
+// path = D:/Project/test.txt
+// 打成jar包后 jar包位置则为项目根路径
+// 如果是Java Web项目 - Tomcat,根目录在WebContent下,具体参考shendi.kit.path.ProjectPath
+
+// 获取项目源路径（bin目录）
+path = PathFactory.getPath(PathFactory.RESOURCE, "/test.txt");
+// path = D:/Project/bin/test.txt
+```
+
+
+
+
+
+
+
 # 加密工具包
 ## 加密工厂 shendi.kit.encrypt.EncryptFactory
 >通过加密工厂获取对应加密算法类.<br>
@@ -1074,6 +1120,240 @@ System.out.println(rs);
 > String html(); 					当前元素的元素内容<br>
 > Set<String> attrNames();			获取所有元素的名称<br>
 > HashMap<String, String> attrs()	获取所有元素<br>
+
+
+
+# 缓存工具 Cache
+
+位于 shendi.kit.cache 下
+
+**SK 1.1新增**
+
+
+
+
+
+## Cache 接口
+
+缓存工具的所有类都实现此接口，接口拥有以下定义
+
+* init()
+* write(byte[])
+* rewrite(byte[])
+* byte[] readAll()
+* clear()
+
+
+
+
+
+## DiskCache 磁盘缓存
+
+将缓存数据写到硬盘上，从缓存中读取
+
+拥有一个构造
+
+* DiskCache(String name)
+
+
+
+其中 name 表示此缓存名称，也表示文件名称
+
+> 文件位置保存在项目根目录的cache文件夹下，例如传递的 name为 test，那么文件地址为
+>
+> 项目位置/cache/test，关于项目位置，可以参考 PathFactory
+
+
+
+在实例化时，会创建对应的目录及文件（如果文件不存在），并且执行 init() 从文件中拿到数据放到 data 中
+
+可通过 getData() 函数获取，虽然此类可以直接使用，但一般都不会直接操作字节，建议编写此类的子类后更加方便使用（关于字符串可参考下方缓存示例实现 - 基于字符串（JSONObject））
+
+
+
+
+
+## DiskCacheFactory
+
+磁盘缓存工厂，磁盘缓存默认是不关闭流的，这样可以频繁读写，但是当读写并不是很频繁的时候，不关闭流就会多占用一些资源了
+
+
+
+使用磁盘缓存工厂创建磁盘缓存，将会监听创建的磁盘缓存，两秒没有读写则关闭流，需要使用时再自动开启
+
+```java
+DiskCache cache = DiskCacheFactory.create("同DiskCache构造函数");
+```
+
+
+
+
+
+
+
+## 磁盘缓存子类示例
+
+实现一个JSONObject的磁盘缓存类，基于 fastjson，可根据需求自行更改
+
+```java
+public class JSONObjectCache extends DiskCache {
+
+	private JSONObject json;
+	
+	public JSONObjectCache(String name) {
+		super(name);
+	}
+	
+	@Override
+	public void initAfter() {
+		// data 为读取到的文件字节
+		if (data.length > 0) json = JSONObject.parseObject(new String(data));
+		else json = new JSONObject();
+	}
+	
+	public Object put(String key, Object value) {
+		Object put = json.put(key, value);
+		rewrite(json.toJSONString().getBytes());
+		return put;
+	}
+	public Object remove(Object key) {
+		Object remove = json.remove(key);
+		rewrite(json.toJSONString().getBytes());
+		return remove;
+	}
+	public boolean remove(Object key, Object value) {
+		boolean remove = json.remove(key, value);
+		rewrite(json.toJSONString().getBytes());
+		return remove;
+	}
+	
+	public Object get(Object key) {
+		return json.get(key);
+	}
+	public String getString(String key) {
+		return json.getString(key);
+	}
+	public JSONArray getJSONArray(String key) {
+		return json.getJSONArray(key);
+	}
+	public JSONObject getJSONObject(String key) {
+		return json.getJSONObject(key);
+	}
+	public String toJSONString() {
+		return json.toJSONString();
+	}
+    
+    public boolean containsKey(Object key) {
+		return json.containsKey(key);
+	}
+	public long getIntValue(String key) {
+		return json.getIntValue(key);
+	}
+	public long getLongValue(String key) {
+		return json.getLongValue(key);
+	}
+    
+    /**
+	 * 将当前数据写入磁盘,当数据改变但此JSONObjectCache未执行任何函数时需要使用此函数来保存数据.
+	 */
+	public void save() {
+		rewrite(json.toJSONString().getBytes());
+	}
+	
+	public JSONObject getJson() {
+		return json;
+	}
+	
+}
+```
+
+
+
+使用
+
+```java
+public class TestDiskCache {
+
+	public static void main(String[] args) throws IOException, InterruptedException {
+		
+		JSONObjectCache cache = new JSONObjectCache("test.json");
+		
+		// 添加进磁盘工厂,使得根据情况自动关流
+		DiskCacheFactory.add(cache);
+		
+		JSONArray users = new JSONArray();
+		JSONObject user = new JSONObject();
+		user.put("id", "1");
+		user.put("name", "Shendi");
+		user.put("test", "ok");
+		
+		users.add(user);
+		
+		cache.put("users", users);
+		
+		JSONArray arr = cache.getJSONArray("users");
+		System.out.println(arr.get(0));
+	}
+	
+}
+```
+
+
+
+输出结果如下
+
+```json
+{"test":"ok","name":"Shendi","id":"1"}
+```
+
+
+
+代码更改如下继续执行
+
+```java
+public class TestDiskCache {
+
+	public static void main(String[] args) throws IOException, InterruptedException {
+		
+		JSONObjectCache cache = new JSONObjectCache("test.json");
+		
+		// 添加进磁盘工厂,使得根据情况自动关流
+		DiskCacheFactory.add(cache);
+		
+		/*JSONArray users = new JSONArray();
+		JSONObject user = new JSONObject();
+		user.put("id", "1");
+		user.put("name", "Shendi");
+		user.put("test", "ok");
+		
+		users.add(user);
+		
+		cache.put("users", users);*/
+		
+		JSONArray arr = cache.getJSONArray("users");
+		System.out.println(arr.get(0));
+	}
+	
+}
+```
+
+
+
+输出结果如下
+
+```json
+{"test":"ok","name":"Shendi","id":"1"}
+```
+
+
+
+在项目根目录下的 cache/test.json 可以看见文件内容
+
+> 需要注意的是，写入操作只有执行 JSONObjectCache 的一些写入函数才会写入硬盘，例如操作 JSONArray等，需要手动执行 JSONObjectCache 的 save 函数
+
+
+
+
 
 
 
@@ -1278,7 +1558,7 @@ http.redirect("localhost/index");
 在 SK1.1 中加入了处理请求的函数，当有HTTP请求数据的字符串或输入流时，则可通过以下函数进行处理
 
 ```java
-// 提供了无参构造用于只处理响应的情况
+// 提供了无参构造用于只处理请求的情况
 
 // 通过输入流处理请求
 boolean disposeReq(InputStream);
