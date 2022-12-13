@@ -67,6 +67,9 @@ public class DiskCache implements Cache {
 			fi.read(data, 0, data.length);
 			
 			initAfter();
+			
+			fi.close();
+			fi = null;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -110,6 +113,10 @@ public class DiskCache implements Cache {
 	public void rewrite(byte[] data) {
 		try {
 			synchronized (file) {
+				if (fo != null) {
+					fo.close();
+					fo = null;
+				}
 				getFo(false);
 				fo.write(data);
 				fo.flush();
@@ -130,6 +137,10 @@ public class DiskCache implements Cache {
 	public void clear() {
 		try {
 			synchronized (file) {
+				if (fo != null) {
+					fo.close();
+					fo = null;
+				}
 				getFo(false);
 				fo.flush();
 			}
@@ -163,13 +174,14 @@ public class DiskCache implements Cache {
 	 */
 	protected FileOutputStream getFo(boolean isAppend) throws IOException {
 		upOptionTime = System.currentTimeMillis();
-		if (fo == null) fo = new FileOutputStream(file, isAppend);
-		else if (this.isAppend != isAppend) {
-			fo.close();
-			fo = new FileOutputStream(file, isAppend);
+		
+		if (this.isAppend != isAppend) {
+			if (fo != null) fo.close();
 			
+			fo = new FileOutputStream(file, isAppend);
 			this.isAppend = isAppend;
-		}
+		} else if (fo == null) fo = new FileOutputStream(file, isAppend);
+		
 		return fo;
 	}
 	
