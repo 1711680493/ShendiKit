@@ -3,9 +3,9 @@
 
 **版本：** 1.1.0
 
-**最后更改时间：** 2022-03-23
+**最后更改时间：** 2023-04-01
 
-
+<br>
 
 [引导页面](https://1711680493.github.io)
 
@@ -13,16 +13,16 @@ Java工具包,纯Java制作,使用JDK8
 
 以前版本可在分支中找到
 
-
+<br>
 
 # 文档及测试样例
 [在线文档 v1.1](https://1711680493.github.io/doc/SK-1.1)
 
 样例在源码的 shendi.kit.test 包下
 
+<br>
 
-
-
+<br>
 
 # 目录
 ## [版本变化](#SK-版本变化)
@@ -133,9 +133,9 @@ Java工具包,纯Java制作,使用JDK8
 
 [HTTP工具类](#HttpUtil)
 
-> 已移动至 shendi.kit.net.http, 具体请参考文档[HTTP工具](#HTTP工具包)
+> 于1.1已移动至 shendi.kit.net.http, 具体请参考文档[HTTP工具](#HTTP工具包)
 
-
+<br>
 
 [数学工具类](#Math)
 
@@ -147,7 +147,11 @@ Java工具包,纯Java制作,使用JDK8
 
 [文件工具类](#FileUtil)
 
+[字符串工具类](#StringUtil)
 
+<br>
+
+<br>
 
 # SK 版本变化
 ## v 1.0
@@ -156,96 +160,69 @@ Java工具包,纯Java制作,使用JDK8
 
 ## v 1.1
 Small kit
-<ol>
-	<li>
-		配置工具
-		<ul>
-			<li>优化了配置类 PropertiesConfiguration</li>
-			<li>
-                ConfigurationFactory 类新增函数 getProperty 简化获取配置文件操作<br>
-				函数支持参数注入,默认使用的编码为UTF-8
-            </li>
-		</ul>
-	</li>
-	<li>
-		控制台
-		<ul>
-			<li>控制台在创建时可以设置组,命令注解可以设置组,解决之前多个控制台共用所有命令问题</li>
-			<li>命令可传递参数,对于字段,传递的参数直接设置,对于函数,传递的参数将当作函数参数传递,详细信息请参考控制台文档</li>
-			<li>控制台的职责简化为为接收命令/返回结果,对于执行命令操作已在父类Console实现(execute)</li>
-			<li>新增shendi.kit.console.command包,包含内置命令类</li>
-			<li>控制台内置命令 execute,用以执行Java语句</li>
-		</ul>
-	</li>
-	<li>
-		HTTP工具
-		<ul>
-			<li>新增 shendi.kit.net.http 包,将 HttpUtil 从 util 包中提出</li>
-			<li>修复HttpUtil 1.0的已知问题,比如无法访问接口等</li>
-			<li>新增对HttpUtil 1.1的chunket处理</li>
-			<li>在之前POST请求无法带请求参数,现在可以使用addParameter(key,value)或setParameters(param)来直接设置</li>
-			<li>增加对HEAD类型支持,以及可从host可携带端口,新增构造 (host, type)</li>
-			<li>包内新增HttpDataDispose接口用以处理http响应数据(比如文件下载,具体请参考文档)</li>
-			<li>支持重定向与转发</li>
-            <li>增加处理请求与响应的函数,可通过函数直接解析http请求/响应数据</li>
-		</ul>
-	</li>
-	<li>
-		util包
-		<ul>
-			<li>util包中新增Math类,用于处理单位换算等</li>
-			<li>util包中新增IsNullUtil类,用于判断给定的参数是否为空(条件可以自行设定)</li>
-			<li>util包中新增ByteUtil类,用于处理对字节的操作</li>
-			<li>util包中新增BitUtil类,用于处理对bit的操作</li>
-			<li>util包中新增FileUtil类,用于处理对文件的操作</li>
-		</ul>
-	</li>
-	<li>
-		注解
-		<ul>
-			<li>解决了扫描注解高版本Java无法扫描本项目的问题</li>
-			<li>优化扫描器,使得扫描时不加载对应类的静态方法</li>
-            <li>解决SpringBoot打包后扫描出错,参考<a href='#anno_scan.shendi'>anno_scan.shendi</a></li>
-		</ul>
-	</li>
-	<li>
-		SKClassLoader
-		<ul>
-			<li>解决 SKClassLoader在高版本JDK中找不到类的问题</li>
-			<li>新增createClass,reload 函数</li>
-		</ul>
-	</li>
-	<li>
-		日志
-		<ul>
-			<li>Log日志输出支持格式化输出,且增加两种日志级别 Debug和Exception,并支持新增日志级别,参考 Log.log 函数</li>
-			<li>新增ALog抽象类,用以对日志进行缓存,新增DefaultLog实现类,新增DebugLog类,用以处理Debug日志缓存</li>
-            <li>新增 shendi.kit.log.data 包用于格外的日志数据持久化,参考DataLog类</li>
-		</ul>
-	</li>
-	<li>
-		路径
-		<ul>
-			<li>优化了待发布的Path包,解决高版本,JavaWeb等路径获取问题</li>
-			<li>可以自行设置项目类型以供确定路径,通过修改 ProjectTypeUtils.type<br>
-				这里列举一些常用需要设置的项目类型
-				<ul>
-					<li>SpringBoot: 需要设置为 ProjectType.Java,不然打包后找不到路径(maven项目可能也需要如此)</li>
-				</ul>
-			</li>
-		</ul>
-	</li>
-	<li>新增shendi.kit.id包,用于处理id生成</li>
-    <li>新增shendi.kit.thread包,用于处理线程</li>
-    <li>新增shendi.kit.cache包,缓存工具</li>
-	<li>TimeUtils改进,将Time,TimeFormat从内部类提取,且修复已知BUG</li>
-	<li>StreamUtils新增 readAllByte(input) 函数,用以读取输入流中所有的数据</li>
-</ol>
 
+* 配置工具
 
+    * 优化了配置类 PropertiesConfiguration
 
+    * ConfigurationFactory 类新增函数 getProperty 简化获取配置文件操作
+        * 函数支持参数注入,默认使用的编码为UTF-8
+* 控制台
 
+    * 控制台在创建时可以设置组,命令注解可以设置组,解决之前多个控制台共用所有命令问题
+    * 命令可传递参数，对于字段，传递的参数直接设置,对于函数,传递的参数将当作函数参数传递，详细信息请参考控制台文档
+    * 控制台的职责简化为为接收命令/返回结果，对于执行命令操作已在父类Console实现(execute)
+    * 新增shendi.kit.console.command包,包含内置命令类
+    * 控制台内置命令 execute,用以执行Java语句
+* HTTP工具
 
+    * 新增 shendi.kit.net.http 包,将 HttpUtil 从 util 包中提出
+    * 修复HttpUtil 1.0的已知问题,比如无法访问接口等
+    * 新增对HttpUtil 1.1的chunket处理
+    * 在之前POST请求无法带请求参数,现在可以使用addParameter(key,value)或setParameters(param)来直接设置
+    * 增加对HEAD类型支持，以及可从host可携带端口，新增构造 (host, type)
+    * 包内新增HttpDataDispose接口用以处理http响应数据(比如文件下载,具体请参考文档)
+    * 支持重定向与转发
+    * 增加处理请求与响应的函数,可通过函数直接解析http请求/响应数据
+* util包
+
+    * util包中新增Math类，用于处理单位换算等
+    * util包中新增IsNullUtil类，用于判断给定的参数是否为空(条件可以自行设定)
+    * util包中新增ByteUtil类，用于处理对字节的操作
+    * util包中新增BitUtil类，用于处理对bit的操作
+    * util包中新增FileUtil类，用于处理对文件的操作
+    * util包中新增StringUtil类，用于处理字符串的操作
+    * StreamUtils 新增 readAllByte(input) 函数,用以读取输入流中所有的数据
+* 注解
+
+    * 解决了扫描注解高版本Java无法扫描本项目的问题
+    * 优化扫描器，使得扫描时不加载对应类的静态方法
+    * 解决SpringBoot打包后扫描出错,参考 [anno_scan.shendi](#anno_scan.shendi)
+    * 解决判断jdk版本是否高于1.9出错的问题，例如版本17-ea
+* SKClassLoader
+
+    * 解决 SKClassLoader在高版本JDK中找不到类的问题
+    * 新增createClass，reload 函数
+* 日志
+
+    * Log日志输出支持格式化输出,且增加两种日志级别 Debug和Exception,并支持新增日志级别,参考 Log.log 函数
+    * 新增ALog抽象类，用以对日志进行缓存，新增DefaultLog实现类，新增DebugLog类，用以处理Debug日志缓存
+    * 新增 shendi.kit.log.data 包用于格外的日志数据持久化，参考DataLog类
+* 路径
+
+    * 优化了待发布的Path包，解决高版本，JavaWeb等路径获取问题
+    * 可以自行设置项目类型以供确定路径，通过修改 ProjectTypeUtils.type
+        * SpringBoot：需要设置为 ProjectType.Java，不然打包后找不到路径(maven项目可能也需要如此)
+* 新增shendi.kit.id包，用于处理id生成
+* 新增shendi.kit.thread包，用于处理线程
+* 新增shendi.kit.cache包，缓存工具
+* TimeUtils改进，将Time，TimeFormat从内部类提取，且修复已知BUG
+
+<br>
+
+<br>
+
+<br>
 
 
 # 开始配置（使用注解则此步骤必须）
@@ -1798,7 +1775,6 @@ num = Math.charLenComposeNum(chars.length(), 32);
 首先会对其进行判断
 例如
 if (account == null || "".equals(account)) {}
-
 当参数一多,就要写很长的代码,或者重复很多次上述操作
 于是此类就这样诞生了
 对于上述操作,判断 null 和 "" 为空的
@@ -1993,10 +1969,26 @@ int bitNum = BitUtil.sizeOf(1);
 >文件工具类<br>
 >SK 1.1中新增
 
-<pre>
+```java
 // 使用指定数据更新/创建指定文件,update(String, byte[])
 FileUtil.update("C:/1.txt", "hello".getBytes());
 // 同上,参数一为相对路径,updateByPro(String, byte[])
 // 例如将项目下的1.txt内容更改
 FileUtil.updateByPro("/1.txt", "hello.getBytes());
-</pre>
+```
+
+<br>
+
+<br>
+
+## StringUtil
+
+> 字符串工具类
+>
+> SK 1.1新增
+
+```java
+// 字符串去除指定字符串的前后空格
+StringUtil.trimByStr("1  . 2.   3", "."); // 1.2.3
+```
+

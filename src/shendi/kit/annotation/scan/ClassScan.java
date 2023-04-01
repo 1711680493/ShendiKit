@@ -40,7 +40,7 @@ public class ClassScan {
 	private static boolean isInit;
 	
 	/** 系统类加载器 */
-	private static final ClassLoader cl = ClassScan.class.getClassLoader();
+	private static final ClassLoader CL = ClassScan.class.getClassLoader();
 	
 	static {
 		ANNOS = new Class[] {
@@ -150,7 +150,7 @@ public class ClassScan {
 		try {
 			className = classPath.substring(0, classPath.length() - ShendiKitInfo.CLASS_SUFFIX.length())
 					.replace(File.separatorChar, '.').replace('/', '.');
-			Class<?> clazz = cl.loadClass(className);
+			Class<?> clazz = CL.loadClass(className);
 			
 			// 将类添加进集合
 			Annotation[] annos = clazz.getAnnotations();
@@ -176,7 +176,7 @@ public class ClassScan {
 	}
 	
 	/**
-	 * 处理指定路径,为jar包则对应处理.
+	 * 处理指定路径,为jar包并在jars中有则对应处理.
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param jarPath 文件路径
 	 */
@@ -254,14 +254,16 @@ public class ClassScan {
 				scanClass(classPath);
 			}
 			
-			// 模块化后的版本(1.9及以上)需要格外处理,上述操作没有处理任何类则做此操作.
+			// 模块化后的版本(1.9及以上)需要格外处理,当resource不为空则不处理
 			// 这种操作经过检验,只有在未打包的高版本普通Java项目中会出现.
+			// 备注: 第一步扫描jar,第二步获取源路径,如果当前项目打包getResource为空,1.9以上也会为空,导致前两步操作在1.9未打包项目扫描不到类,需要格外处理
 			String version = System.getProperty("java.version");
-			if (version.indexOf('.') != -1) {
-				version = version.substring(0, version.indexOf('.') + 2);
-			}
-			
-			if (CLASSES.size() == 0 && Double.parseDouble(version) >= 1.9) { 
+			// 10以前都是1.x.x
+			boolean jdkUpNine = version.startsWith("1.")
+					? Integer.parseInt(version.substring(2, 3)) > 8 ? true : false
+					: true;
+
+			if (resource == null && jdkUpNine) {
 				String projectPath = System.getProperty("user.dir");
 				// 路径以分隔符结尾,不然获取到的会以分隔符开头.
 				ClassScan.classPath = projectPath + File.separatorChar + "bin" + File.separatorChar;
