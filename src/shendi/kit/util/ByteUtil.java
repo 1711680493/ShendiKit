@@ -329,6 +329,51 @@ public class ByteUtil {
 	 * @return 分割后的数组
 	 */
 	public static byte[][] split(byte[] data, byte[] split, int limit) {
+		return split(data, split, false, limit);
+	}
+	
+	/** 同 split(data, split, canNull, 0); */
+	public static byte[][] split(byte[] data, byte[] split, boolean canNull) {
+		return split(data, split, canNull, 0);
+	}
+	
+	/**
+	 * 将字节数组按照指定字节数组进行分割,并指定分割数量,从左到右.<br>
+	 * 当分割后的字节数组为空将抛弃此数组<br>
+	 * <pre>
+	 * byte[] data = "hello,world".getBytes();
+	 * byte[] split = ",".getBytes();
+	 * byte[][] result = split(data, split);
+	 * result[0] -> "hello"
+	 * result[1] -> "world"
+	 * 
+	 * data = "hello,world,,,,,,,,123".getBytes();
+	 * result -> ["hello", "world", "123"]
+	 * 
+	 * data = "red,green,blue,shendi".getBytes();
+	 * result = split(data, split);
+	 * result -> ["red", "green", "blue", "shendi"]
+	 * 
+	 * data = "I like,,this kit!".getBytes();  
+	 * result = split(data, split);
+	 * result -> ["I like", "this kit!"]
+	 * 
+	 * data = "123,456,789,012".getBytes();
+	 * result = split(data, split, 3)
+	 * result -> ["123", "456", "789"]
+	 * 
+	 * result = split(data, split, true);
+	 * data = "hello,world,,123".getBytes();
+	 * result -> ["hello", null, "world", "123"]
+	 * </pre>
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param data 		要分割的字节数组
+	 * @param split		分割数组
+	 * @param canNull 	是否可以包含空
+	 * @param limit		分割的数量,小于等于0则分割全部.
+	 * @return 分割后的数组
+	 */
+	public static byte[][] split(byte[] data, byte[] split, boolean canNull, int limit) {
 		if (split == null) return null;
 		if (split.length == 0) return null;
 		
@@ -341,13 +386,17 @@ public class ByteUtil {
 		int size = 0;
 		for (int i = 0; i < datas.length; i++) {
 			// 找到一个切一个,直到数据为空
-			int index = shendi.kit.util.ByteUtil.indexOf(cdata, split);			
+			int index = indexOf(cdata, split);			
 			if (index == -1) {
 				datas[size++] = cdata;
 				break;
 			}
+			
+			// 连续的分隔符,可以为空则置空
 			if (index == 0) {
-				cdata = shendi.kit.util.ByteUtil.subByte(cdata, split.length);
+				cdata = subByte(cdata, split.length);
+				if (canNull) datas[size++] = null;
+				if (limit > 0 && size >= limit) break;
 				continue;
 			}
 			
@@ -357,7 +406,7 @@ public class ByteUtil {
 			int nextLen = index + split.length;
 			if (nextLen >= cdata.length) break;
 			
-			cdata = shendi.kit.util.ByteUtil.subByte(cdata, nextLen);
+			cdata = subByte(cdata, nextLen);
 			datas[size++] = d;
 			
 			if (limit > 0 && size >= limit) break;
@@ -367,6 +416,9 @@ public class ByteUtil {
 		for (int i = 0; i < result.length; i++) {
 			result[i] = datas[i];
 		}
+		
+		cdata = null;
+		datas = null;
 		
 		return result;
 	}
