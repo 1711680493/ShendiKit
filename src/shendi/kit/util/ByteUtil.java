@@ -211,7 +211,7 @@ public class ByteUtil {
 	 * result = concatSplit(split, "red".getBytes(), "green".getBytes(), "blue".getBytes(), "shendi".getBytes());
 	 * result -> "red,green,blue,shendi"
 	 * 
-	 * result = concatStr(split, "hello, world".getBytes());
+	 * result = concatSplit(split, "hello, world".getBytes());
 	 * result -> "hello, world"
 	 * 
 	 * data1 = "I like".getBytes();  
@@ -226,12 +226,49 @@ public class ByteUtil {
 	 * @return 拼接后的数组
 	 */
 	public static byte[] concatSplit(byte[] split, byte[]... datas) {
+		return concatSplit(split, false, datas);
+	}
+	
+	/**
+	 * 将两个或多个字节数组拼接并在其中间插入分隔数组.<br>
+	 * <pre>
+	 * byte[] split = ",".getBytes();
+	 * byte[] data1 = "hello".getBytes();
+	 * byte[] data2 = "world".getBytes();
+	 * byte[] result = concatSplit(split, data1, data2);
+	 * result -> "hello,world"
+	 * 
+	 * result = concatSplit(split, "red".getBytes(), "green".getBytes(), "blue".getBytes(), "shendi".getBytes());
+	 * result -> "red,green,blue,shendi"
+	 * 
+	 * result = concatSplit(split, "hello, world".getBytes());
+	 * result -> "hello, world"
+	 * 
+	 * data1 = "I like".getBytes();  
+	 * data2 = new byte[0];
+	 * data3 = "this kit!".getBytes();
+	 * result = concatSplit(split, data1, data2, data3);
+	 * result -> "I like,this kit!"
+	 * 
+	 * result = concatSplit(split, true, data1, data2, data3);
+	 * result -> "I like,,this kit!"
+	 * 
+	 * </pre>
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param split 分隔数组
+	 * @param canNull 是否可以包含空数组,是则将空数组以0字节数组形式
+	 * @param datas 要拼接的数组
+	 * @return 拼接后的数组
+	 */
+	public static byte[] concatSplit(byte[] split, boolean canNull, byte[]... datas) {
 		if (split == null || split.length == 0 || datas == null || datas.length == 0) return null;
 		if (datas.length == 1) return datas[0];
 		
+		// 计算操作后的总长度,只多不少
 		int size = datas[0].length;
-		for (int i = 1; i < datas.length; i++)
-			size += datas[i].length;
+		for (int i = 1; i < datas.length; i++) {
+			if (datas[i] != null) size += datas[i].length;
+		}
 		
 		// 加上切割字符的长度
 		size += (datas.length - 1) * split.length;
@@ -241,10 +278,10 @@ public class ByteUtil {
 		// 先拷贝第一个有效数组,然后遍历 + split + data
 		int i = 0;
 		while (i < datas.length) {
-			
-			if (datas[i].length == 0) {
+			if (datas[i] == null || datas[i].length == 0) {
 				++i;
-				continue;
+				if (canNull) break;
+				else continue;
 			}
 			
 			System.arraycopy(datas[i], 0, result, size, datas[i].length);
@@ -254,7 +291,14 @@ public class ByteUtil {
 		}
 		
 		for (; i < datas.length; i++) {
-			if (datas[i].length == 0) continue;
+			if (datas[i] == null || datas[i].length == 0) {
+				if (canNull) {
+					System.arraycopy(split, 0, result, size, split.length);
+					size += split.length;
+				}
+				continue;
+			}
+			
 			System.arraycopy(split, 0, result, size, split.length);
 			size += split.length;
 			System.arraycopy(datas[i], 0, result, size, datas[i].length);
