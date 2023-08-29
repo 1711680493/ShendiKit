@@ -409,6 +409,9 @@ public class ByteUtil {
 	 * result = split(data, split, true);
 	 * data = "hello,world,,123".getBytes();
 	 * result -> ["hello", null, "world", "123"]
+	 * 
+	 * data = ",".getBytes();
+	 * result -> [null, null]
 	 * </pre>
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param data 		要分割的字节数组
@@ -421,25 +424,48 @@ public class ByteUtil {
 		if (split == null) return null;
 		if (split.length == 0) return null;
 		
+		// 数据没有要切割的则直接返回
+		int index = indexOf(data, split);
+		if (index == -1) {
+			return new byte[][] {data};
+		}
+		
 		// 复制一份,避免污染源数据
 		byte[] cdata = new byte[data.length];
 		System.arraycopy(data, 0, cdata, 0, data.length);
 		
-		byte[][] datas = new byte[(data.length >> 1) + 1][];
-		
+		byte[][] datas = new byte[data.length + 1][];
 		int size = 0;
+		
+		// 开头即是分隔符,可以为空则置空
+		if (index == 0) {
+			if (canNull) size++;
+			if (limit > 0 && size >= limit) return new byte[][] {datas[0]};
+			cdata = subByte(cdata, split.length);
+		} else {
+			byte[] d = new byte[index];
+			System.arraycopy(cdata, 0, d, 0, index);
+			
+			datas[size++] = d;
+			
+			if (limit > 0 && size >= limit) return new byte[][] {datas[0]};
+			cdata = subByte(cdata, index + split.length);
+		}
+		
 		for (int i = 0; i < datas.length; i++) {
-			// 找到一个切一个,直到数据为空
-			int index = indexOf(cdata, split);			
+			// 方式从左到右,找到一个分割一个
+			index = indexOf(cdata, split);
 			if (index == -1) {
-				datas[size++] = cdata;
+				if (cdata.length > 0) {
+					datas[size++] = cdata;
+				} else if (canNull) size++;
 				break;
 			}
 			
 			// 连续的分隔符,可以为空则置空
 			if (index == 0) {
 				cdata = subByte(cdata, split.length);
-				if (canNull) datas[size++] = null;
+				if (canNull) size++;
 				if (limit > 0 && size >= limit) break;
 				continue;
 			}
@@ -447,10 +473,7 @@ public class ByteUtil {
 			byte[] d = new byte[index];
 			System.arraycopy(cdata, 0, d, 0, index);
 			
-			int nextLen = index + split.length;
-			if (nextLen >= cdata.length) break;
-			
-			cdata = subByte(cdata, nextLen);
+			cdata = subByte(cdata, index + split.length);
 			datas[size++] = d;
 			
 			if (limit > 0 && size >= limit) break;
