@@ -27,8 +27,9 @@ public class Math {
 	 * @return 转换后的字符串表示形式
 	 */
 	public static String unitConvert(String[] names, long decimal, long size) {
-		if (names == null) return null;
-		if (size < decimal) return size + names[0];
+		if (names == null || names.length == 0) return null;
+		
+		if (names.length == 1 || size < decimal) return size + names[0];
 		else if (size == decimal) return 1 + names[1];
 		
 		StringBuilder data = new StringBuilder(20);
@@ -72,8 +73,9 @@ public class Math {
 	 * @return 转换后的字符串表示形式
 	 */
 	public static String unitConvert(String[] names, double decimal, double size) {
-		if (names == null) return null;
-		if (size < decimal) return size + names[0];
+		if (names == null || names.length == 0) return null;
+
+		if (names.length == 1 || size < decimal) return size + names[0];
 		else if (size == decimal) return 1.0 + names[1];
 		
 		StringBuilder data = new StringBuilder(20);

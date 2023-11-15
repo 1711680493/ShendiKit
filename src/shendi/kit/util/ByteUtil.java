@@ -402,6 +402,9 @@ public class ByteUtil {
 	 * result = split(data, split);
 	 * result -> ["I like", "this kit!"]
 	 * 
+	 * data = "".getBytes();
+	 * result -> [null]
+	 * 
 	 * data = "123,456,789,012".getBytes();
 	 * result = split(data, split, 3)
 	 * result -> ["123", "456", "789"]
@@ -412,6 +415,9 @@ public class ByteUtil {
 	 * 
 	 * data = ",".getBytes();
 	 * result -> [null, null]
+	 * 
+	 * data = "".getBytes();
+	 * result -> [null]
 	 * </pre>
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @param data 		要分割的字节数组
@@ -427,6 +433,11 @@ public class ByteUtil {
 		// 数据没有要切割的则直接返回
 		int index = indexOf(data, split);
 		if (index == -1) {
+			// 如果长度为0，那么返回空数组
+			if (data.length == 0) {
+				if (canNull) return new byte[][] {null};
+				return new byte[0][];
+			}
 			return new byte[][] {data};
 		}
 		
