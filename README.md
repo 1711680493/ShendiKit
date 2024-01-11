@@ -1,22 +1,20 @@
 # Shendi Kit
-**author：** Shendi
+**作者：** Shendi
 
-**版本：** 1.1.0
+**版本：** 1.1.1
 
-**最后更改时间：** 2023-04-01
+**最后更改时间：** 2024-01-11
 
 <br>
 
-[引导页面](https://1711680493.github.io)
-
-Java工具包,纯Java制作,使用JDK8
+基于 JDK 8。将常用的代码封装成工具，放到此工具包，因为是工具，其中的很多是没有任何耦合的，可以直接选取需要的类复制使用。
 
 以前版本可在分支中找到
 
 <br>
 
 # 文档及测试样例
-[在线文档 v1.1](https://1711680493.github.io/doc/SK-1.1)
+[在线文档 v1.1 | 此文档可能有很多类未包含，请直接参考1.1.1](https://1711680493.github.io/doc/SK-1.1)
 
 样例在源码的 shendi.kit.test 包下
 
@@ -25,20 +23,16 @@ Java工具包,纯Java制作,使用JDK8
 <br>
 
 # 目录
-## [版本变化](#SK-版本变化)
-[1.0 Start](#v-10)
-[1.1 Small Kit](#v-11)
-
-
-
-## [SK 配置](#开始配置)
+## [SK 配置](#开始配置（使用注解则此步骤必须）)
 [SK 配置文件地址](#配置文件地址)
 
 [SK 默认配置文件](#默认配置文件)
 
 [注解扫描配置](#anno_scan.shendi注解扫描配置)
 
+<br>
 
+## [自定义注解](#自定义注解与解析)
 
 ## [控制台](#控制台模块)
 [给自己的程序增加一个控制台模块](#给自己的程序增加一个控制台模块)
@@ -59,7 +53,7 @@ Java工具包,纯Java制作,使用JDK8
 >
 >[扩展内置命令](#扩展内置命令)
 
-
+<br>
 
 ## [配置文件](#非常简单的使用-properties-配置文件)
 
@@ -67,11 +61,11 @@ Java工具包,纯Java制作,使用JDK8
 
 ## [日志工具](#日志工具包)
 
-
+<br>
 
 ## [路径工具](#Path工具包)
 
-
+<br>
 
 ## [加密工具](#加密工具包)
 ## [爬虫工具](#爬虫工具包)
@@ -83,27 +77,29 @@ Java工具包,纯Java制作,使用JDK8
 
 [元素标签](#元素标签)
 
+<br>
 
-
-
+<br>
 
 ## [缓存工具](#缓存工具-Cache)
 
 >待完善，目前只提供磁盘缓存，文件读写功能
 
-
+<br>
 
 ## [JSON工具](#JSON工具包)
 >待完善
 
 [JSONObject](#JSONObject)
 
-
+<br>
 
 ## [id工具](#id工具包)
 [雪花算法](#SnowFlake)
 
+[随机id](#RanId)
 
+<br>
 
 ## [HTTP工具](#HTTP工具包)
 [工具类](#工具类)
@@ -118,11 +114,11 @@ Java工具包,纯Java制作,使用JDK8
 
 [处理响应](#处理响应)
 
-
+<br>
 
 ## [线程工具](#线程管理器)
 
-
+<br>
 
 ## [简洁实用工具包-shendi.kit.util](#工具类)
 >统一在 shendi.kit.util 包下
@@ -149,76 +145,15 @@ Java工具包,纯Java制作,使用JDK8
 
 [字符串工具类](#StringUtil)
 
+[正则工具类](#PatternUtil)
+
 <br>
 
 <br>
 
 # SK 版本变化
-## v 1.0
->起航,包含以下<br>
->Properties配置,控制台,时间工具,日志,加密工具,路径工具,爬虫工具,util包等.
 
-## v 1.1
-Small kit
-
-* 配置工具
-
-    * 优化了配置类 PropertiesConfiguration
-
-    * ConfigurationFactory 类新增函数 getProperty 简化获取配置文件操作
-        * 函数支持参数注入,默认使用的编码为UTF-8
-* 控制台
-
-    * 控制台在创建时可以设置组,命令注解可以设置组,解决之前多个控制台共用所有命令问题
-    * 命令可传递参数，对于字段，传递的参数直接设置,对于函数,传递的参数将当作函数参数传递，详细信息请参考控制台文档
-    * 控制台的职责简化为为接收命令/返回结果，对于执行命令操作已在父类Console实现(execute)
-    * 新增shendi.kit.console.command包,包含内置命令类
-    * 控制台内置命令 execute,用以执行Java语句
-* HTTP工具
-
-    * 新增 shendi.kit.net.http 包,将 HttpUtil 从 util 包中提出
-    * 修复HttpUtil 1.0的已知问题,比如无法访问接口等
-    * 新增对HttpUtil 1.1的chunket处理
-    * 在之前POST请求无法带请求参数,现在可以使用addParameter(key,value)或setParameters(param)来直接设置
-    * 增加对HEAD类型支持，以及可从host可携带端口，新增构造 (host, type)
-    * 包内新增HttpDataDispose接口用以处理http响应数据(比如文件下载,具体请参考文档)
-    * 支持重定向与转发
-    * 增加处理请求与响应的函数,可通过函数直接解析http请求/响应数据
-* util包
-
-    * util包中新增Math类，用于处理单位换算等
-    * util包中新增IsNullUtil类，用于判断给定的参数是否为空(条件可以自行设定)
-    * util包中新增ByteUtil类，用于处理对字节的操作
-    * util包中新增BitUtil类，用于处理对bit的操作
-    * util包中新增FileUtil类，用于处理对文件的操作
-    * util包中新增StringUtil类，用于处理字符串的操作
-    * StreamUtils 新增 readAllByte(input) 函数,用以读取输入流中所有的数据
-* 注解
-
-    * 解决了扫描注解高版本Java无法扫描本项目的问题
-    * 优化扫描器，使得扫描时不加载对应类的静态方法
-    * 解决SpringBoot打包后扫描出错,参考 [anno_scan.shendi](#anno_scan.shendi)
-    * 解决判断jdk版本是否高于1.9出错的问题，例如版本17-ea
-* SKClassLoader
-
-    * 解决 SKClassLoader在高版本JDK中找不到类的问题
-    * 新增createClass，reload 函数
-* 日志
-
-    * Log日志输出支持格式化输出,且增加两种日志级别 Debug和Exception,并支持新增日志级别,参考 Log.log 函数
-    * 新增ALog抽象类，用以对日志进行缓存，新增DefaultLog实现类，新增DebugLog类，用以处理Debug日志缓存
-    * 新增 shendi.kit.log.data 包用于格外的日志数据持久化，参考DataLog类
-* 路径
-
-    * 优化了待发布的Path包，解决高版本，JavaWeb等路径获取问题
-    * 可以自行设置项目类型以供确定路径，通过修改 ProjectTypeUtils.type
-        * SpringBoot：需要设置为 ProjectType.Java，不然打包后找不到路径(maven项目可能也需要如此)
-* 新增shendi.kit.id包，用于处理id生成
-* 新增shendi.kit.thread包，用于处理线程
-* 新增shendi.kit.cache包，缓存工具
-* TimeUtils改进，将Time，TimeFormat从内部类提取，且修复已知BUG
-
-<br>
+这部分已经放到 `版本.md` 中。
 
 <br>
 
@@ -227,37 +162,41 @@ Small kit
 
 # 开始配置（使用注解则此步骤必须）
 
-如果使用到注解，配置工具，则首先需要进行此步骤，未使用到则可忽略此部分
+如果使用到本工具的注解，配置工具，则首先需要进行此步骤，未使用到则可忽略此部分
 
-
+<br>
 
 ## 配置文件地址
 
->普通Java项目以及SpringBoot项目等,配置文件地址在项目根目录的/files下<br>
->Web项目配置文件地址在WebContent的/files下<br>
->具体位置以 shendi.kit.path.ProjectPath 为准.
->
->>如果没有此目录,则项目可能无法正常运作
+普通Java项目以及SpringBoot项目等，配置文件地址在项目根目录的/files下
 
+Web项目配置文件地址在WebContent的/files下
 
+具体位置以 shendi.kit.path.ProjectPath 为准
+
+>如果没有此目录,则项目可能无法正常运作
+
+<br>
+
+<br>
 
 ## 默认配置文件
 
 在配置文件地址下(/files)
 
-
+<br>
 
 ### anno_scan.shendi
 
 注解扫描配置
 
-
+<br>
 
 **编码：** UTF-8
 
 **描述：** 配置需要扫描的jar以及类路径
 
-
+<br>
 
 **文件内容(不支持注释)**
 
@@ -268,7 +207,7 @@ jar文件路径=此jar文件中要扫描的类的路径;路径2;路径3
 ...
 ```
 
-
+<br>
 
 其中jar文件路径可以为相对路径，也可以为jar包名，应携带后缀(.jar)
 
@@ -279,7 +218,7 @@ shendi-kit-1.1.jar
 /lib/shendi-kit-1.1.jar
 ```
 
-
+<br>
 
 类路径为需要扫描的类所在指定文件夹下，当指定后，不是此文件夹下的类将不会被解析
 
@@ -295,7 +234,7 @@ shendi-kit-1.1.jar
 	|-kit
 ```
 
-
+<br>
 
 SpringBoot jar文件结构
 
@@ -310,7 +249,7 @@ SpringBoot jar文件结构
 |-org
 ```
 
-
+<br>
 
 于是为了找到包名所在路径，在 anno_scan.shendi 文件里需要指定，否则打包后将会运行出错，指定方式如下
 
@@ -320,7 +259,7 @@ jar文件路径=BOOT-INF/classes
 
 有多个路径使用分号分隔，且结尾不能为斜杠（BOOT-INF/classes/ 这种将不会被扫描）
 
-
+<br>
 
 如果不需要使用 SK 注解，则可将此文件内容改为(大小写一致)
 
@@ -328,7 +267,7 @@ jar文件路径=BOOT-INF/classes
 No
 ```
 
-
+<br>
 
 如果不需要扫描 Jar 包，则可将此文件内容改为(内容需完全一模一样)
 
@@ -336,13 +275,13 @@ No
 No Jar
 ```
 
-
+<br>
 
 **当项目打包后，且使用到了SK注解，则打包后的jar需要写入此文件里，否则将扫描不到**
 
+<br>
 
-
-
+<br>
 
 #### 以前版本使用
 
@@ -360,7 +299,7 @@ jar1.jar;jar2.jar
 
 根据jar包后缀进行判断,所以如果需要扫描所有jar,配置文件内容可以为 .jar
 
-
+<br>
 
 在扫描时会触发此类的静态代码块,所以扫描所有jar则可能出现一些问题,例如mysql的jdbc驱动...
 
@@ -378,9 +317,128 @@ No代表移除注解扫描，No Jar则不扫描jar
 
 **jar文件内的jar将不会被扫描**
 
+<br>
 
+<br>
 
+# 自定义注解与处理
 
+SK 1.1.1 新增
+
+> 因使用注解，所以需要将上面开始配置部分完成
+
+可以自定义一个注解，并获取到注解对应的类/函数/属性，并进行处理。
+
+`shendi.kit.annotation.scan` 包含了当前工具包的所有注解处理，其中 `ClassScan` 负责扫描注解。
+
+<br>
+
+ClassScan 被加载时（静态构造），会读取 `anno_scan.shendi` 文件，获取需要扫描的jar包
+
+ClassScan 有一函数 `getClasses` 用于获取类上包含工具包注解的指定类，第一次执行这个函数将会进行扫描（耗时操作）
+
+<br>
+
+## 新增注解，加入扫描
+
+Java的注解，通过 `@interface 来定义`，可以参考 `shendi.kit.annotation` 包
+
+例如命令行注解
+
+```java
+@Target(value = {ElementType.METHOD,ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface CommandAnno {
+	String name();
+	String info();
+	String group() default ConsoleAnno.DEFAULT_GROUP;
+}
+```
+
+<br>
+
+其中 `@Target` 注解表示这个注解将用于哪个位置，上面的命令行注解可用于函数与字段，`ElementType.TYPE` 代表用于类。
+
+`@Retention` 表示注解如何保留，上面 RUNTIME 代表运行时保留，因为需要运行时拿到注解，所以统一使用 RUNTIME，**这点很重要，否则会无法扫描到包含此注解的类**。
+
+<br>
+
+上面说的是 Java 的注解，注解最重要的是扫描与处理，否则就同注释一样，毫无意义
+
+而对于扫描操作，上面提到的 ClassScan，只会扫描**工具包类注解**，并将类存储到 HashMap 中，这样也是为了提高扫描速度，而工具包类注解，可以通过 `ANNOS` 属性进行添加，`ANNOS` 是一个存储注解类的 List，示例如下
+
+```java
+ClassScan.ANNOS.add(CommandAnno.class);
+```
+
+**添加的操作一定要在扫描之前！** 扫描是在执行 `getClasses` 函数开始。
+
+<br>
+
+## 处理注解
+
+注解如果不进行处理，则毫无用处。
+
+对于处理，上面提到的 `getClasses` 函数，函数获取所有扫描到的包含注解的类，是一个HashMap，其中key是类全路径，例如 com.a.b.Test，value是类。
+
+除了无参的 getClasses，还有一个获取指定注解类的 classes。
+
+<br>
+
+这里就做一个简单的说明，当拿到类后，通过反射拿到类的字段、函数，对于类、类成员（函数与字段），皆包含 `getAnnotation` 函数，这个函数用于获取注解，以及注解的值。
+
+```java
+/** 测试自定义注解 */
+@CAnno
+public class TestCustomAnno {
+
+	@CFieldAnno("Shendi")
+	private String name;
+	
+	public static void main(String[] args) {
+		ClassScan.ANNOS.add(CAnno.class);
+		
+		ClassScan.getClasses(CAnno.class).forEach((k, v) -> {
+			System.out.println(k);
+			
+			// 获取所有字段列表，判断是否有 CFiledAnno 注解，有则打印值
+			Field[] fields = v.getDeclaredFields();
+			System.out.println(fields.length);
+			for (Field f : fields) {
+				CFieldAnno anno = f.getAnnotation(CFieldAnno.class);
+				if (anno != null) {
+					System.out.println(anno.value());
+				}
+			}
+		});
+	}
+	
+}
+
+@Retention(RetentionPolicy.RUNTIME)
+@interface CAnno {
+}
+
+@Retention(RetentionPolicy.RUNTIME)
+@interface CFieldAnno {
+	
+	String value();
+	
+}
+```
+
+<br>
+
+关于更详细的处理，可以直接参考 `shendi.kit.annotation.scan` 包下的一些类，例如 `ConsoleScan`，其包含一个测试用例 `shendi.kit.test.TestConsole` 
+
+<br>
+
+可以实现 `AnnotationScan` 接口，实现一个 init 函数，用于编写处理代码，在提供使用的类调用 init 进行初始化，可以参考 `shendi.kit.console.Console`。
+
+<br>
+
+<br>
 
 # 控制台模块
 
@@ -1345,7 +1403,7 @@ public class TestDiskCache {
 >位于 shendi.kit.format.json 下<br>
 >SK 1.1新增<br>
 
-### JSONObject
+## JSONObject
 >Json对象,格式如下<br>
 >
 >>{key:value,key:value}<br>
@@ -1359,45 +1417,77 @@ public class TestDiskCache {
 >通过 convert(Class) 来将 json 转化为对应类,转化的对象数据会自行填充
 
 # id工具包
->位于 shendi.kit.id 下<br>
->SK 1.1新增<br>
+位于 shendi.kit.id 下
 
-### SnowFlake
->雪花算法,生成唯一id,可用于分布式架构,高并发等.<br>
->雪花算法为 Twitter 开源的分布式 id 生成算法<br>
->其核心思想就是: 使用一个 64 位的数字作为全局唯一id.在分布式系统中的应用十分广泛.<br>
->64位,默认配置为,第一位为0(正数),41位表示时间戳,5位机房id,5位机器id,12位序列号
+SK 1.1新增
 
-#### 构造方法
->(); 默认构造,使用默认配置<br>
->(int, int); 通过指定的机房id和机器id<br>
->(int tBitNum, int gBitNum, int hBitNum, int sBitNum, int groupId, int hostId);
->
->>自定义设置,通过指定的时间戳位,机房id位,机器id位,序列号位,机房id,机器id创建.
+<br>
 
-#### 使用
->在创建对象后,通过 spawn() 方法来生成id<br>
-<pre>
-    SnowFlake snow = new SnowFlake();
-    long id = snow.spawn();
-</pre>
->此算法生成的id够用70年,默认初始时间戳为2020-12-17(我完成这个类的日期)<br>
->也可以通过 setStartTime(long) 来设置初始时间戳,请勿在使用时设置,并保证设置的值为常量<br>
-<pre>
-    设置初始时间戳示例
-    long t = System.currentTimeMillis();
-    t -> 时间戳,例如为 11111111111
-    -------------
-    SnowFlake snow = new SnowFlake();
-    snow.setStartTime(11111111111);
-    long id = snow.spawn();
-</pre>
+## SnowFlake
+雪花算法,生成唯一id,可用于分布式架构,高并发等.
+
+雪花算法为 Twitter 开源的分布式 id 生成算法
+
+其核心思想就是: 使用一个 64 位的数字作为全局唯一id.在分布式系统中的应用十分广泛.
+
+64位,默认配置为,第一位为0(正数),41位表示时间戳,5位机房id,5位机器id,12位序列号
+
+<br>
+
+### 构造方法
+* (); 默认构造,使用默认配置
+* (int, int); 通过指定的机房id和机器id
+* (int tBitNum, int gBitNum, int hBitNum, int sBitNum, int groupId, int hostId);
+    * 自定义设置,通过指定的时间戳位,机房id位,机器id位,序列号位,机房id,机器id创建.
+
+### 使用
+在创建对象后,通过 spawn() 方法来生成id
+
+```java
+SnowFlake snow = new SnowFlake();
+long id = snow.spawn();
+```
+
+此算法生成的id够用70年,默认初始时间戳为2020-12-17(我完成这个类的日期)
+
+也可以通过 setStartTime(long) 来设置初始时间戳,请勿在使用时设置,并保证设置的值为常量
+
+```java
+// 设置初始时间戳示例
+long t = System.currentTimeMillis();
+// t -> 时间戳,例如为 11111111111
+// -------------
+SnowFlake snow = new SnowFlake();
+snow.setStartTime(11111111111);
+long id = snow.spawn();
+```
+
+<br>
+
+## RanId
+
+SK 1.1.1 新增
+
+随即字串生成工具
+
+```java
+// Random.RANDOM 是 java.util.Random 实例
+// RanId.RANDOM_CHAR 是包含0-9a-zA-Z的char数组
+// 生成16字符的随机字串
+RanId.ranCodeToString(16);
+```
+
+<br>
+
+<br>
 
 # HTTP工具包
-shendi.kit.net.http<br>
+
+shendi.kit.net.http
+
 SK 1.1 新增
 
-
+<br>
 
 ## 工具类
 shendi.kit.net.http.HttpUtil
@@ -1709,17 +1799,19 @@ byte[] fData = StreamUtils.getFile("C:/1.txt");
 
 ## SKClassLoader
 
->类加载器<br>
->用于将外部class文件定义可使用的类
+类加载器
 
+用于将外部class文件定义可使用的类
 
+<br>
 
 ## HttpUtil
 
->Http工具类<br>
->在 SK 1.1 中,此类被移至 shendi.kit.net.http 包中,文档也移动,请参考 [HTTP工具](#HTTP工具包)
+Http工具类
 
+在 SK 1.1 中,此类被移至 shendi.kit.net.http 包中,文档也移动,请参考 [HTTP工具](#HTTP工具包)
 
+<br>
 
 ## Math
 
@@ -1727,7 +1819,7 @@ byte[] fData = StreamUtils.getFile("C:/1.txt");
 
 SK 1.1中新增
 
-
+<br>
 
 ### 单位转换
 
@@ -1992,3 +2084,29 @@ FileUtil.updateByPro("/1.txt", "hello.getBytes());
 StringUtil.trimByStr("1  . 2.   3", "."); // 1.2.3
 ```
 
+<br>
+
+<br>
+
+## PatternUtil
+
+正则工具类，将各种常用正则封装其中
+
+SK 1.1.1 新增
+
+<br>
+
+测试用例类：`TestPatternUtil` 
+
+```java
+// 示例：校验手机
+PatternUtil.PHONE.matcher("13333333333").matches();
+// NUMBER - 数字
+// URI - 匹配数字,字母,斜杠,点
+// EMAIL - 邮箱
+// MONEY - 金额
+```
+
+<br>
+
+<br>

@@ -17,8 +17,11 @@ import java.lang.annotation.Target;
  * @version 1.1
  * @see CommandAnno
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME) @Documented
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface ConsoleAnno {
+	
 	/** 默认命令组 */
 	String DEFAULT_GROUP = "default";
 	

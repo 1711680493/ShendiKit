@@ -5,13 +5,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import shendi.kit.ShendiKitInfo;
-import shendi.kit.annotation.CommandAnno;
 import shendi.kit.annotation.ConsoleAnno;
 import shendi.kit.annotation.EncryptAnno;
 import shendi.kit.annotation.PConfig;
@@ -28,7 +30,7 @@ import shendi.kit.util.SKClassLoader;
 public class ClassScan {
 	
 	/** 当前工具包的注解类 */
-	private static final Class<?>[] ANNOS;
+	public static final List<Class<? extends Annotation>> ANNOS = new ArrayList<>();
 	
 	/** 扫描了多少个文件 */
 	private static int scanNum;
@@ -43,13 +45,10 @@ public class ClassScan {
 	private static final ClassLoader CL = ClassScan.class.getClassLoader();
 	
 	static {
-		ANNOS = new Class[] {
-			PConfig.class,
-//			Init.class,
-			EncryptAnno.class,
-			ConsoleAnno.class,
-			CommandAnno.class
-		};
+		ANNOS.add(PConfig.class);
+		ANNOS.add(EncryptAnno.class);
+		ANNOS.add(ConsoleAnno.class);
+		ANNOS.add(PConfig.class);
 		
 		// 获取需要处理的 jar 包名.
 		File scanFile = new File(PathFactory.getPath(PathFactory.PROJECT, File.separatorChar + "files" + File.separatorChar + "/anno_scan.shendi"));
@@ -89,7 +88,7 @@ public class ClassScan {
 	}
 	
 	/** 项目中所有有工具包注解的类,全路径与类一一对应. */
-	private static final HashMap<String,Class<?>> CLASSES = new HashMap<>();
+	private static final Map<String, Class<?>> CLASSES = new HashMap<>();
 	
 	/** 当前项目的类路径,如果当前项目已打成jar包,则为null. */
 	private static String classPath;
@@ -155,9 +154,9 @@ public class ClassScan {
 			// 将类添加进集合
 			Annotation[] annos = clazz.getAnnotations();
 			if (annos.length > 0) {
-				for (int i = 0;i < ANNOS.length; i++) {
+				for (int i = 0;i < ANNOS.size(); i++) {
 					for (int j = 0;j < annos.length;j++) {
-						if (ANNOS[i] == annos[j].annotationType()) {
+						if (ANNOS.get(i) == annos[j].annotationType()) {
 							CLASSES.put(className, clazz);
 							return;
 						}
@@ -228,7 +227,7 @@ public class ClassScan {
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @return {@link HashMap}
 	 */
-	public static HashMap<String, Class<?>> getClasses() {
+	public static Map<String, Class<?>> getClasses() {
 		// 没有初始化则先初始化
 		if (!isInit) {
 			// 处理项目使用到的需要处理的 Jar 包,
@@ -283,6 +282,29 @@ public class ClassScan {
 	}
 	
 	/**
+	 * 获取带指定注解的类,仅限类注解.
+	 * <br>
+	 * getClasses(ConsoleAnno.class)
+	 * <br>
+	 * 创建时间 2024年1月11日
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param clazz 注解
+	 * @return 注解对应的类map，key为类全路径,value类
+	 * @since 1.1.1
+	 */
+	public static <A extends Annotation> Map<String, Class<?>> getClasses(Class<A> clazz) {
+		HashMap<String, Class<?>> result = new HashMap<>();
+		getClasses().forEach((k,v) -> {
+			A anno = v.getAnnotation(clazz);
+			if (anno != null) {
+				result.put(k, v);
+			}
+		});
+		
+		return result;
+	}
+	
+	/**
 	 * 重新扫描加载,用于热更.
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 */
@@ -308,9 +330,9 @@ public class ClassScan {
 				// 将类添加进集合
 				Annotation[] annos = c.getAnnotations();
 				if (annos.length > 0) {
-					for (int i = 0;i < ANNOS.length; i++) {
+					for (int i = 0;i < ANNOS.size(); i++) {
 						for (int j = 0;j < annos.length;j++) {
-							if (ANNOS[i] == annos[j].annotationType()) {
+							if (ANNOS.get(i) == annos[j].annotationType()) {
 								CLASSES.put(clazz, c);
 								return;
 							}

@@ -1,8 +1,10 @@
 package shendi.kit.annotation;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * 使用此注解在函数/字段上来代表一个命令<br>
@@ -38,8 +40,11 @@ import java.lang.annotation.RetentionPolicy;
  * @version 1.1
  * @see ConsoleAnno
  */
-@Retention(RetentionPolicy.RUNTIME) @Documented
+@Target(value = {ElementType.METHOD,ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface CommandAnno {
+	
 	/**
 	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
 	 * @return 命令名称

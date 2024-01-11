@@ -11,7 +11,7 @@ public class ShendiKitInfo {
 	public static final int VERSION = 2;
 	
 	/** 版本名 */
-	public static final String VERSION_NAME = "1.1";
+	public static final String VERSION_NAME = "1.1.1";
 	
 	/** 包名 */
 	public static final String PACKAGE_NAME = "shendi-kit";
