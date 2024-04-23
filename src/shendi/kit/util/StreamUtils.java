@@ -158,14 +158,40 @@ public class StreamUtils {
 	 * @since 1.1
 	 */
 	public static byte[] readAllByte(InputStream input, int max) throws IOException {
-		byte[] data = new byte[input.available()];
+		int initSize = input.available();
+		// 超过 1M 则不翻倍，否则翻倍
+		if (initSize == 0) initSize = 1048576;
+		else if (initSize < 1048576) initSize <<= 1;
+			
+		byte[] data = new byte[initSize];
+		byte[] temp = new byte[initSize];
+		int len = 0;
 		
-		for (int i = 0; i < data.length; i++) {
-			data[i] = (byte) input.read();
-			if (max != -1 && data.length >= max) {
+		int readLen;
+		while ((readLen = input.read(temp)) != -1) {
+			if (max != -1 && len + readLen >= max) {
 				Log.print("本地读取数据已超过设置的最大数(%s),跳出读取", max);
+				
+				byte[] tmp = data;
+				data = new byte[max];
+				System.arraycopy(tmp, 0, data, 0, max);
 				break;
+			} else if (readLen + len >= data.length) {
+				// 数组扩容
+				byte[] tmp = data;
+				data = new byte[tmp.length + initSize];
+				
+				System.arraycopy(tmp, 0, data, 0, tmp.length);
 			}
+			
+			System.arraycopy(temp, 0, data, len, readLen);
+			len += readLen;
+		}
+
+		if (data.length != len) {
+			byte[] tmp = data;
+			data = new byte[len];
+			System.arraycopy(tmp, 0, data, 0, len);
 		}
 		
 		return data;
