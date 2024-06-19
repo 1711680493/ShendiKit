@@ -34,4 +34,37 @@ public class StringUtil {
         return result.substring(0, result.length() - c.length());
 	}
 	
+	/**
+	 * 将字符串重复复制得到一个新的字符串。
+	 * <br>
+	 * 同 jdk11 及以上的 String.repeat
+	 * <br>
+	 * 创建时间 2024年6月19日
+	 * @author Shendi <a href='tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=1711680493'>QQ</a>
+	 * @param str	字符串
+	 * @param count	次数
+	 * @return 重复后的字符串
+	 * @since 1.1.3
+	 */
+	public static String repeat(String str, int count) {
+		if (count < 0) throw new IllegalArgumentException("count is negative: " + count);
+		if (count == 1) return str;
+		
+        final int len = str.length();
+        if (len == 0 || count == 0) {
+            return "";
+        }
+        
+        if (Integer.MAX_VALUE / count < len) {
+            throw new OutOfMemoryError("Required length exceeds implementation limit");
+        }
+        
+        StringBuilder sb = new StringBuilder(str.length() * count);  
+		for (int i = 0; i < count; i++) {  
+			sb.append(str);  
+		}  
+        
+        return sb.toString();
+	}
+	
 }

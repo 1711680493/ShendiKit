@@ -1,9 +1,9 @@
 # Shendi Kit
 **作者：** Shendi
 
-**版本：** 1.1.1
+**版本：** 1.1.3
 
-**最后更改时间：** 2024-01-11
+**最后更改时间：** 2024-06-19
 
 <br>
 
@@ -2082,6 +2082,10 @@ FileUtil.updateByPro("/1.txt", "hello.getBytes());
 ```java
 // 字符串去除指定字符串的前后空格
 StringUtil.trimByStr("1  . 2.   3", "."); // 1.2.3
+
+// 1.1.3新增
+// 重复字符串，同 JDK11 的 String.repeat
+StringUtil.repeat("test", 3); // testtesttest
 ```
 
 <br>
@@ -2106,6 +2110,23 @@ PatternUtil.PHONE.matcher("13333333333").matches();
 // EMAIL - 邮箱
 // MONEY - 金额
 ```
+
+<br>
+
+<br>
+
+## InfoUtil
+
+信息工具类，提供一些常用的信息操作，如脱敏等
+
+SK 1.1.3 新增
+
+```java
+// 保留前三位和后四位
+String phone = InfoUtil.priv("13333333333", 3, 4); // 133****3333
+```
+
+<br>
 
 <br>
 
